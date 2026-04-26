@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { LeLoLogo } from "./lelo-logo"
 import { Phone, MapPin, MessageCircle, Mail, ChevronLeft } from "lucide-react"
 
@@ -67,6 +68,28 @@ const socials = [
   },
 ]
 
+function FooterRow({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="mb-3 flex flex-row flex-wrap items-center gap-x-2 gap-y-2 text-white/70 text-sm">
+      <h3
+        className="font-semibold whitespace-nowrap"
+        style={{ color: "var(--gold-light)" }}
+      >
+        {title}:
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+function FooterChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-white/10 bg-white/5 whitespace-nowrap">
+      {children}
+    </span>
+  );
+}
+
 export function Footer() {
   return (
     <footer
@@ -106,28 +129,20 @@ export function Footer() {
             </div>
           </div>
 
-          <div dir="rtl" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-            <h3
-              className="font-semibold mb-4"
-              style={{ color: "var(--gold-light)" }}
-            >
-              تواصل معنا
-            </h3>
-            <ul className="space-y-3 text-white/70 text-sm">
-              <li className="flex items-start gap-2">
-                <Phone
-                  className="h-4 w-4 mt-1 flex-shrink-0"
-                  style={{ color: "var(--gold)" }}
-                />
+          <div
+            dir="rtl"
+            className="lg:col-span-4"
+            style={{ fontFamily: "'Tajawal', sans-serif" }}
+          >
+            <FooterRow title="تواصل معنا">
+              <FooterChip>
+                <Phone className="h-3.5 w-3.5" style={{ color: "var(--gold)" }} />
                 <a href="tel:17327" className="hover:text-white transition-colors">
                   الخط الساخن: <span style={{ color: "var(--gold-light)" }}>17327</span>
                 </a>
-              </li>
-              <li className="flex items-start gap-2">
-                <Phone
-                  className="h-4 w-4 mt-1 flex-shrink-0"
-                  style={{ color: "var(--gold)" }}
-                />
+              </FooterChip>
+              <FooterChip>
+                <Phone className="h-3.5 w-3.5" style={{ color: "var(--gold)" }} />
                 <a
                   href="tel:+201151313999"
                   className="hover:text-white transition-colors"
@@ -135,12 +150,9 @@ export function Footer() {
                 >
                   +20 11 5131 3999
                 </a>
-              </li>
-              <li className="flex items-start gap-2">
-                <MessageCircle
-                  className="h-4 w-4 mt-1 flex-shrink-0"
-                  style={{ color: "var(--gold)" }}
-                />
+              </FooterChip>
+              <FooterChip>
+                <MessageCircle className="h-3.5 w-3.5" style={{ color: "var(--gold)" }} />
                 <a
                   href="https://wa.me/201151313999"
                   target="_blank"
@@ -149,12 +161,9 @@ export function Footer() {
                 >
                   واتساب
                 </a>
-              </li>
-              <li className="flex items-start gap-2">
-                <Mail
-                  className="h-4 w-4 mt-1 flex-shrink-0"
-                  style={{ color: "var(--gold)" }}
-                />
+              </FooterChip>
+              <FooterChip>
+                <Mail className="h-3.5 w-3.5" style={{ color: "var(--gold)" }} />
                 <a
                   href="mailto:info@bashakdevelopments.com"
                   className="hover:text-white transition-colors"
@@ -162,91 +171,52 @@ export function Footer() {
                 >
                   info@bashakdevelopments.com
                 </a>
-              </li>
-            </ul>
-          </div>
+              </FooterChip>
+            </FooterRow>
 
-          <div dir="rtl" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-            <h3
-              className="font-semibold mb-4"
-              style={{ color: "var(--gold-light)" }}
-            >
-              روابط سريعة
-            </h3>
-            <ul className="space-y-2 text-white/70 text-sm">
+            <FooterRow title="روابط سريعة">
               {quickLinks.map((link) => (
-                <li key={link.label}>
+                <FooterChip key={link.label}>
                   <a
                     href={link.href}
                     className="inline-flex items-center gap-1 hover:text-white transition-colors"
                   >
-                    <ChevronLeft
-                      className="h-3.5 w-3.5"
-                      style={{ color: "var(--gold)" }}
-                    />
+                    <ChevronLeft className="h-3 w-3" style={{ color: "var(--gold)" }} />
                     {link.label}
                   </a>
-                </li>
+                </FooterChip>
               ))}
-            </ul>
-          </div>
+            </FooterRow>
 
-          <div dir="rtl" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-            <h3
-              className="font-semibold mb-4"
-              style={{ color: "var(--gold-light)" }}
-            >
-              أنواع العقارات
-            </h3>
-            <ul className="space-y-2 text-white/70 text-sm">
+            <FooterRow title="أنواع العقارات">
               {propertyTypes.map((link) => (
-                <li key={link.label}>
+                <FooterChip key={link.label}>
                   <a
                     href={link.href}
                     className="inline-flex items-center gap-1 hover:text-white transition-colors"
                   >
-                    <ChevronLeft
-                      className="h-3.5 w-3.5"
-                      style={{ color: "var(--gold)" }}
-                    />
+                    <ChevronLeft className="h-3 w-3" style={{ color: "var(--gold)" }} />
                     {link.label}
                   </a>
-                </li>
+                </FooterChip>
               ))}
-            </ul>
-          </div>
+            </FooterRow>
 
-          <div
-            dir="rtl"
-            className="md:col-span-2 lg:col-span-6"
-            style={{ fontFamily: "'Tajawal', sans-serif" }}
-          >
-            <h3
-              className="font-semibold mb-4"
-              style={{ color: "var(--gold-light)" }}
-            >
-              العنوان
-            </h3>
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Bashak+Developments+Villa+99+First+District+Street+90+Fifth+Settlement+New+Cairo+Egypt"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="افتح العنوان على خريطة جوجل"
-              className="group inline-flex items-start gap-2 text-white/70 text-sm leading-relaxed hover:text-white transition-colors"
-              data-testid="link-address-map"
-            >
-              <MapPin
-                className="h-4 w-4 mt-1 flex-shrink-0 transition-transform group-hover:scale-110"
-                style={{ color: "var(--gold)" }}
-              />
-              <span className="border-b border-transparent group-hover:border-[var(--gold)]/60">
-                فيلا 99، الحي الأول، شارع 90،
-                <br />
-                التجمع الخامس، القاهرة الجديدة 1،
-                <br />
-                محافظة القاهرة، مصر، 11835
-              </span>
-            </a>
+            <FooterRow title="العنوان">
+              <FooterChip>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Bashak+Developments+Villa+99+First+District+Street+90+Fifth+Settlement+New+Cairo+Egypt"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="افتح العنوان على خريطة جوجل"
+                  className="group inline-flex items-center gap-1 hover:text-white transition-colors"
+                  data-testid="link-address-map"
+                >
+                  <MapPin className="h-3.5 w-3.5" style={{ color: "var(--gold)" }} />
+                  <span>فيلا 99، الحي الأول، شارع 90، التجمع الخامس، القاهرة الجديدة 1، محافظة القاهرة، مصر، 11835</span>
+                </a>
+              </FooterChip>
+            </FooterRow>
 
             <a
               href="https://www.google.com/maps/search/?api=1&query=Bashak+Developments+Villa+99+First+District+Street+90+Fifth+Settlement+New+Cairo+Egypt"
@@ -261,7 +231,7 @@ export function Footer() {
                 title="موقع شركة باشاك على الخريطة"
                 src="https://www.google.com/maps?q=Fifth+Settlement+New+Cairo+Egypt&output=embed"
                 width="100%"
-                height="220"
+                height="180"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 style={{ border: 0, display: "block", pointerEvents: "none" }}
