@@ -1,5 +1,6 @@
 import { Header } from "@/components/header";
 import { HeroSection } from "@/components/hero-section";
+import { PropertySearch } from "@/components/property-search";
 import { StatsSection } from "@/components/stats-section";
 import { PartnersMarquee } from "@/components/partners-marquee";
 import { AnimatedFeaturesSection } from "@/components/animated-features-section";
@@ -20,6 +21,7 @@ export default function HomePage() {
       <Header />
       <main className="pt-20">
         <HeroSection />
+        <PropertySearch />
         <StatsSection />
         <PartnersMarquee />
         <AboutSection />

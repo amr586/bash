@@ -38,7 +38,26 @@ export default function PropertiesPage() {
     initial.get("listing") || "all",
   );
   const [q, setQ] = useState<string>(initial.get("q") || "");
+  const [priceMin, setPriceMin] = useState<string>(
+    initial.get("priceMin") || "",
+  );
+  const [priceMax, setPriceMax] = useState<string>(
+    initial.get("priceMax") || "",
+  );
+  const [areaMin, setAreaMin] = useState<string>(initial.get("areaMin") || "");
+  const [areaMax, setAreaMax] = useState<string>(initial.get("areaMax") || "");
   const [items, setItems] = useState<Property[] | null>(null);
+
+  // Sync state when URL search params change (e.g. navigation from home search)
+  useEffect(() => {
+    setType(initial.get("type") || "all");
+    setListing(initial.get("listing") || "all");
+    setQ(initial.get("q") || "");
+    setPriceMin(initial.get("priceMin") || "");
+    setPriceMax(initial.get("priceMax") || "");
+    setAreaMin(initial.get("areaMin") || "");
+    setAreaMax(initial.get("areaMax") || "");
+  }, [initial]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -55,13 +74,24 @@ export default function PropertiesPage() {
   const filtered = useMemo(() => {
     if (!items) return null;
     const term = q.trim().toLowerCase();
-    if (!term) return items;
-    return items.filter((p) =>
-      [p.title, p.location, p.description]
-        .filter(Boolean)
-        .some((s) => s.toLowerCase().includes(term)),
-    );
-  }, [items, q]);
+    const pMin = priceMin ? Number(priceMin) : null;
+    const pMax = priceMax ? Number(priceMax) : null;
+    const aMin = areaMin ? Number(areaMin) : null;
+    const aMax = areaMax ? Number(areaMax) : null;
+    return items.filter((p) => {
+      if (term) {
+        const hit = [p.title, p.location, p.description]
+          .filter(Boolean)
+          .some((s) => s.toLowerCase().includes(term));
+        if (!hit) return false;
+      }
+      if (pMin != null && Number(p.price) < pMin) return false;
+      if (pMax != null && Number(p.price) > pMax) return false;
+      if (aMin != null && (p.area == null || p.area < aMin)) return false;
+      if (aMax != null && (p.area == null || p.area > aMax)) return false;
+      return true;
+    });
+  }, [items, q, priceMin, priceMax, areaMin, areaMax]);
 
   return (
     <div className="min-h-screen bg-background">
