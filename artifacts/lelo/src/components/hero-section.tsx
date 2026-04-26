@@ -54,8 +54,11 @@ export function HeroSection() {
               trigger={
                 <Button
                   size="lg"
-                  className="text-black font-semibold"
-                  style={{ background: "var(--gold)" }}
+                  className="text-black font-semibold rounded-xl transform-gpu transition-all duration-150 ease-out hover:scale-105 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(212,175,55,0.55)] active:scale-95 active:translate-y-0.5 active:shadow-[inset_0_4px_10px_rgba(0,0,0,0.35)] active:brightness-90 focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
+                  style={{
+                    background: "linear-gradient(135deg, var(--gold), var(--gold-light))",
+                    boxShadow: "0 8px 20px rgba(212,175,55,0.35)",
+                  }}
                   data-testid="button-register-now"
                 >
                   <ClipboardList className="ml-2 h-4 w-4" />
