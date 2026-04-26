@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, MapPin, Save } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Clock, Loader2, MapPin, Save, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   apiFetch,
@@ -46,6 +47,10 @@ export default function EditPropertyPage() {
   const [floorPlanUrls, setFloorPlanUrls] = useState<string[]>([]);
   const [mapsLink, setMapsLink] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [status, setStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [ownerId, setOwnerId] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+  const [updatedAt, setUpdatedAt] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -77,6 +82,10 @@ export default function EditPropertyPage() {
         setFloorPlanUrls(p.floorPlanUrls ?? []);
         setMapsLink(p.mapsLink ?? "");
         setContactPhone(p.contactPhone ?? "");
+        setStatus(p.status);
+        setOwnerId(p.ownerId);
+        setCreatedAt(p.createdAt);
+        setUpdatedAt(p.updatedAt);
         setNotFound(false);
       })
       .catch(() => setNotFound(true))
@@ -157,6 +166,7 @@ export default function EditPropertyPage() {
           floorPlanUrls,
           mapsLink: mapsLink.trim() || null,
           contactPhone: contactPhone.trim() || null,
+          status,
         }),
       });
       toast({
@@ -186,6 +196,52 @@ export default function EditPropertyPage() {
         <Card className="border-border/40 bg-background/60 backdrop-blur">
           <CardContent className="pt-6 pb-6 px-6">
             <form onSubmit={onSubmit} className="grid gap-5">
+              <div
+                className="grid gap-2 p-4 rounded-xl border"
+                style={{
+                  borderColor: "var(--gold-dark)",
+                  background: "var(--gold)/5",
+                }}
+              >
+                <Label htmlFor="status" className="font-semibold">
+                  حالة العقار
+                </Label>
+                <Select
+                  value={status}
+                  onValueChange={(v) =>
+                    setStatus(v as "pending" | "approved" | "rejected")
+                  }
+                >
+                  <SelectTrigger data-testid="select-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">
+                      <span className="inline-flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-yellow-500" />
+                        قيد المراجعة
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="approved">
+                      <span className="inline-flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        معتمد ومنشور
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="rejected">
+                      <span className="inline-flex items-center gap-2">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                        مرفوض
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-foreground/60">
+                  لما تختار "معتمد" العقار هيظهر للزوار في صفحة العقارات وصاحبه
+                  هيوصله إشعار.
+                </p>
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="title">عنوان العقار *</Label>
                 <Input
@@ -354,6 +410,67 @@ export default function EditPropertyPage() {
                   rows={5}
                   maxLength={5000}
                 />
+              </div>
+
+              <div className="grid gap-2 p-4 rounded-xl border border-border/40 bg-foreground/5">
+                <Label className="font-semibold text-sm">
+                  بيانات إدارية (للقراءة فقط)
+                </Label>
+                <div className="grid gap-1.5 text-xs text-foreground/70">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-foreground/50">رقم العقار:</span>
+                    <code
+                      className="text-[10px] font-mono truncate max-w-[260px]"
+                      dir="ltr"
+                    >
+                      {id}
+                    </code>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-foreground/50">رقم صاحب العقار:</span>
+                    <code
+                      className="text-[10px] font-mono truncate max-w-[260px]"
+                      dir="ltr"
+                    >
+                      {ownerId}
+                    </code>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-foreground/50">تاريخ الإضافة:</span>
+                    <span dir="ltr">
+                      {createdAt
+                        ? new Date(createdAt).toLocaleString("ar-EG")
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-foreground/50">آخر تعديل:</span>
+                    <span dir="ltr">
+                      {updatedAt
+                        ? new Date(updatedAt).toLocaleString("ar-EG")
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-foreground/50">الحالة الحالية:</span>
+                    <Badge
+                      variant="outline"
+                      className={
+                        status === "approved"
+                          ? "border-green-500/40 text-green-400"
+                          : status === "rejected"
+                            ? "border-red-500/40 text-red-400"
+                            : "border-yellow-500/40 text-yellow-400"
+                      }
+                    >
+                      {status === "approved"
+                        ? "معتمد ومنشور"
+                        : status === "rejected"
+                          ? "مرفوض"
+                          : "قيد المراجعة"}
+                    </Badge>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
