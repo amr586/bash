@@ -43,6 +43,13 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
 
+  const nextUrl = (() => {
+    if (typeof window === "undefined") return "/profile";
+    const sp = new URLSearchParams(window.location.search);
+    const n = sp.get("next");
+    return n && n.startsWith("/") ? n : "/profile";
+  })();
+
   const [mode, setMode] = useState<Mode>("login");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -61,9 +68,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      navigate("/profile");
+      navigate(nextUrl);
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, nextUrl]);
 
   useEffect(() => {
     if (!otp) return;
@@ -180,7 +187,7 @@ export default function LoginPage() {
         setError(data.error ?? "الكود غلط أو انتهت صلاحيته.");
         return;
       }
-      window.location.href = "/profile";
+      window.location.href = nextUrl;
     } catch {
       setError("تعذّر التحقق. حاول تاني.");
     } finally {

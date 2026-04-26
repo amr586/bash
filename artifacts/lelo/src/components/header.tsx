@@ -231,6 +231,15 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/add-property")}
+            className="rounded-xl border-[var(--gold-dark)] text-[var(--gold-light)] hover:bg-[var(--gold)]/10 hover:text-[var(--gold-light)] font-semibold whitespace-nowrap"
+            data-testid="button-header-add-property"
+          >
+            {lang === "ar" ? "أضف عقارك" : "List Property"}
+          </Button>
           {isLoading ? (
             <div className="h-8 w-8 rounded-full bg-foreground/10 animate-pulse" />
           ) : isAuthenticated && user ? (

@@ -36,7 +36,9 @@ export default function AddPropertyPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) navigate("/login");
+    if (!isLoading && !isAuthenticated) {
+      navigate(`/login?next=${encodeURIComponent("/add-property")}`);
+    }
   }, [isLoading, isAuthenticated, navigate]);
 
   useEffect(() => {
