@@ -402,7 +402,7 @@ export function ParticleTextEffect({ words = DEFAULT_WORDS }: ParticleTextEffect
 
   return (
     <div className="w-full h-full absolute inset-0">
-      <canvas ref={canvasRef} className="w-full h-full" style={{ background: "black", zIndex: 10 }} />
+      <canvas ref={canvasRef} className="w-full h-full bg-[#00000000] opacity-[1]" style={{ background: "black", zIndex: 10 }} />
     </div>
-  )
+  );
 }
