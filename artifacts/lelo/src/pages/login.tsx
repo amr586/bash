@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LeLoLogo } from "@/components/lelo-logo";
@@ -416,14 +417,14 @@ export default function LoginPage() {
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="password">كلمة المرور *</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={mode === "signup" ? "8 أحرف، حرف كبير، رقم، رمز" : ""}
                 dir="ltr"
                 minLength={mode === "signup" ? 8 : undefined}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 required
                 data-testid="input-password"
               />
@@ -440,12 +441,12 @@ export default function LoginPage() {
             {mode === "signup" && (
               <div className="flex flex-col gap-2">
                 <Label htmlFor="confirmPassword">تأكيد كلمة المرور *</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   dir="ltr"
+                  autoComplete="new-password"
                   required
                   data-testid="input-confirm-password"
                 />
