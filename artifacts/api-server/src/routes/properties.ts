@@ -13,6 +13,20 @@ import { createNotification, notifyAllAdmins } from "../lib/notifications";
 
 const router: IRouter = Router();
 
+const STAFF_ROLES = new Set([
+  "super_admin",
+  "admin",
+  "property_manager",
+  "data_entry",
+]);
+
+function isStaff(user: Express.User | undefined): boolean {
+  if (!user) return false;
+  if (user.isAdmin === true) return true;
+  const role = (user as { role?: string }).role;
+  return typeof role === "string" && STAFF_ROLES.has(role);
+}
+
 const propertyInputSchema = z.object({
   title: z.string().trim().min(2).max(200),
   description: z.string().trim().max(5000).optional().default(""),
@@ -58,7 +72,7 @@ router.post("/properties", async (req: Request, res: Response) => {
     res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
     return;
   }
-  const isAdminCreator = req.user.isAdmin === true;
+  const isAdminCreator = isStaff(req.user);
   const initialStatus = isAdminCreator ? "approved" : "pending";
 
   const [created] = await db
@@ -153,7 +167,7 @@ router.get("/properties/:id", async (req: Request, res: Response) => {
     const isOwnerOrAdmin =
       req.isAuthenticated() &&
       row &&
-      (req.user.id === row.ownerId || req.user.isAdmin);
+      (req.user.id === row.ownerId || isStaff(req.user));
     if (!row || !isOwnerOrAdmin) {
       res.status(404).json({ error: "Not found" });
       return;
@@ -195,7 +209,7 @@ router.get("/me/recommended-properties", async (req: Request, res: Response) => 
 });
 
 router.get("/admin/properties", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated() || !req.user.isAdmin) {
+  if (!req.isAuthenticated() || !isStaff(req.user)) {
     res.status(403).json({ error: "Forbidden" });
     return;
   }
@@ -221,7 +235,7 @@ const adminUpdateSchema = z.object({
 });
 
 router.patch("/admin/properties/:id", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated() || !req.user.isAdmin) {
+  if (!req.isAuthenticated() || !isStaff(req.user)) {
     res.status(403).json({ error: "Forbidden" });
     return;
   }
@@ -278,7 +292,7 @@ router.patch("/admin/properties/:id", async (req: Request, res: Response) => {
 });
 
 router.delete("/admin/properties/:id", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated() || !req.user.isAdmin) {
+  if (!req.isAuthenticated() || !isStaff(req.user)) {
     res.status(403).json({ error: "Forbidden" });
     return;
   }

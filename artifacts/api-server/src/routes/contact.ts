@@ -14,6 +14,10 @@ const contactInputSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().email().max(255).optional().nullable(),
   phone: z.string().trim().min(3).max(30).optional().nullable(),
+  reason: z
+    .enum(["general", "buy", "follow_up", "partner", "sell"])
+    .optional()
+    .default("general"),
   message: z.string().trim().min(2).max(5000),
   propertyId: z.string().trim().min(1).optional().nullable(),
 });
@@ -44,6 +48,7 @@ router.post("/contact", async (req: Request, res: Response) => {
       name: parsed.data.name,
       email: parsed.data.email ?? null,
       phone: parsed.data.phone ?? null,
+      reason: parsed.data.reason,
       message: parsed.data.message,
       propertyId: parsed.data.propertyId ?? null,
       propertyOwnerId,

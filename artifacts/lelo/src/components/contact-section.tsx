@@ -15,6 +15,9 @@ export function ContactSection() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [reason, setReason] = useState<"general" | "buy" | "follow_up" | "partner" | "sell">(
+    "general",
+  );
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -45,6 +48,7 @@ export function ContactSection() {
           name: name.trim(),
           email: email.trim() || null,
           phone: phone.trim() || null,
+          reason,
           message: message.trim(),
         }),
       });
@@ -119,6 +123,22 @@ export function ContactSection() {
                   className="text-right"
                   maxLength={255}
                 />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="c-reason">سبب الاستفسار *</Label>
+                <select
+                  id="c-reason"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value as typeof reason)}
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                  data-testid="select-contact-reason"
+                >
+                  <option value="general">استفسار عام</option>
+                  <option value="buy">شراء عقار</option>
+                  <option value="follow_up">متابعة طلب سابق</option>
+                  <option value="partner">شراكة / استثمار</option>
+                  <option value="sell">بيع / عرض عقار</option>
+                </select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="c-msg">رسالتك *</Label>

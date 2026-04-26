@@ -33,7 +33,7 @@ function Counter({ to, suffix = "", duration = 2 }: CounterProps) {
 
 const stats = [
   { icon: Calendar, value: 10, suffix: "+", label: "سنوات من الخبرة" },
-  { icon: Building2, value: 50, suffix: "", label: "مشروع تم تسليمه" },
+  { icon: Building2, value: 50, suffix: "+", label: "مشروع تم تسليمه" },
   { icon: Users, value: 850, suffix: "+", label: "عميل سعيد" },
   { icon: Award, value: 99, suffix: "%", label: "نسبة رضا العملاء" },
 ]

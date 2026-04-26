@@ -3,7 +3,10 @@ import { HeroSection } from "@/components/hero-section";
 import { StatsSection } from "@/components/stats-section";
 import { PartnersMarquee } from "@/components/partners-marquee";
 import { AnimatedFeaturesSection } from "@/components/animated-features-section";
+import { AboutSection } from "@/components/about-section";
 import { ProjectsSection } from "@/components/projects-section";
+import { PastProjectsSection } from "@/components/past-projects-section";
+import { MediaSection } from "@/components/media-section";
 import { ServicesSection } from "@/components/services-section";
 import { FAQSection } from "@/components/faq-section";
 import { AnimatedCTASection } from "@/components/animated-cta-section";
@@ -20,9 +23,12 @@ export default function HomePage() {
         <HeroSection />
         <StatsSection />
         <PartnersMarquee />
+        <AboutSection />
         <ProjectsSection />
+        <PastProjectsSection />
         <AnimatedFeaturesSection />
         <ServicesSection />
+        <MediaSection />
         <FAQSection />
         <AnimatedCTASection />
         <ContactSection />

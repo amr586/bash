@@ -65,6 +65,15 @@ export const propertiesTable = pgTable(
 export type Property = typeof propertiesTable.$inferSelect;
 export type NewProperty = typeof propertiesTable.$inferInsert;
 
+export const contactReasonValues = [
+  "general",
+  "buy",
+  "follow_up",
+  "partner",
+  "sell",
+] as const;
+export type ContactReason = (typeof contactReasonValues)[number];
+
 export const contactRequestsTable = pgTable(
   "contact_requests",
   {
@@ -72,6 +81,7 @@ export const contactRequestsTable = pgTable(
     name: varchar("name", { length: 100 }).notNull(),
     email: varchar("email", { length: 255 }),
     phone: varchar("phone", { length: 30 }),
+    reason: varchar("reason", { length: 32 }).notNull().default("general"),
     message: text("message").notNull(),
     propertyId: varchar("property_id").references(() => propertiesTable.id, {
       onDelete: "set null",
