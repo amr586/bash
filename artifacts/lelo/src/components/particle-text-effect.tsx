@@ -159,6 +159,7 @@ export function ParticleTextEffect({ words = DEFAULT_WORDS }: ParticleTextEffect
   }
 
   const nextWord = (word: string, canvas: HTMLCanvasElement) => {
+    if (canvas.width <= 0 || canvas.height <= 0) return
     // Create off-screen canvas for text rendering
     const offscreenCanvas = document.createElement("canvas")
     offscreenCanvas.width = canvas.width
@@ -319,11 +320,37 @@ export function ParticleTextEffect({ words = DEFAULT_WORDS }: ParticleTextEffect
     // Initial resize
     resizeCanvas()
 
-    // Initialize with first word
-    nextWord(words[0], canvas)
+    let initialized = false
+    const tryInit = () => {
+      if (initialized) return
+      if (canvas.width > 0 && canvas.height > 0) {
+        nextWord(words[0], canvas)
+        animate()
+        initialized = true
+        return true
+      }
+      return false
+    }
 
-    // Start animation
-    animate()
+    if (!tryInit()) {
+      // Canvas not laid out yet — observe its container until it is
+      const container = canvas.parentElement
+      if (container && typeof ResizeObserver !== "undefined") {
+        const ro = new ResizeObserver(() => {
+          resizeCanvas()
+          if (tryInit()) {
+            ro.disconnect()
+          }
+        })
+        ro.observe(container)
+      } else {
+        // Fallback: try again on next frame
+        requestAnimationFrame(() => {
+          resizeCanvas()
+          tryInit()
+        })
+      }
+    }
 
     // Mouse event handlers
     const handleMouseDown = (e: MouseEvent) => {
