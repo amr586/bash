@@ -3,6 +3,7 @@ import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
 import { db, propertiesTable } from "@workspace/db";
 import { and, eq, desc } from "drizzle-orm";
+import { loadSiteSettings } from "./site-settings";
 
 const router: IRouter = Router();
 
@@ -35,23 +36,30 @@ const chatBodySchema = z.object({
     .max(40),
 });
 
-const COMPANY_FACTS = `
+function buildCompanyFacts(s: {
+  hotlineNumber: string;
+  contactPhone: string;
+  whatsappNumber: string;
+  contactEmail: string;
+  address: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  aiCompanyFacts: string;
+}): string {
+  return `
 معلومات عن شركة باشاك للتطوير العقاري (Bashak Developments):
-- شركة تطوير عقاري بخبرة تمتد لأكثر من 10 أعوام.
-- 12 مشروع تم تسليمه بنجاح، أكثر من 850 عميل سعيد، نسبة رضا 99%.
-- متخصصون في الشقق والفيلات والمكاتب والشاليهات والمحلات التجارية والأراضي.
-- المناطق: التجمع الخامس، شارع 90 الشمالي، الحي الأول، الحي الثاني، الحي الخامس، النرجس، اللوتس، بيت الوطن.
-- شركاء التمويل العقاري: بنك مصر، البنك الأهلي، CIB، QNB الأهلي، بنك الإمارات دبي الوطني، بنك الكويت الوطني، HSBC، بنك أبوظبي الإسلامي.
-- مميزات: ضمان الجودة، تشطيبات فاخرة، حدائق متشطبة، تقسيط حتى 8 سنوات، تسليم في الميعاد، عقود موثقة.
+${s.aiCompanyFacts}
 
 أرقام ووسائل التواصل:
-- الخط الساخن: 17327
-- موبايل / واتساب: +20 11 5131 3999
-- إيميل: info@bashakdevelopments.com
-- العنوان: فيلا 99، الحي الأول، شارع 90، التجمع الخامس، القاهرة الجديدة، مصر، 11835
-- فيسبوك: facebook.com/BashakDevelopments
-- إنستجرام: instagram.com/bashakdevelopments
+- الخط الساخن: ${s.hotlineNumber}
+- موبايل: ${s.contactPhone}
+- واتساب: https://wa.me/${s.whatsappNumber}
+- إيميل: ${s.contactEmail}
+- العنوان: ${s.address}
+- فيسبوك: ${s.facebookUrl}
+- إنستجرام: ${s.instagramUrl}
 `;
+}
 
 function formatProperty(p: typeof propertiesTable.$inferSelect): string {
   const parts = [
@@ -68,6 +76,12 @@ function formatProperty(p: typeof propertiesTable.$inferSelect): string {
 function fallbackReply(
   question: string,
   properties: (typeof propertiesTable.$inferSelect)[],
+  s: {
+    hotlineNumber: string;
+    contactPhone: string;
+    whatsappNumber: string;
+    contactEmail: string;
+  },
 ): string {
   const q = question.toLowerCase();
   const has = (...words: string[]) => words.some((w) => q.includes(w));
@@ -75,9 +89,9 @@ function fallbackReply(
   if (has("واتساب", "whatsapp", "رقم", "تواصل", "اتصال", "موبايل", "ساخن", "هاتف", "تليفون")) {
     return [
       "تقدر تتواصل مع باشاك من خلال:",
-      "• الخط الساخن: 17327",
-      "• واتساب / موبايل: +20 11 5131 3999",
-      "• إيميل: info@bashakdevelopments.com",
+      `• الخط الساخن: ${s.hotlineNumber}`,
+      `• واتساب / موبايل: ${s.contactPhone}`,
+      `• إيميل: ${s.contactEmail}`,
       "أو دوس على زر «سجّل الآن» وفريق المبيعات هيرجع لك بسرعة.",
     ].join("\n");
   }
@@ -94,10 +108,10 @@ function fallbackReply(
 
   if (has("عقار", "عقارات", "متاح", "متاحه", "متاحة", "شقق", "فيلا", "وحدات", "وحده", "وحدات")) {
     if (properties.length === 0) {
-      return "في الوقت الحالي مفيش عقارات منشورة على المنصة. تقدر تكلمنا على 17327 أو 01151313999 وفريق المبيعات هيقترح عليك أنسب الوحدات.";
+      return `في الوقت الحالي مفيش عقارات منشورة على المنصة. تقدر تكلمنا على ${s.hotlineNumber} أو ${s.contactPhone} وفريق المبيعات هيقترح عليك أنسب الوحدات.`;
     }
     const lines = properties.slice(0, 5).map(formatProperty).join("\n");
-    return `أحدث العقارات المتاحة من باشاك:\n${lines}\n\nللمعاينة أو الحجز كلمنا على 17327.`;
+    return `أحدث العقارات المتاحة من باشاك:\n${lines}\n\nللمعاينة أو الحجز كلمنا على ${s.hotlineNumber}.`;
   }
 
   if (has("مين", "ايه", "إيه", "بشاك", "باشاك", "الشركة", "الشركه", "عن")) {
@@ -106,11 +120,11 @@ function fallbackReply(
       "• خبرة أكثر من 10 أعوام في السوق المصري.",
       "• 12 مشروع مسلَّم، أكثر من 850 عميل، نسبة رضا 99%.",
       "• متخصصون في الشقق والفيلات والمكاتب والشاليهات والمحلات والأراضي.",
-      "للاستفسار: 17327 أو واتساب 01151313999.",
+      `للاستفسار: ${s.hotlineNumber} أو واتساب ${s.contactPhone}.`,
     ].join("\n");
   }
 
-  return "أهلاً بيك في باشاك! تقدر تسألني عن: أرقام التواصل، آخر مشاريعنا، أو العقارات المتاحة. وللحجز أو المعاينة كلمنا على 17327 أو واتساب 01151313999.";
+  return `أهلاً بيك في باشاك! تقدر تسألني عن: أرقام التواصل، آخر مشاريعنا، أو العقارات المتاحة. وللحجز أو المعاينة كلمنا على ${s.hotlineNumber} أو واتساب ${s.contactPhone}.`;
 }
 
 router.post("/bashak-ai/chat", async (req: Request, res: Response) => {
@@ -140,11 +154,14 @@ router.post("/bashak-ai/chat", async (req: Request, res: Response) => {
   }
   void and;
 
+  const settings = await loadSiteSettings();
+  const companyFacts = buildCompanyFacts(settings);
+
   const lastUserMessage =
     [...parsed.data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
   if (!baseUrl || !apiKey) {
-    res.json({ reply: fallbackReply(lastUserMessage, recentProperties) });
+    res.json({ reply: fallbackReply(lastUserMessage, recentProperties, settings) });
     return;
   }
 
@@ -154,11 +171,11 @@ router.post("/bashak-ai/chat", async (req: Request, res: Response) => {
 
 التزم بالقواعد دي:
 1) ردّك يبقى مختصر (٢ إلى ٥ جمل) ومفيد، ولو الإجابة فيها تفاصيل استخدم نقاط قصيرة.
-2) لو حد سأل عن السعر النهائي أو المعاينة أو الحجز، اعرض عليه خط ساخن 17327 أو واتساب +20 11 5131 3999 أو زر "سجّل الآن" في الموقع.
-3) ما تختلقش معلومات. لو ما تعرفش، قول إنك هتحوّله لفريق المبيعات على الرقم 17327.
+2) لو حد سأل عن السعر النهائي أو المعاينة أو الحجز، اعرض عليه الخط الساخن ${settings.hotlineNumber} أو واتساب ${settings.contactPhone} أو زر "سجّل الآن" في الموقع.
+3) ما تختلقش معلومات. لو ما تعرفش، قول إنك هتحوّله لفريق المبيعات على الرقم ${settings.hotlineNumber}.
 4) ما تتكلمش عن أي شركة منافسة.
 
-${COMPANY_FACTS}${propertiesContext}`;
+${companyFacts}${propertiesContext}`;
 
   try {
     const client = getClient();

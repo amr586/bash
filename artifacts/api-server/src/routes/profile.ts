@@ -1,14 +1,22 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { z } from "zod";
 import { db, usersTable } from "@workspace/db";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import {
-  UpdateMyProfileBody,
   UpdateMyProfileResponse,
   UpdateUserAsAdminBody,
   UpdateUserAsAdminResponse,
   ListAllUsersResponse,
   DeleteUserAsAdminResponse,
 } from "@workspace/api-zod";
+
+const updateMeSchema = z.object({
+  firstName: z.string().trim().max(100).nullish(),
+  lastName: z.string().trim().max(100).nullish(),
+  profileImageUrl: z.string().trim().max(1000).nullish(),
+  phone: z.string().trim().max(30).nullish(),
+  email: z.string().trim().email().max(255).nullish(),
+});
 
 const router: IRouter = Router();
 
@@ -29,9 +37,9 @@ router.patch("/me", async (req: Request, res: Response) => {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
-  const parsed = UpdateMyProfileBody.safeParse(req.body);
+  const parsed = updateMeSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid input" });
+    res.status(400).json({ error: "بيانات غير صحيحة." });
     return;
   }
   const updates: Record<string, unknown> = {};
@@ -42,6 +50,22 @@ router.patch("/me", async (req: Request, res: Response) => {
   if (parsed.data.profileImageUrl !== undefined)
     updates.profileImageUrl = parsed.data.profileImageUrl;
   if (parsed.data.phone !== undefined) updates.phone = parsed.data.phone;
+
+  if (parsed.data.email !== undefined && parsed.data.email !== null) {
+    const newEmail = parsed.data.email.toLowerCase();
+    const conflict = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(and(eq(usersTable.email, newEmail), ne(usersTable.id, req.user.id)))
+      .limit(1);
+    if (conflict.length > 0) {
+      res.status(409).json({ error: "الإيميل ده مستخدم بالفعل." });
+      return;
+    }
+    updates.email = newEmail;
+  } else if (parsed.data.email === null) {
+    updates.email = null;
+  }
 
   const [updated] = await db
     .update(usersTable)

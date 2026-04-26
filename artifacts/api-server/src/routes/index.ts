@@ -7,6 +7,7 @@ import contactRouter from "./contact";
 import notificationsRouter from "./notifications";
 import bashakAiRouter from "./bashak-ai";
 import storageRouter from "./storage";
+import siteSettingsRouter from "./site-settings";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(contactRouter);
 router.use(notificationsRouter);
 router.use(bashakAiRouter);
 router.use(storageRouter);
+router.use(siteSettingsRouter);
 
 export default router;

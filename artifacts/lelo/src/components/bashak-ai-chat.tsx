@@ -1,18 +1,13 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Sparkles, Send, X, Loader2, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useSiteSettings } from "@/lib/site-settings";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
-
-const WELCOME: ChatMessage = {
-  role: "assistant",
-  content:
-    "أهلاً بيك في باشاك! 👋 اسألني عن الشركة، أرقام التواصل، آخر مشاريعنا، أو العقارات المتاحة دلوقتي.",
-};
 
 const QUICK_PROMPTS = [
   "مين شركة باشاك؟",
@@ -22,12 +17,23 @@ const QUICK_PROMPTS = [
 ];
 
 export function BashakAIChat() {
+  const { settings } = useSiteSettings();
+  const welcome = useMemo<ChatMessage>(
+    () => ({ role: "assistant", content: settings.aiWelcomeMessage }),
+    [settings.aiWelcomeMessage],
+  );
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
+  const [messages, setMessages] = useState<ChatMessage[]>([welcome]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMessages((prev) =>
+      prev.length === 1 && prev[0]?.role === "assistant" ? [welcome] : prev,
+    );
+  }, [welcome]);
 
   useEffect(() => {
     if (open && scrollRef.current) {
@@ -51,7 +57,7 @@ export function BashakAIChat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: next.filter((m) => m !== WELCOME).slice(-12),
+          messages: next.filter((m) => m !== welcome).slice(-12),
         }),
       });
       const body = (await res.json().catch(() => ({}))) as {

@@ -1,11 +1,17 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth, type AuthUser } from "@workspace/replit-auth-web";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  useSiteSettings,
+  DEFAULT_SETTINGS,
+  type SiteSettings,
+} from "@/lib/site-settings";
 import {
   Tabs,
   TabsContent,
@@ -37,8 +43,11 @@ import {
   Loader2,
   Pencil,
   RefreshCcw,
+  Save,
+  Settings as SettingsIcon,
   ShieldCheck,
   Trash2,
+  Upload,
   Users,
   X,
 } from "lucide-react";
@@ -47,11 +56,12 @@ import { PropertyCard } from "@/components/property-card";
 import {
   apiFetch,
   formatRelative,
+  resolveImageUrl,
   type ContactRequest,
   type Property,
 } from "@/lib/api";
 
-const TABS = ["users", "properties", "contacts"] as const;
+const TABS = ["users", "properties", "contacts", "settings"] as const;
 type Tab = (typeof TABS)[number];
 
 function readTab(): Tab {
@@ -111,7 +121,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs value={tab} onValueChange={changeTab} dir="rtl">
-          <TabsList className="grid grid-cols-3 w-full md:w-fit">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-fit">
             <TabsTrigger value="users" className="gap-1.5">
               <Users className="h-4 w-4" /> المستخدمين
             </TabsTrigger>
@@ -120,6 +130,9 @@ export default function AdminPage() {
             </TabsTrigger>
             <TabsTrigger value="contacts" className="gap-1.5">
               <Inbox className="h-4 w-4" /> طلبات التواصل
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-1.5">
+              <SettingsIcon className="h-4 w-4" /> إعدادات الموقع
             </TabsTrigger>
           </TabsList>
 
@@ -131,6 +144,9 @@ export default function AdminPage() {
           </TabsContent>
           <TabsContent value="contacts" className="mt-6">
             <ContactsPanel />
+          </TabsContent>
+          <TabsContent value="settings" className="mt-6">
+            <SettingsPanel />
           </TabsContent>
         </Tabs>
       </div>
@@ -771,6 +787,387 @@ function ContactsPanel() {
             </li>
           ))}
         </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+const TAB_LABELS = {
+  brand: "العلامة + الشعار",
+  contact: "أرقام التواصل",
+  socials: "السوشيال ميديا",
+  ai: "ردود المساعد الذكي",
+} as const;
+
+type SettingsSection = keyof typeof TAB_LABELS;
+
+async function uploadLogoFile(file: File): Promise<string> {
+  const metaRes = await fetch("/api/storage/uploads/request-url", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: file.name,
+      size: file.size,
+      contentType: file.type || "application/octet-stream",
+    }),
+  });
+  if (!metaRes.ok) {
+    const err = (await metaRes.json().catch(() => ({}))) as { error?: string };
+    throw new Error(err.error ?? "تعذّر بدء الرفع");
+  }
+  const { uploadURL, objectPath } = (await metaRes.json()) as {
+    uploadURL: string;
+    objectPath: string;
+  };
+  const putRes = await fetch(uploadURL, {
+    method: "PUT",
+    body: file,
+    headers: { "Content-Type": file.type || "application/octet-stream" },
+  });
+  if (!putRes.ok) throw new Error("فشل رفع الشعار");
+  return objectPath;
+}
+
+function SettingsPanel() {
+  const { settings, refresh } = useSiteSettings();
+  const { toast } = useToast();
+  const [section, setSection] = useState<SettingsSection>("brand");
+  const [draft, setDraft] = useState<SiteSettings>(settings);
+  const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setDraft(settings);
+  }, [settings]);
+
+  function update<K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) {
+    setDraft((d) => ({ ...d, [key]: value }));
+  }
+
+  async function onLogoFile(file: File | null) {
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast({
+        title: "حجم كبير",
+        description: "الشعار لازم يبقى أصغر من 8 ميجا.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setUploadingLogo(true);
+    try {
+      const path = await uploadLogoFile(file);
+      update("logoUrl", path);
+      toast({
+        title: "اترفع الشعار",
+        description: "اضغط حفظ لتثبيته على الهيدر والفوتر.",
+      });
+    } catch (err) {
+      toast({
+        title: "خطأ",
+        description: err instanceof Error ? err.message : "فشل الرفع.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    }
+  }
+
+  async function onSave(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/site-settings", {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      await refresh();
+      toast({
+        title: "تم الحفظ",
+        description: "إعدادات الموقع اتحدّثت لكل الزوار.",
+      });
+    } catch (err) {
+      toast({
+        title: "حصل خطأ",
+        description: err instanceof Error ? err.message : "ما قدرناش نحفظ.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function onResetDefaults() {
+    setDraft(DEFAULT_SETTINGS);
+    toast({
+      title: "تم استرجاع الافتراضي",
+      description: "اضغط حفظ لتطبيق الإعدادات الافتراضية.",
+    });
+  }
+
+  const logoPreview = draft.logoUrl ? resolveImageUrl(draft.logoUrl) : "";
+
+  return (
+    <Card className="border-border/40">
+      <CardContent className="pt-6 pb-6 px-6">
+        <form onSubmit={onSave} className="space-y-6">
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(TAB_LABELS) as SettingsSection[]).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSection(s)}
+                data-testid={`tab-settings-${s}`}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  section === s
+                    ? "text-black"
+                    : "text-foreground/70 bg-foreground/5 hover:bg-foreground/10"
+                }`}
+                style={
+                  section === s
+                    ? { background: "var(--gold)" }
+                    : undefined
+                }
+              >
+                {TAB_LABELS[s]}
+              </button>
+            ))}
+          </div>
+
+          {section === "brand" && (
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-2 block">شعار الموقع (للهيدر والفوتر)</Label>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div
+                    className="rounded-lg border border-border/40 flex items-center justify-center"
+                    style={{
+                      width: 200,
+                      height: 80,
+                      background: "#000",
+                    }}
+                  >
+                    {logoPreview ? (
+                      <img
+                        src={logoPreview}
+                        alt="logo preview"
+                        style={{
+                          maxWidth: 180,
+                          maxHeight: 64,
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
+                      <span className="text-xs text-white/40">
+                        الشعار الافتراضي
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => logoInputRef.current?.click()}
+                      disabled={uploadingLogo}
+                      data-testid="button-upload-logo"
+                      className="rounded-xl"
+                    >
+                      {uploadingLogo ? (
+                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="ml-2 h-4 w-4" />
+                      )}
+                      اختر صورة من جهازك
+                    </Button>
+                    {draft.logoUrl && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => update("logoUrl", null)}
+                        data-testid="button-clear-logo"
+                        className="rounded-xl text-xs"
+                      >
+                        ارجع للشعار الافتراضي
+                      </Button>
+                    )}
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      data-testid="input-logo-file"
+                      onChange={(e) =>
+                        onLogoFile(e.target.files?.[0] ?? null)
+                      }
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-foreground/50 mt-2">
+                  PNG شفّاف بنسبة قريبة من 160×56 يدّي أحسن نتيجة.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {section === "contact" && (
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-1.5">
+                <Label htmlFor="hotlineNumber">الخط الساخن</Label>
+                <Input
+                  id="hotlineNumber"
+                  value={draft.hotlineNumber}
+                  onChange={(e) => update("hotlineNumber", e.target.value)}
+                  dir="ltr"
+                  className="text-right"
+                  data-testid="input-hotline"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="contactPhone">الموبايل المعلن</Label>
+                <Input
+                  id="contactPhone"
+                  value={draft.contactPhone}
+                  onChange={(e) => update("contactPhone", e.target.value)}
+                  dir="ltr"
+                  className="text-right"
+                  data-testid="input-contact-phone"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="whatsappNumber">رقم واتساب (دولي بدون +)</Label>
+                <Input
+                  id="whatsappNumber"
+                  value={draft.whatsappNumber}
+                  onChange={(e) => update("whatsappNumber", e.target.value)}
+                  dir="ltr"
+                  className="text-right"
+                  placeholder="201151313999"
+                  data-testid="input-whatsapp"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="contactEmail">إيميل التواصل</Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  value={draft.contactEmail}
+                  onChange={(e) => update("contactEmail", e.target.value)}
+                  dir="ltr"
+                  className="text-right"
+                  data-testid="input-contact-email"
+                />
+              </div>
+              <div className="grid gap-1.5 md:col-span-2">
+                <Label htmlFor="address">العنوان (يظهر في الفوتر والخريطة)</Label>
+                <Textarea
+                  id="address"
+                  value={draft.address}
+                  onChange={(e) => update("address", e.target.value)}
+                  rows={2}
+                  data-testid="input-address"
+                />
+              </div>
+            </div>
+          )}
+
+          {section === "socials" && (
+            <div className="grid gap-4 md:grid-cols-2">
+              {([
+                ["facebookUrl", "فيسبوك"],
+                ["instagramUrl", "إنستجرام"],
+                ["tiktokUrl", "تيك توك"],
+                ["youtubeUrl", "يوتيوب"],
+                ["linkedinUrl", "لينكدإن"],
+              ] as const).map(([key, label]) => (
+                <div className="grid gap-1.5" key={key}>
+                  <Label htmlFor={key}>{label}</Label>
+                  <Input
+                    id={key}
+                    value={draft[key]}
+                    onChange={(e) => update(key, e.target.value)}
+                    dir="ltr"
+                    className="text-right"
+                    placeholder="https://"
+                    data-testid={`input-${key}`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {section === "ai" && (
+            <div className="space-y-4">
+              <div className="grid gap-1.5">
+                <Label htmlFor="aiWelcomeMessage">رسالة الترحيب للمساعد</Label>
+                <Textarea
+                  id="aiWelcomeMessage"
+                  value={draft.aiWelcomeMessage}
+                  onChange={(e) =>
+                    update("aiWelcomeMessage", e.target.value)
+                  }
+                  rows={3}
+                  data-testid="input-ai-welcome"
+                />
+                <p className="text-xs text-foreground/50">
+                  أول رسالة بيشوفها العميل لما يفتح الشات.
+                </p>
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="aiCompanyFacts">
+                  المعلومات اللي يستخدمها المساعد عن الشركة
+                </Label>
+                <Textarea
+                  id="aiCompanyFacts"
+                  value={draft.aiCompanyFacts}
+                  onChange={(e) => update("aiCompanyFacts", e.target.value)}
+                  rows={10}
+                  data-testid="input-ai-facts"
+                />
+                <p className="text-xs text-foreground/50">
+                  دي اللي بيرجع لها بشاك بوت لما حد يسأل عن الشركة. خلّيها
+                  مختصرة وواضحة.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center pt-4 border-t border-border/40">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onResetDefaults}
+              className="rounded-xl text-foreground/70"
+              data-testid="button-reset-defaults"
+            >
+              <RefreshCcw className="ml-2 h-4 w-4" />
+              استرجاع الافتراضي
+            </Button>
+            <Button
+              type="submit"
+              disabled={saving || uploadingLogo}
+              className="rounded-xl text-black font-semibold"
+              style={{ background: "var(--gold)" }}
+              data-testid="button-save-settings"
+            >
+              {saving ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="ml-2 h-4 w-4" />
+              )}
+              حفظ
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

@@ -23,20 +23,18 @@ type Lang = "ar" | "en"
 
 const NAV_BY_LANG: Record<Lang, NavItem[]> = {
   ar: [
-    { label: "الرئيسية", href: "/" },
     { label: "عننا", href: "/#about" },
-    { label: "العقارات", href: "/properties" },
-    { label: "مشاريع سابقة", href: "/#past-projects" },
     { label: "المكتبة الإعلامية", href: "/#media" },
-    { label: "تواصل معنا", href: "/#contact" },
+    { label: "العقارات", href: "/properties" },
+    { label: "أضف عقار", href: "/add-property" },
+    { label: "مشاريع سابقة", href: "/#past-projects" },
   ],
   en: [
-    { label: "Home", href: "/" },
     { label: "About", href: "/#about" },
-    { label: "Properties", href: "/properties" },
-    { label: "Past Projects", href: "/#past-projects" },
     { label: "Media", href: "/#media" },
-    { label: "Contact", href: "/#contact" },
+    { label: "Properties", href: "/properties" },
+    { label: "Add Property", href: "/add-property" },
+    { label: "Past Projects", href: "/#past-projects" },
   ],
 }
 
