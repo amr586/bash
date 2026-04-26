@@ -89,6 +89,67 @@ function NavLinkItem({ link }: { link: NavItem }) {
   )
 }
 
+function LangPill({
+  lang,
+  setLang,
+  compact = false,
+}: {
+  lang: Lang
+  setLang: (l: Lang) => void
+  compact?: boolean
+}) {
+  const apply = (next: Lang) => {
+    if (next === lang) return
+    setLang(next)
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("bashak.lang", next)
+      } catch {
+        /* ignore */
+      }
+      document.documentElement.lang = next
+      document.documentElement.dir = next === "ar" ? "rtl" : "ltr"
+    }
+  }
+  const sizes = compact ? "h-8 text-[11px]" : "h-9 text-xs"
+  const padX = compact ? "px-2" : "px-3"
+  return (
+    <div
+      role="group"
+      aria-label="Language switcher"
+      data-testid="lang-switcher"
+      className={`inline-flex ${sizes} items-stretch rounded-xl overflow-hidden border border-[var(--gold-dark)]/60 bg-background/80`}
+    >
+      <button
+        type="button"
+        onClick={() => apply("ar")}
+        aria-pressed={lang === "ar"}
+        data-testid="button-lang-ar"
+        className={`${padX} font-bold inline-flex items-center justify-center transition-colors ${
+          lang === "ar"
+            ? "bg-[var(--gold)] text-black"
+            : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
+        }`}
+      >
+        ع
+      </button>
+      <button
+        type="button"
+        onClick={() => apply("en")}
+        aria-pressed={lang === "en"}
+        data-testid="button-lang-en"
+        className={`${padX} font-bold inline-flex items-center justify-center border-r border-[var(--gold-dark)]/40 transition-colors ${
+          lang === "en"
+            ? "bg-[var(--gold)] text-black"
+            : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
+        }`}
+      >
+        EN
+      </button>
+    </div>
+  )
+}
+
 function UserMenu({ user, logout }: { user: AuthUser; logout: () => void }) {
   return (
     <DropdownMenu>
@@ -269,24 +330,18 @@ export function Header() {
               </Button>
             </>
           )}
-          <button
-            type="button"
-            onClick={toggleLang}
-            data-testid="button-lang-toggle"
-            aria-label="Toggle language"
-            className="ml-1 inline-flex items-center justify-center w-10 h-9 rounded-xl border border-border/40 text-xs font-bold text-foreground/80 hover:text-foreground hover:bg-foreground/10 transition-colors"
-          >
-            {lang === "ar" ? "EN" : "ع"}
-          </button>
+          <LangPill lang={lang} setLang={setLang} />
         </div>
 
-        <button
-          type="button"
-          aria-label="Toggle menu"
-          aria-expanded={isMobileOpen}
-          className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-border/40 text-foreground/80 hover:text-foreground hover:bg-foreground/10 transition-colors"
-          onClick={() => setIsMobileOpen((v) => !v)}
-        >
+        <div className="lg:hidden flex items-center gap-2">
+          <LangPill lang={lang} setLang={setLang} compact />
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded={isMobileOpen}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-border/40 text-foreground/80 hover:text-foreground hover:bg-foreground/10 transition-colors"
+            onClick={() => setIsMobileOpen((v) => !v)}
+          >
           <span className="sr-only">Menu</span>
           {isMobileOpen ? (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -300,7 +355,8 @@ export function Header() {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           )}
-        </button>
+          </button>
+        </div>
       </div>
 
       {isMobileOpen && (
