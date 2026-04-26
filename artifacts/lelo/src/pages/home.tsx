@@ -9,7 +9,6 @@ import { PastProjectsSection } from "@/components/past-projects-section";
 import { MediaSection } from "@/components/media-section";
 import { ServicesSection } from "@/components/services-section";
 import { FAQSection } from "@/components/faq-section";
-import { AnimatedCTASection } from "@/components/animated-cta-section";
 import { ContactSection } from "@/components/contact-section";
 import { Footer } from "@/components/footer";
 import { BashakAIChat } from "@/components/bashak-ai-chat";
@@ -30,7 +29,6 @@ export default function HomePage() {
         <ServicesSection />
         <MediaSection />
         <FAQSection />
-        <AnimatedCTASection />
         <ContactSection />
       </main>
       <Footer />

@@ -10,6 +10,7 @@ import {
 import { db, usersTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 import { hashPassword, verifyPassword } from "../lib/password";
+import { createChallenge, consumeChallenge } from "../lib/otp";
 import {
   clearSession,
   getOidcConfig,
@@ -112,18 +113,32 @@ router.get("/auth/user", (req: Request, res: Response) => {
   );
 });
 
+const STRONG_PW =
+  /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`])[\S]{8,200}$/;
+const STRONG_PW_MSG =
+  "كلمة السر لازم 8 أحرف على الأقل وفيها حرف كبير ورقم ورمز.";
+
 const signupSchema = z.object({
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().max(100).optional().nullable(),
   email: z.string().trim().toLowerCase().email().max(255),
-  phone: z.string().trim().min(3).max(30).optional().nullable(),
-  password: z.string().min(6).max(200),
+  phone: z.string().trim().min(3).max(30),
+  password: z
+    .string()
+    .min(8, STRONG_PW_MSG)
+    .max(200)
+    .regex(STRONG_PW, STRONG_PW_MSG),
 });
 
 const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
   password: z.string().min(1).max(200),
   remember: z.boolean().optional(),
+});
+
+const verifyOtpSchema = z.object({
+  challengeId: z.string().trim().min(8).max(64),
+  code: z.string().trim().regex(/^\d{6}$/, "كود من 6 أرقام."),
 });
 
 async function startLocalSession(
@@ -153,8 +168,10 @@ async function startLocalSession(
 router.post("/auth/signup", async (req: Request, res: Response) => {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
+    const first = parsed.error.issues[0];
     res.status(400).json({
-      error: "بيانات غير صحيحة. تأكد من الإيميل وكلمة المرور (6 أحرف على الأقل).",
+      error:
+        first?.message ?? "بيانات غير صحيحة. راجع الحقول وحاول تاني.",
     });
     return;
   }
@@ -182,23 +199,20 @@ router.post("/auth/signup", async (req: Request, res: Response) => {
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName ?? null,
-      phone: data.phone ?? null,
+      phone: data.phone,
       passwordHash,
       isAdmin: isFirstUser,
       role: isFirstUser ? "super_admin" : "user",
     })
     .returning();
-  await startLocalSession(res, created);
+
+  const challenge = createChallenge({ kind: "signup", userId: created.id });
   res.status(201).json({
-    user: {
-      id: created.id,
-      email: created.email,
-      firstName: created.firstName,
-      lastName: created.lastName,
-      profileImageUrl: created.profileImageUrl,
-      phone: created.phone,
-      isAdmin: created.isAdmin,
-    },
+    needsOtp: true,
+    challengeId: challenge.challengeId,
+    devOtp: challenge.code,
+    expiresAt: challenge.expiresAt,
+    target: data.phone,
   });
 });
 
@@ -222,7 +236,46 @@ router.post("/auth/login", async (req: Request, res: Response) => {
     res.status(401).json({ error: "الإيميل أو كلمة المرور غير صحيحة." });
     return;
   }
-  await startLocalSession(res, user, parsed.data.remember === true);
+
+  const challenge = createChallenge({
+    kind: "login",
+    userId: user.id,
+    remember: parsed.data.remember === true,
+  });
+  res.json({
+    needsOtp: true,
+    challengeId: challenge.challengeId,
+    devOtp: challenge.code,
+    expiresAt: challenge.expiresAt,
+    target: user.phone ?? user.email,
+  });
+});
+
+router.post("/auth/verify-otp", async (req: Request, res: Response) => {
+  const parsed = verifyOtpSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "كود غير صحيح." });
+    return;
+  }
+  const result = consumeChallenge(parsed.data.challengeId, parsed.data.code);
+  if ("error" in result) {
+    const map = {
+      not_found: "انتهت صلاحية الجلسة. ابدأ من الأول.",
+      expired: "الكود انتهت صلاحيته. اطلب كود جديد.",
+      invalid_code: "الكود غلط. حاول تاني.",
+    } as const;
+    res.status(400).json({ error: map[result.error] });
+    return;
+  }
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, result.userId));
+  if (!user) {
+    res.status(404).json({ error: "الحساب مش موجود." });
+    return;
+  }
+  await startLocalSession(res, user, result.remember);
   res.json({
     user: {
       id: user.id,

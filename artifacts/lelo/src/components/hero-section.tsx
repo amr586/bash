@@ -49,50 +49,13 @@ export function HeroSection() {
             </span>
           </p>
 
-          <div
-            dir="rtl"
-            className="flex flex-wrap items-center justify-center gap-3 mb-8 text-sm md:text-base"
-            style={{ fontFamily: "'Tajawal', sans-serif" }}
-          >
-            <span
-              className="px-4 py-1.5 rounded-full border"
-              style={{ color: "var(--gold)", borderColor: "var(--gold-dark)" }}
-            >
-              #باشاك
-            </span>
-            <span
-              className="px-4 py-1.5 rounded-full border"
-              style={{ color: "var(--gold)", borderColor: "var(--gold-dark)" }}
-            >
-              #باشاك_رؤية_جديدة_تطوير_مختلف
-            </span>
-            <span
-              className="px-4 py-1.5 rounded-full border"
-              style={{ color: "var(--gold)", borderColor: "var(--gold-dark)" }}
-            >
-              #فيها_حاجة_حلوة
-            </span>
-          </div>
-
           <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center mb-12">
-            <Button
-              size="lg"
-              className="text-black group font-semibold"
-              style={{ background: "var(--gold)" }}
-              asChild
-            >
-              <a href="https://wa.me/201151313999" target="_blank" rel="noreferrer">
-                احجز شقتك الآن
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform rotate-180" />
-              </a>
-            </Button>
-
             <RegisterNowDialog
               trigger={
                 <Button
                   size="lg"
                   className="text-black font-semibold"
-                  style={{ background: "var(--gold-light)" }}
+                  style={{ background: "var(--gold)" }}
                   data-testid="button-register-now"
                 >
                   <ClipboardList className="ml-2 h-4 w-4" />
@@ -100,19 +63,6 @@ export function HeroSection() {
                 </Button>
               }
             />
-
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-white bg-transparent hover:bg-white/5"
-              style={{ borderColor: "var(--gold)", color: "var(--gold-light)" }}
-              asChild
-            >
-              <a href="tel:17327">
-                <Phone className="mr-2 h-4 w-4" />
-                الخط الساخن 17327
-              </a>
-            </Button>
           </div>
         </div>
       </div>
