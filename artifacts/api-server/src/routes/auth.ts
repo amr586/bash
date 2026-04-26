@@ -185,6 +185,7 @@ router.post("/auth/signup", async (req: Request, res: Response) => {
       phone: data.phone ?? null,
       passwordHash,
       isAdmin: isFirstUser,
+      role: isFirstUser ? "super_admin" : "user",
     })
     .returning();
   await startLocalSession(res, created);

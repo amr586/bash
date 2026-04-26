@@ -247,6 +247,26 @@ export function Footer() {
                 محافظة القاهرة، مصر، 11835
               </span>
             </a>
+
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Bashak+Developments+Villa+99+First+District+Street+90+Fifth+Settlement+New+Cairo+Egypt"
+              target="_blank"
+              rel="noreferrer"
+              data-testid="link-map-embed"
+              className="block mt-4 rounded-xl overflow-hidden border hover:shadow-lg transition-shadow"
+              style={{ borderColor: "var(--gold-dark)" }}
+              aria-label="افتح موقع باشاك على خرائط جوجل"
+            >
+              <iframe
+                title="موقع شركة باشاك على الخريطة"
+                src="https://www.google.com/maps?q=Fifth+Settlement+New+Cairo+Egypt&output=embed"
+                width="100%"
+                height="220"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                style={{ border: 0, display: "block", pointerEvents: "none" }}
+              />
+            </a>
           </div>
         </div>
 

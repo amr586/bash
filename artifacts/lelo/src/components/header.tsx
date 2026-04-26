@@ -19,23 +19,29 @@ import { NotificationBell } from "./notification-bell"
 type NavChild = { label: string; href: string }
 type NavItem = { label: string; href: string; children?: NavChild[] }
 
-const navLinks: NavItem[] = [
-  {
-    label: "Home",
-    href: "/",
-    children: [{ label: "About", href: "/#features" }],
-  },
-  {
-    label: "Services",
-    href: "/#services",
-    children: [
-      { label: "View", href: "/#projects" },
-      { label: "Add Property", href: "/#add-property" },
-    ],
-  },
-  { label: "FAQ", href: "/#faq" },
-  { label: "Contact Us", href: "/#contact" },
-]
+type Lang = "ar" | "en"
+
+const NAV_BY_LANG: Record<Lang, NavItem[]> = {
+  ar: [
+    { label: "الرئيسية", href: "/" },
+    { label: "العقارات", href: "/#projects" },
+    { label: "خدماتنا", href: "/#services" },
+    { label: "الأسئلة الشائعة", href: "/#faq" },
+    { label: "تواصل معنا", href: "/#contact" },
+  ],
+  en: [
+    { label: "Home", href: "/" },
+    { label: "Properties", href: "/#projects" },
+    { label: "Services", href: "/#services" },
+    { label: "FAQ", href: "/#faq" },
+    { label: "Contact", href: "/#contact" },
+  ],
+}
+
+const T = {
+  ar: { login: "دخول", signup: "تسجيل", dashboard: "حسابي", admin: "لوحة الأدمن", logout: "خروج" },
+  en: { login: "Login", signup: "Sign Up", dashboard: "Dashboard", admin: "Admin", logout: "Logout" },
+} as const
 
 function initials(u: AuthUser): string {
   const f = u.firstName?.[0] ?? ""
@@ -155,6 +161,21 @@ export function Header() {
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null)
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const [, navigate] = useLocation()
+  const [lang, setLang] = useState<Lang>(() => {
+    if (typeof window === "undefined") return "ar"
+    return (localStorage.getItem("bashak.lang") as Lang) || "ar"
+  })
+  const navLinks = NAV_BY_LANG[lang]
+  const t = T[lang]
+  const toggleLang = () => {
+    const next: Lang = lang === "ar" ? "en" : "ar"
+    setLang(next)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("bashak.lang", next)
+      document.documentElement.dir = next === "ar" ? "rtl" : "ltr"
+      document.documentElement.lang = next
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -222,19 +243,30 @@ export function Header() {
                 size="sm"
                 onClick={() => navigate("/login")}
                 className="text-foreground/80 hover:text-foreground hover:bg-foreground/10 transition-all duration-200 rounded-xl"
+                data-testid="button-header-login"
               >
-                Login
+                {t.login}
               </Button>
               <Button
                 size="sm"
                 onClick={() => navigate("/login")}
                 className="text-black transform transition-all duration-200 hover:scale-105 hover:shadow-lg rounded-xl font-semibold"
                 style={{ background: "var(--gold)" }}
+                data-testid="button-header-signup"
               >
-                Create Account
+                {t.signup}
               </Button>
             </>
           )}
+          <button
+            type="button"
+            onClick={toggleLang}
+            data-testid="button-lang-toggle"
+            aria-label="Toggle language"
+            className="ml-1 inline-flex items-center justify-center w-10 h-9 rounded-xl border border-border/40 text-xs font-bold text-foreground/80 hover:text-foreground hover:bg-foreground/10 transition-colors"
+          >
+            {lang === "ar" ? "EN" : "ع"}
+          </button>
         </div>
 
         <button
