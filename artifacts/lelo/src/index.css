@@ -4,7 +4,57 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Bashak Developments — black & gold palette */
+  /* Bashak Developments — LIGHT mode (white & gold) */
+  --background: #ffffff;
+  --foreground: #1a1408;
+  --card: #fdfaf2;
+  --card-foreground: #1a1408;
+  --popover: #ffffff;
+  --popover-foreground: #1a1408;
+  --primary: #b8941f;
+  --primary-foreground: #ffffff;
+  --secondary: #f5ecd2;
+  --secondary-foreground: #5c4a18;
+  --muted: #f7f2e3;
+  --muted-foreground: #6b5a2a;
+  --accent: #d4af37;
+  --accent-foreground: #1a1408;
+  --destructive: #b8941f;
+  --destructive-foreground: #ffffff;
+  --border: #e8dcb5;
+  --input: #f7f2e3;
+  --ring: rgba(184, 148, 31, 0.4);
+  --chart-1: #b8941f;
+  --chart-2: #c9a55c;
+  --chart-3: #8b7340;
+  --chart-4: #f5ecd2;
+  --chart-5: #ffffff;
+  --gold: #c69b1b;
+  --gold-light: #d4af37;
+  --gold-dark: #8b7340;
+  --radius: 0.5rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1408;
+  --sidebar-primary: #f5ecd2;
+  --sidebar-primary-foreground: #1a1408;
+  --sidebar-accent: #f7f2e3;
+  --sidebar-accent-foreground: #1a1408;
+  --sidebar-border: #e8dcb5;
+  --sidebar-ring: rgba(184, 148, 31, 0.4);
+  --background-gradient-speed: 15s;
+  --background-gradient-delay: 0s;
+  --tx-1: 1;
+  --ty-1: 1;
+  --tx-2: -1;
+  --ty-2: 1;
+  --tx-3: 1;
+  --ty-3: -1;
+  --tx-4: -1;
+  --ty-4: -1;
+}
+
+.dark {
+  /* DARK mode (black & gold) */
   --background: #000000;
   --foreground: #ffffff;
   --card: #14110a;
@@ -32,53 +82,6 @@
   --gold: #d4af37;
   --gold-light: #e6c785;
   --gold-dark: #8b7340;
-  --radius: 0.5rem;
-  --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #1a1a1a;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #404040;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #404040;
-  --sidebar-ring: rgba(255, 255, 255, 0.3);
-  --background-gradient-speed: 15s;
-  --background-gradient-delay: 0s;
-  --tx-1: 1;
-  --ty-1: 1;
-  --tx-2: -1;
-  --ty-2: 1;
-  --tx-3: 1;
-  --ty-3: -1;
-  --tx-4: -1;
-  --ty-4: -1;
-}
-
-.dark {
-  /* Dark mode uses same black & gold scheme */
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: #14110a;
-  --card-foreground: #ffffff;
-  --popover: #14110a;
-  --popover-foreground: #ffffff;
-  --primary: #d4af37;
-  --primary-foreground: #000000;
-  --secondary: #2a2418;
-  --secondary-foreground: #f5e9c8;
-  --muted: #14110a;
-  --muted-foreground: #b8a274;
-  --accent: #d4af37;
-  --accent-foreground: #000000;
-  --destructive: #d4af37;
-  --destructive-foreground: #000000;
-  --border: #3a311c;
-  --input: #14110a;
-  --ring: rgba(212, 175, 55, 0.4);
-  --chart-1: #d4af37;
-  --chart-2: #c9a55c;
-  --chart-3: #8b7340;
-  --chart-4: #2a2418;
-  --chart-5: #000000;
   --sidebar: #000000;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #1a1a1a;

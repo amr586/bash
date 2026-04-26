@@ -13,8 +13,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
-import { ChevronDown, LayoutDashboard, LogOut, Settings, ShieldCheck, User as UserIcon } from "lucide-react"
+import { ChevronDown, LayoutDashboard, LogOut, Moon, Settings, ShieldCheck, Sun, User as UserIcon } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
+import { useTheme } from "@/lib/theme"
+
+function ThemeToggle({ compact = false }: { compact?: boolean }) {
+  const { theme, toggleTheme } = useTheme()
+  const size = compact ? "w-8 h-8" : "w-9 h-9"
+  const isDark = theme === "dark"
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label={isDark ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الداكن"}
+      title={isDark ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الداكن"}
+      data-testid="button-theme-toggle"
+      className={`relative inline-flex ${size} items-center justify-center rounded-xl border border-[var(--gold-dark)]/60 bg-background/80 text-[var(--gold-light)] transition-all duration-300 hover:scale-110 hover:bg-[var(--gold)]/10 overflow-hidden`}
+    >
+      <Sun
+        className={`absolute h-4 w-4 transition-all duration-500 ${
+          isDark ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"
+        }`}
+      />
+      <Moon
+        className={`absolute h-4 w-4 transition-all duration-500 ${
+          isDark ? "-rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+        }`}
+      />
+    </button>
+  )
+}
 
 type NavChild = { label: string; href: string }
 type NavItem = { label: string; href: string; children?: NavChild[] }
@@ -328,10 +356,12 @@ export function Header() {
               </Button>
             </>
           )}
+          <ThemeToggle />
           <LangPill lang={lang} setLang={setLang} />
         </div>
 
         <div className="lg:hidden flex items-center gap-2">
+          <ThemeToggle compact />
           <LangPill lang={lang} setLang={setLang} compact />
           <button
             type="button"

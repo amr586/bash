@@ -92,7 +92,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     return (
       <Link
         href={href}
-        className="block text-white/70 hover:text-[var(--gold-light)] transition-colors py-1.5 text-sm"
+        className="block text-foreground/70 hover:text-[var(--gold-light)] transition-colors py-1.5 text-sm"
       >
         • {children}
       </Link>
@@ -101,7 +101,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
   return (
     <a
       href={href}
-      className="block text-white/70 hover:text-[var(--gold-light)] transition-colors py-1.5 text-sm"
+      className="block text-foreground/70 hover:text-[var(--gold-light)] transition-colors py-1.5 text-sm"
     >
       • {children}
     </a>
@@ -124,13 +124,12 @@ function ContactItem({
       href={href}
       target={href.startsWith("http") ? "_blank" : undefined}
       rel={href.startsWith("http") ? "noreferrer" : undefined}
-      className="flex items-center gap-3 text-white/75 hover:text-white transition-colors py-2 text-sm"
+      className="flex items-center gap-3 text-foreground/75 hover:text-foreground transition-colors py-2 text-sm"
     >
       <span
-        className="inline-flex items-center justify-center w-9 h-9 rounded-full shrink-0"
+        className="inline-flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-[var(--gold)]/10"
         style={{
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(212,175,55,0.25)",
+          border: "1px solid rgba(198,155,27,0.35)",
           color: "var(--gold-light)",
         }}
       >
@@ -153,9 +152,8 @@ export function Footer() {
   return (
     <footer
       dir="rtl"
-      className="border-t pt-14 pb-8 px-4"
+      className="border-t pt-14 pb-8 px-4 bg-background text-foreground"
       style={{
-        background: "#000",
         borderColor: "var(--border)",
         fontFamily: "'Tajawal', sans-serif",
       }}
@@ -172,7 +170,7 @@ export function Footer() {
             >
               <LeLoLogo />
             </Link>
-            <p className="text-white/70 text-sm leading-relaxed mb-5">
+            <p className="text-foreground/70 text-sm leading-relaxed mb-5">
               شركة باشاك للتطوير العقاري — شركة مصرية متخصصة في تقديم خدمات
               عقارية شاملة في مجالات متعددة بخبرة تمتد لأكثر من 10 أعوام.
             </p>
@@ -185,11 +183,10 @@ export function Footer() {
                   rel="noreferrer"
                   aria-label={s.name}
                   data-testid={`link-social-${s.name.toLowerCase()}`}
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-all hover:scale-110 hover:brightness-110"
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-all hover:scale-110 hover:brightness-110 bg-[var(--gold)]/10 hover:bg-[var(--gold)]/20"
                   style={{
-                    background: "linear-gradient(135deg, #1a1a1a, #0d0d0d)",
                     color: "var(--gold-light)",
-                    border: "1px solid rgba(212,175,55,0.2)",
+                    border: "1px solid rgba(198,155,27,0.3)",
                   }}
                 >
                   {s.icon}
@@ -276,7 +273,7 @@ export function Footer() {
         </a>
 
         <div
-          className="border-t mt-10 pt-6 text-center text-white/50 text-sm"
+          className="border-t mt-10 pt-6 text-center text-foreground/55 text-sm"
           style={{ borderColor: "var(--border)" }}
         >
           <p>&copy; 2026 Bashak Developments. جميع الحقوق محفوظة.</p>
