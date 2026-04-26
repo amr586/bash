@@ -9,6 +9,7 @@ import ProfilePage from "@/pages/profile";
 import AdminPage from "@/pages/admin-users";
 import DashboardPage from "@/pages/dashboard";
 import AddPropertyPage from "@/pages/add-property";
+import PropertiesPage from "@/pages/properties";
 import PropertyDetailPage from "@/pages/property-detail";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/profile" component={ProfilePage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/add-property" component={AddPropertyPage} />
+      <Route path="/properties" component={PropertiesPage} />
       <Route path="/properties/:id" component={PropertyDetailPage} />
       <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
