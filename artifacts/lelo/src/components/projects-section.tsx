@@ -86,11 +86,34 @@ export function ProjectsSection() {
             <Loader2 className="h-8 w-8 animate-spin text-[var(--gold)]" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {properties.slice(0, 4).map((p, i) => (
-              <FeaturedCard key={p.id} property={p} index={i} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {properties.slice(0, 4).map((p, i) => (
+                <FeaturedCard key={p.id} property={p} index={i} />
+              ))}
+            </div>
+            <motion.div
+              className="mt-12 flex justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <Link
+                href="/properties"
+                data-testid="link-view-more-properties"
+                className="group inline-flex items-center gap-3 px-8 py-3 rounded-xl border-2 font-semibold transition-all duration-300 hover:scale-105"
+                style={{
+                  borderColor: "var(--gold)",
+                  color: "var(--gold-light)",
+                  background: "rgba(212, 175, 55, 0.05)",
+                }}
+              >
+                <span>عرض المزيد</span>
+                <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+              </Link>
+            </motion.div>
+          </>
         )}
       </div>
     </section>
