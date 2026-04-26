@@ -1,12 +1,14 @@
+import { useEffect, useState } from "react"
 import { Button } from "./ui/button"
-import { ArrowRight, Phone, ClipboardList } from "lucide-react"
+import { ClipboardList } from "lucide-react"
 import { ParticleTextEffect } from "./particle-text-effect"
 import { HeroSlideshow } from "./hero-slideshow"
 import { RegisterNowDialog } from "./register-now-dialog"
+import { apiFetch, type Property } from "@/lib/api"
 import heroBg from "../assets/hero-bg.png"
 
 const BASE = import.meta.env.BASE_URL
-const slideshowImages = [
+const fallbackImages = [
   heroBg,
   `${BASE}images/project-1.png`,
   `${BASE}images/project-2.png`,
@@ -15,10 +17,36 @@ const slideshowImages = [
 ]
 
 export function HeroSection() {
+  const [propertyImages, setPropertyImages] = useState<string[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    apiFetch<{ properties: Property[] }>("/api/properties?status=approved&limit=20")
+      .then((d) => {
+        if (cancelled) return
+        const imgs: string[] = []
+        for (const p of d.properties ?? []) {
+          if (p.mainImageUrl) imgs.push(p.mainImageUrl)
+          for (const u of p.imageUrls ?? []) {
+            if (u && !imgs.includes(u)) imgs.push(u)
+          }
+        }
+        if (imgs.length > 0) setPropertyImages(imgs.slice(0, 12))
+      })
+      .catch(() => {
+        /* keep fallback */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const slideshowImages = propertyImages.length > 0 ? propertyImages : fallbackImages
+
   return (
     <section className="py-20 px-4 relative overflow-hidden min-h-screen flex flex-col justify-between">
       {/* Animated real-estate slideshow background */}
-      <HeroSlideshow images={slideshowImages} />
+      <HeroSlideshow images={slideshowImages} intervalMs={3000} />
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/70 to-black/95" />
         <div
