@@ -486,6 +486,7 @@ function DeleteUserDialog({
 
 function PropertiesPanel() {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const [items, setItems] = useState<Property[] | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">(
     "pending",
@@ -603,6 +604,7 @@ function PropertiesPanel() {
                       disabled={busyId === p.id}
                       className="rounded-lg text-black font-semibold"
                       style={{ background: "var(--gold)" }}
+                      data-testid={`button-approve-${p.id}`}
                     >
                       <Check className="ml-1 h-3.5 w-3.5" /> اعتماد
                     </Button>
@@ -614,16 +616,29 @@ function PropertiesPanel() {
                       onClick={() => setStatus(p, "rejected")}
                       disabled={busyId === p.id}
                       className="rounded-lg"
+                      data-testid={`button-reject-${p.id}`}
                     >
                       <X className="ml-1 h-3.5 w-3.5" /> رفض
                     </Button>
                   )}
                   <Button
                     size="sm"
+                    variant="outline"
+                    onClick={() => navigate(`/edit-property/${p.id}`)}
+                    disabled={busyId === p.id}
+                    className="rounded-lg"
+                    style={{ borderColor: "var(--gold)", color: "var(--gold-light)" }}
+                    data-testid={`button-edit-${p.id}`}
+                  >
+                    <Pencil className="ml-1 h-3.5 w-3.5" /> تعديل
+                  </Button>
+                  <Button
+                    size="sm"
                     variant="ghost"
                     onClick={() => remove(p)}
                     disabled={busyId === p.id}
                     className="rounded-lg text-destructive hover:bg-destructive/10"
+                    data-testid={`button-delete-${p.id}`}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

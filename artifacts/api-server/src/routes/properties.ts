@@ -245,6 +245,17 @@ const adminUpdateSchema = z.object({
   title: z.string().trim().min(2).max(200).optional(),
   description: z.string().trim().max(5000).optional(),
   price: z.coerce.number().min(0).optional(),
+  type: z.enum(propertyTypeValues).optional(),
+  listingType: z.enum(propertyListingValues).optional(),
+  location: z.string().trim().max(200).optional(),
+  bedrooms: z.coerce.number().int().min(0).max(50).nullable().optional(),
+  bathrooms: z.coerce.number().int().min(0).max(50).nullable().optional(),
+  area: z.coerce.number().int().min(0).max(1_000_000).nullable().optional(),
+  mainImageUrl: z.string().trim().max(1000).nullable().optional(),
+  imageUrls: z.array(z.string().trim().min(1).max(1000)).max(40).optional(),
+  floorPlanUrls: z.array(z.string().trim().min(1).max(1000)).max(20).optional(),
+  mapsLink: z.string().trim().max(1000).nullable().optional(),
+  contactPhone: z.string().trim().max(30).nullable().optional(),
 });
 
 router.patch("/admin/properties/:id", async (req: Request, res: Response) => {
@@ -272,6 +283,22 @@ router.patch("/admin/properties/:id", async (req: Request, res: Response) => {
   if (parsed.data.description !== undefined)
     updates.description = parsed.data.description;
   if (parsed.data.price !== undefined) updates.price = String(parsed.data.price);
+  if (parsed.data.type) updates.type = parsed.data.type;
+  if (parsed.data.listingType) updates.listingType = parsed.data.listingType;
+  if (parsed.data.location !== undefined) updates.location = parsed.data.location;
+  if (parsed.data.bedrooms !== undefined) updates.bedrooms = parsed.data.bedrooms;
+  if (parsed.data.bathrooms !== undefined)
+    updates.bathrooms = parsed.data.bathrooms;
+  if (parsed.data.area !== undefined) updates.area = parsed.data.area;
+  if (parsed.data.mainImageUrl !== undefined)
+    updates.mainImageUrl = parsed.data.mainImageUrl;
+  if (parsed.data.imageUrls !== undefined)
+    updates.imageUrls = parsed.data.imageUrls;
+  if (parsed.data.floorPlanUrls !== undefined)
+    updates.floorPlanUrls = parsed.data.floorPlanUrls;
+  if (parsed.data.mapsLink !== undefined) updates.mapsLink = parsed.data.mapsLink;
+  if (parsed.data.contactPhone !== undefined)
+    updates.contactPhone = parsed.data.contactPhone;
 
   const [updated] = await db
     .update(propertiesTable)
