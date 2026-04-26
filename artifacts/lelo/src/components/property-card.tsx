@@ -6,6 +6,7 @@ import {
   formatPrice,
   listingTypeLabels,
   propertyTypeLabels,
+  resolveImageUrl,
   statusLabels,
   type Property,
 } from "@/lib/api";
@@ -29,9 +30,9 @@ export function PropertyCard({
       className="overflow-hidden border-border/40 bg-background/60 backdrop-blur hover:shadow-xl transition-shadow group"
     >
       <div className="relative aspect-[4/3] bg-foreground/5">
-        {property.mainImageUrl ? (
+        {property.mainImageUrl || property.imageUrls?.[0] ? (
           <img
-            src={property.mainImageUrl}
+            src={resolveImageUrl(property.mainImageUrl ?? property.imageUrls[0])}
             alt={property.title}
             className="absolute inset-0 w-full h-full object-cover"
             onError={(e) => {

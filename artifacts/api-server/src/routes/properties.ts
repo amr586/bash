@@ -38,6 +38,9 @@ const propertyInputSchema = z.object({
   bathrooms: z.coerce.number().int().min(0).max(50).nullable().optional(),
   area: z.coerce.number().int().min(0).max(1_000_000).nullable().optional(),
   mainImageUrl: z.string().trim().max(1000).nullable().optional(),
+  imageUrls: z.array(z.string().trim().min(1).max(1000)).max(40).optional(),
+  floorPlanUrls: z.array(z.string().trim().min(1).max(1000)).max(20).optional(),
+  mapsLink: z.string().trim().max(1000).nullable().optional(),
   contactPhone: z.string().trim().max(30).nullable().optional(),
 });
 
@@ -55,6 +58,9 @@ function serializeProperty(p: typeof propertiesTable.$inferSelect) {
     bathrooms: p.bathrooms,
     area: p.area,
     mainImageUrl: p.mainImageUrl,
+    imageUrls: p.imageUrls ?? [],
+    floorPlanUrls: p.floorPlanUrls ?? [],
+    mapsLink: p.mapsLink,
     contactPhone: p.contactPhone,
     status: p.status,
     createdAt: p.createdAt.toISOString(),
@@ -88,7 +94,14 @@ router.post("/properties", async (req: Request, res: Response) => {
       bedrooms: parsed.data.bedrooms ?? null,
       bathrooms: parsed.data.bathrooms ?? null,
       area: parsed.data.area ?? null,
-      mainImageUrl: parsed.data.mainImageUrl ?? null,
+      mainImageUrl:
+        parsed.data.mainImageUrl ??
+        (parsed.data.imageUrls && parsed.data.imageUrls.length > 0
+          ? parsed.data.imageUrls[0]
+          : null),
+      imageUrls: parsed.data.imageUrls ?? [],
+      floorPlanUrls: parsed.data.floorPlanUrls ?? [],
+      mapsLink: parsed.data.mapsLink ?? null,
       contactPhone: parsed.data.contactPhone ?? null,
       status: initialStatus,
     })

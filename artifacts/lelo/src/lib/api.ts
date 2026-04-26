@@ -11,6 +11,9 @@ export type Property = {
   bathrooms: number | null;
   area: number | null;
   mainImageUrl: string | null;
+  imageUrls: string[];
+  floorPlanUrls: string[];
+  mapsLink: string | null;
   contactPhone: string | null;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
@@ -74,6 +77,18 @@ export async function apiFetch<T>(
     throw new Error(body.error ?? `HTTP ${res.status}`);
   }
   return (await res.json()) as T;
+}
+
+/**
+ * Resolve a stored image reference to a renderable URL.
+ * - Full URLs (http/https) pass through.
+ * - Object storage paths (`/objects/...`) are routed through `/api/storage`.
+ */
+export function resolveImageUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith("/objects/")) return `/api/storage${url}`;
+  return url;
 }
 
 export function formatPrice(n: number): string {

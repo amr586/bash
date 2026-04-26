@@ -13,9 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch, propertyTypeLabels, listingTypeLabels } from "@/lib/api";
+import { MultiImageUploader } from "@/components/multi-image-uploader";
 
 export default function AddPropertyPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -31,7 +32,9 @@ export default function AddPropertyPage() {
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [area, setArea] = useState("");
-  const [mainImageUrl, setMainImageUrl] = useState("");
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [floorPlanUrls, setFloorPlanUrls] = useState<string[]>([]);
+  const [mapsLink, setMapsLink] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -53,12 +56,30 @@ export default function AddPropertyPage() {
     );
   }
 
+  function isValidMapsLink(v: string): boolean {
+    if (!v) return true;
+    try {
+      const u = new URL(v);
+      return u.protocol === "https:" || u.protocol === "http:";
+    } catch {
+      return false;
+    }
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!title.trim() || !type || !listingType) {
       toast({
         title: "بيانات ناقصة",
         description: "املأ العنوان ونوع العقار ونوع العرض.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!isValidMapsLink(mapsLink.trim())) {
+      toast({
+        title: "رابط الخريطة غير صحيح",
+        description: "ابعت لينك يبدأ بـ https://",
         variant: "destructive",
       });
       return;
@@ -77,7 +98,10 @@ export default function AddPropertyPage() {
           bedrooms: bedrooms ? Number(bedrooms) : null,
           bathrooms: bathrooms ? Number(bathrooms) : null,
           area: area ? Number(area) : null,
-          mainImageUrl: mainImageUrl.trim() || null,
+          mainImageUrl: imageUrls[0] ?? null,
+          imageUrls,
+          floorPlanUrls,
+          mapsLink: mapsLink.trim() || null,
           contactPhone: contactPhone.trim() || null,
         }),
       });
@@ -222,17 +246,46 @@ export default function AddPropertyPage() {
                 </div>
               </div>
 
+              <MultiImageUploader
+                values={imageUrls}
+                onChange={setImageUrls}
+                label="صور العقار"
+                description="ارفع صور العقار من جهازك دفعة واحدة. الصورة الأولى هتبقى الصورة الرئيسية."
+                buttonLabel="ارفع صور من الجهاز"
+                max={30}
+                testId="property-images"
+              />
+
+              <MultiImageUploader
+                values={floorPlanUrls}
+                onChange={setFloorPlanUrls}
+                label="صور المخطط (2D)"
+                description="ارفع صور المخططات الهندسية / Floor Plans (PNG أو JPG)."
+                buttonLabel="ارفع صور المخطط"
+                max={10}
+                testId="property-floorplans"
+              />
+
               <div className="grid gap-2">
-                <Label htmlFor="image">رابط الصورة الرئيسية</Label>
+                <Label htmlFor="maps">
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" style={{ color: "var(--gold)" }} />
+                    رابط جوجل ماب
+                  </span>
+                </Label>
                 <Input
-                  id="image"
-                  value={mainImageUrl}
-                  onChange={(e) => setMainImageUrl(e.target.value)}
-                  placeholder="https://..."
+                  id="maps"
+                  value={mapsLink}
+                  onChange={(e) => setMapsLink(e.target.value)}
+                  placeholder="https://maps.app.goo.gl/..."
                   dir="ltr"
                   className="text-right"
                   maxLength={1000}
+                  data-testid="input-maps-link"
                 />
+                <p className="text-xs text-foreground/50">
+                  افتح Google Maps، اضغط Share واختار Copy link، وألصقه هنا.
+                </p>
               </div>
 
               <div className="grid gap-2">
@@ -266,6 +319,7 @@ export default function AddPropertyPage() {
                   disabled={saving}
                   className="rounded-xl text-black font-semibold"
                   style={{ background: "var(--gold)" }}
+                  data-testid="button-submit-property"
                 >
                   {saving ? (
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />

@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Bath,
   BedDouble,
+  ExternalLink,
   Loader2,
   MapPin,
   Maximize2,
@@ -33,6 +34,7 @@ import {
   formatPrice,
   listingTypeLabels,
   propertyTypeLabels,
+  resolveImageUrl,
   type Property,
 } from "@/lib/api";
 
@@ -106,13 +108,26 @@ export default function PropertyDetailPage() {
 }
 
 function PropertyDetail({ property }: { property: Property }) {
+  const gallery: string[] = (() => {
+    const list = [...(property.imageUrls ?? [])];
+    if (
+      property.mainImageUrl &&
+      !list.includes(property.mainImageUrl)
+    ) {
+      list.unshift(property.mainImageUrl);
+    }
+    return list;
+  })();
+  const [activeIdx, setActiveIdx] = useState(0);
+  const heroSrc = gallery[activeIdx] ?? property.mainImageUrl ?? null;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
       <div className="lg:col-span-3 space-y-5">
         <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-border/40 bg-foreground/5">
-          {property.mainImageUrl ? (
+          {heroSrc ? (
             <img
-              src={property.mainImageUrl}
+              src={resolveImageUrl(heroSrc)}
               alt={property.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
@@ -133,6 +148,60 @@ function PropertyDetail({ property }: { property: Property }) {
             </Badge>
           </div>
         </div>
+
+        {gallery.length > 1 && (
+          <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+            {gallery.map((url, idx) => (
+              <button
+                type="button"
+                key={`${url}-${idx}`}
+                onClick={() => setActiveIdx(idx)}
+                className={`relative aspect-square rounded-md overflow-hidden border transition-all ${
+                  idx === activeIdx
+                    ? "ring-2 ring-[var(--gold)] border-transparent"
+                    : "border-border/40 opacity-80 hover:opacity-100"
+                }`}
+                aria-label={`الصورة ${idx + 1}`}
+                data-testid={`thumb-image-${idx}`}
+              >
+                <img
+                  src={resolveImageUrl(url)}
+                  alt={`${property.title} ${idx + 1}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {property.floorPlanUrls && property.floorPlanUrls.length > 0 && (
+          <Card className="border-border/40 bg-background/60 backdrop-blur">
+            <CardContent className="p-6 space-y-3">
+              <h2 className="font-semibold text-foreground flex items-center gap-2">
+                <Maximize2 className="h-4 w-4" style={{ color: "var(--gold)" }} />
+                المخطط (2D)
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {property.floorPlanUrls.map((url, idx) => (
+                  <a
+                    key={`${url}-${idx}`}
+                    href={resolveImageUrl(url)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="relative aspect-[4/3] rounded-lg overflow-hidden border border-border/40 bg-foreground/5 group"
+                    data-testid={`floorplan-${idx}`}
+                  >
+                    <img
+                      src={resolveImageUrl(url)}
+                      alt={`مخطط ${idx + 1}`}
+                      className="absolute inset-0 w-full h-full object-contain group-hover:scale-[1.02] transition-transform"
+                    />
+                  </a>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-border/40 bg-background/60 backdrop-blur">
           <CardContent className="p-6 space-y-4">
@@ -181,6 +250,24 @@ function PropertyDetail({ property }: { property: Property }) {
                 <p className="text-foreground/80 whitespace-pre-wrap leading-relaxed">
                   {property.description}
                 </p>
+              </div>
+            )}
+
+            {property.mapsLink && (
+              <div className="pt-2 border-t border-border/30">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-xl"
+                  style={{ borderColor: "var(--gold)", color: "var(--gold-light)" }}
+                  data-testid="link-maps"
+                >
+                  <a href={property.mapsLink} target="_blank" rel="noreferrer">
+                    <MapPin className="ml-2 h-4 w-4" />
+                    افتح الموقع على جوجل ماب
+                    <ExternalLink className="mr-2 h-3.5 w-3.5 opacity-60" />
+                  </a>
+                </Button>
               </div>
             )}
 

@@ -44,6 +44,9 @@ export const propertiesTable = pgTable(
     bathrooms: integer("bathrooms"),
     area: integer("area"),
     mainImageUrl: varchar("main_image_url", { length: 1000 }),
+    imageUrls: text("image_urls").array().notNull().default(sql`ARRAY[]::text[]`),
+    floorPlanUrls: text("floor_plan_urls").array().notNull().default(sql`ARRAY[]::text[]`),
+    mapsLink: varchar("maps_link", { length: 1000 }),
     contactPhone: varchar("contact_phone", { length: 30 }),
     status: varchar("status", { length: 16 }).notNull().default("pending"),
     createdAt: timestamp("created_at", { withTimezone: true })
