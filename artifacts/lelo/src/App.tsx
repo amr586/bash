@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteSettingsProvider } from "@/lib/site-settings";
+import { Header } from "@/components/header";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
@@ -18,19 +19,22 @@ const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route path="/login" component={LoginPage} />
-      <Route path="/create-account" component={LoginPage} />
-      <Route path="/profile" component={ProfilePage} />
-      <Route path="/dashboard" component={DashboardPage} />
-      <Route path="/add-property" component={AddPropertyPage} />
-      <Route path="/edit-property/:id" component={EditPropertyPage} />
-      <Route path="/properties" component={PropertiesPage} />
-      <Route path="/properties/:id" component={PropertyDetailPage} />
-      <Route path="/admin" component={AdminPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <Header />
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="/login" component={LoginPage} />
+        <Route path="/create-account" component={LoginPage} />
+        <Route path="/profile" component={ProfilePage} />
+        <Route path="/dashboard" component={DashboardPage} />
+        <Route path="/add-property" component={AddPropertyPage} />
+        <Route path="/edit-property/:id" component={EditPropertyPage} />
+        <Route path="/properties" component={PropertiesPage} />
+        <Route path="/properties/:id" component={PropertyDetailPage} />
+        <Route path="/admin" component={AdminPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 

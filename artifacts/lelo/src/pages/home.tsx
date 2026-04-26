@@ -1,4 +1,3 @@
-import { Header } from "@/components/header";
 import { HeroSection } from "@/components/hero-section";
 import { PropertySearch } from "@/components/property-search";
 import { StatsSection } from "@/components/stats-section";
@@ -18,7 +17,6 @@ import { ContactWidget } from "@/components/contact-widget";
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <main className="pt-20">
         <HeroSection />
         <PropertySearch />

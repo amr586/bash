@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { useAuth } from "@workspace/replit-auth-web";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -72,7 +71,6 @@ export default function PropertyDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <main dir="rtl" className="pt-20 pb-16">
         <div className="container mx-auto px-4">
           <button

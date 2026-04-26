@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearch } from "wouter";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { PropertyCard } from "@/components/property-card";
 import { Input } from "@/components/ui/input";
@@ -95,7 +94,6 @@ export default function PropertiesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <main
         dir="rtl"
         className="pt-24 pb-16"
