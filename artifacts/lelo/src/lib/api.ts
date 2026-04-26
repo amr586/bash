@@ -1,3 +1,5 @@
+export type PropertyFinishing = "full" | "semi" | "three_quarters" | "super_lux";
+
 export type Property = {
   id: string;
   ownerId: string;
@@ -7,9 +9,21 @@ export type Property = {
   listingType: string;
   price: number;
   location: string;
+  addressDetails: string | null;
+  downPayment: string | null;
+  deliveryStatus: string | null;
   bedrooms: number | null;
   bathrooms: number | null;
   area: number | null;
+  floor: number | null;
+  furnished: boolean;
+  parking: boolean;
+  elevator: boolean;
+  pool: boolean;
+  garden: boolean;
+  basement: boolean;
+  finishing: PropertyFinishing | null;
+  featured: boolean;
   mainImageUrl: string | null;
   imageUrls: string[];
   floorPlanUrls: string[];
@@ -18,6 +32,22 @@ export type Property = {
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
+};
+
+export const finishingLabels: Record<PropertyFinishing, string> = {
+  full: "تشطيب كامل",
+  semi: "نص تشطيب",
+  three_quarters: "3/4 تشطيب",
+  super_lux: "سوبر لوكس",
+};
+
+export const amenityLabels: Record<string, string> = {
+  furnished: "مفروش",
+  parking: "موقف سيارات",
+  elevator: "مصعد",
+  pool: "حمام سباحة",
+  garden: "حديقة",
+  basement: "بيزمنت",
 };
 
 export type ContactRequest = {

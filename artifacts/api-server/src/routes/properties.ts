@@ -27,6 +27,13 @@ function isStaff(user: Express.User | undefined): boolean {
   return typeof role === "string" && STAFF_ROLES.has(role);
 }
 
+const propertyFinishingEnum = z.enum([
+  "full",
+  "semi",
+  "three_quarters",
+  "super_lux",
+] as const);
+
 const propertyInputSchema = z.object({
   title: z.string().trim().min(2).max(200),
   description: z.string().trim().max(5000).optional().default(""),
@@ -34,9 +41,21 @@ const propertyInputSchema = z.object({
   listingType: z.enum(propertyListingValues),
   price: z.coerce.number().min(0),
   location: z.string().trim().max(200).optional().default(""),
+  addressDetails: z.string().trim().max(200).nullable().optional(),
+  downPayment: z.string().trim().max(100).nullable().optional(),
+  deliveryStatus: z.string().trim().max(100).nullable().optional(),
   bedrooms: z.coerce.number().int().min(0).max(50).nullable().optional(),
   bathrooms: z.coerce.number().int().min(0).max(50).nullable().optional(),
   area: z.coerce.number().int().min(0).max(1_000_000).nullable().optional(),
+  floor: z.coerce.number().int().min(-5).max(200).nullable().optional(),
+  furnished: z.coerce.boolean().optional().default(false),
+  parking: z.coerce.boolean().optional().default(false),
+  elevator: z.coerce.boolean().optional().default(false),
+  pool: z.coerce.boolean().optional().default(false),
+  garden: z.coerce.boolean().optional().default(false),
+  basement: z.coerce.boolean().optional().default(false),
+  finishing: propertyFinishingEnum.nullable().optional(),
+  featured: z.coerce.boolean().optional().default(false),
   mainImageUrl: z.string().trim().max(1000).nullable().optional(),
   imageUrls: z.array(z.string().trim().min(1).max(1000)).max(40).optional(),
   floorPlanUrls: z.array(z.string().trim().min(1).max(1000)).max(20).optional(),
@@ -54,9 +73,21 @@ function serializeProperty(p: typeof propertiesTable.$inferSelect) {
     listingType: p.listingType,
     price: Number(p.price),
     location: p.location,
+    addressDetails: p.addressDetails,
+    downPayment: p.downPayment,
+    deliveryStatus: p.deliveryStatus,
     bedrooms: p.bedrooms,
     bathrooms: p.bathrooms,
     area: p.area,
+    floor: p.floor,
+    furnished: p.furnished,
+    parking: p.parking,
+    elevator: p.elevator,
+    pool: p.pool,
+    garden: p.garden,
+    basement: p.basement,
+    finishing: p.finishing,
+    featured: p.featured,
     mainImageUrl: p.mainImageUrl,
     imageUrls: p.imageUrls ?? [],
     floorPlanUrls: p.floorPlanUrls ?? [],
@@ -91,9 +122,21 @@ router.post("/properties", async (req: Request, res: Response) => {
       listingType: parsed.data.listingType,
       price: String(parsed.data.price),
       location: parsed.data.location ?? "",
+      addressDetails: parsed.data.addressDetails ?? null,
+      downPayment: parsed.data.downPayment ?? null,
+      deliveryStatus: parsed.data.deliveryStatus ?? null,
       bedrooms: parsed.data.bedrooms ?? null,
       bathrooms: parsed.data.bathrooms ?? null,
       area: parsed.data.area ?? null,
+      floor: parsed.data.floor ?? null,
+      furnished: parsed.data.furnished ?? false,
+      parking: parsed.data.parking ?? false,
+      elevator: parsed.data.elevator ?? false,
+      pool: parsed.data.pool ?? false,
+      garden: parsed.data.garden ?? false,
+      basement: parsed.data.basement ?? false,
+      finishing: parsed.data.finishing ?? null,
+      featured: isAdminCreator ? (parsed.data.featured ?? false) : false,
       mainImageUrl:
         parsed.data.mainImageUrl ??
         (parsed.data.imageUrls && parsed.data.imageUrls.length > 0
@@ -248,9 +291,21 @@ const adminUpdateSchema = z.object({
   type: z.enum(propertyTypeValues).optional(),
   listingType: z.enum(propertyListingValues).optional(),
   location: z.string().trim().max(200).optional(),
+  addressDetails: z.string().trim().max(200).nullable().optional(),
+  downPayment: z.string().trim().max(100).nullable().optional(),
+  deliveryStatus: z.string().trim().max(100).nullable().optional(),
   bedrooms: z.coerce.number().int().min(0).max(50).nullable().optional(),
   bathrooms: z.coerce.number().int().min(0).max(50).nullable().optional(),
   area: z.coerce.number().int().min(0).max(1_000_000).nullable().optional(),
+  floor: z.coerce.number().int().min(-5).max(200).nullable().optional(),
+  furnished: z.coerce.boolean().optional(),
+  parking: z.coerce.boolean().optional(),
+  elevator: z.coerce.boolean().optional(),
+  pool: z.coerce.boolean().optional(),
+  garden: z.coerce.boolean().optional(),
+  basement: z.coerce.boolean().optional(),
+  finishing: propertyFinishingEnum.nullable().optional(),
+  featured: z.coerce.boolean().optional(),
   mainImageUrl: z.string().trim().max(1000).nullable().optional(),
   imageUrls: z.array(z.string().trim().min(1).max(1000)).max(40).optional(),
   floorPlanUrls: z.array(z.string().trim().min(1).max(1000)).max(20).optional(),
@@ -290,6 +345,21 @@ router.patch("/admin/properties/:id", async (req: Request, res: Response) => {
   if (parsed.data.bathrooms !== undefined)
     updates.bathrooms = parsed.data.bathrooms;
   if (parsed.data.area !== undefined) updates.area = parsed.data.area;
+  if (parsed.data.addressDetails !== undefined)
+    updates.addressDetails = parsed.data.addressDetails;
+  if (parsed.data.downPayment !== undefined)
+    updates.downPayment = parsed.data.downPayment;
+  if (parsed.data.deliveryStatus !== undefined)
+    updates.deliveryStatus = parsed.data.deliveryStatus;
+  if (parsed.data.floor !== undefined) updates.floor = parsed.data.floor;
+  if (parsed.data.furnished !== undefined) updates.furnished = parsed.data.furnished;
+  if (parsed.data.parking !== undefined) updates.parking = parsed.data.parking;
+  if (parsed.data.elevator !== undefined) updates.elevator = parsed.data.elevator;
+  if (parsed.data.pool !== undefined) updates.pool = parsed.data.pool;
+  if (parsed.data.garden !== undefined) updates.garden = parsed.data.garden;
+  if (parsed.data.basement !== undefined) updates.basement = parsed.data.basement;
+  if (parsed.data.finishing !== undefined) updates.finishing = parsed.data.finishing;
+  if (parsed.data.featured !== undefined) updates.featured = parsed.data.featured;
   if (parsed.data.mainImageUrl !== undefined)
     updates.mainImageUrl = parsed.data.mainImageUrl;
   if (parsed.data.imageUrls !== undefined)

@@ -27,6 +27,14 @@ export type PropertyType = (typeof propertyTypeValues)[number];
 export const propertyListingValues = ["sale", "rent"] as const;
 export type PropertyListing = (typeof propertyListingValues)[number];
 
+export const propertyFinishingValues = [
+  "full",
+  "semi",
+  "three_quarters",
+  "super_lux",
+] as const;
+export type PropertyFinishing = (typeof propertyFinishingValues)[number];
+
 export const propertiesTable = pgTable(
   "properties",
   {
@@ -40,9 +48,21 @@ export const propertiesTable = pgTable(
     listingType: varchar("listing_type", { length: 16 }).notNull(),
     price: numeric("price", { precision: 14, scale: 2 }).notNull().default("0"),
     location: varchar("location", { length: 200 }).notNull().default(""),
+    addressDetails: varchar("address_details", { length: 200 }),
+    downPayment: varchar("down_payment", { length: 100 }),
+    deliveryStatus: varchar("delivery_status", { length: 100 }),
     bedrooms: integer("bedrooms"),
     bathrooms: integer("bathrooms"),
     area: integer("area"),
+    floor: integer("floor"),
+    furnished: boolean("furnished").notNull().default(false),
+    parking: boolean("parking").notNull().default(false),
+    elevator: boolean("elevator").notNull().default(false),
+    pool: boolean("pool").notNull().default(false),
+    garden: boolean("garden").notNull().default(false),
+    basement: boolean("basement").notNull().default(false),
+    finishing: varchar("finishing", { length: 32 }),
+    featured: boolean("featured").notNull().default(false),
     mainImageUrl: varchar("main_image_url", { length: 1000 }),
     imageUrls: text("image_urls").array().notNull().default(sql`ARRAY[]::text[]`),
     floorPlanUrls: text("floor_plan_urls").array().notNull().default(sql`ARRAY[]::text[]`),
@@ -62,6 +82,7 @@ export const propertiesTable = pgTable(
     index("idx_properties_status").on(table.status),
     index("idx_properties_type").on(table.type),
     index("idx_properties_listing").on(table.listingType),
+    index("idx_properties_featured").on(table.featured),
   ],
 );
 

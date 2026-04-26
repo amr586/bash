@@ -13,16 +13,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, Loader2, MapPin, Save, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Loader2,
+  MapPin,
+  Save,
+  Star,
+  XCircle,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   apiFetch,
   propertyTypeLabels,
   listingTypeLabels,
+  finishingLabels,
   type Property,
+  type PropertyFinishing,
 } from "@/lib/api";
 import { MultiImageUploader } from "@/components/multi-image-uploader";
+
+const AMENITIES: Array<{ key: string; label: string }> = [
+  { key: "furnished", label: "مفروش" },
+  { key: "parking", label: "موقف سيارات" },
+  { key: "elevator", label: "مصعد" },
+  { key: "pool", label: "حمام سباحة" },
+  { key: "garden", label: "حديقة" },
+  { key: "basement", label: "بيزمنت" },
+];
 
 export default function EditPropertyPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -38,16 +59,32 @@ export default function EditPropertyPage() {
   const [description, setDescription] = useState("");
   const [type, setType] = useState("apartment");
   const [listingType, setListingType] = useState("sale");
+  const [featured, setFeatured] = useState(false);
   const [price, setPrice] = useState("");
+  const [area, setArea] = useState("");
   const [location, setLocation] = useState("");
+  const [addressDetails, setAddressDetails] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [downPayment, setDownPayment] = useState("");
+  const [deliveryStatus, setDeliveryStatus] = useState("");
+  const [mapsLink, setMapsLink] = useState("");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
-  const [area, setArea] = useState("");
+  const [floor, setFloor] = useState("");
+  const [amenities, setAmenities] = useState<Record<string, boolean>>({
+    furnished: false,
+    parking: false,
+    elevator: false,
+    pool: false,
+    garden: false,
+    basement: false,
+  });
+  const [finishing, setFinishing] = useState<PropertyFinishing | "">("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [floorPlanUrls, setFloorPlanUrls] = useState<string[]>([]);
-  const [mapsLink, setMapsLink] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [status, setStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [status, setStatus] = useState<"pending" | "approved" | "rejected">(
+    "pending",
+  );
   const [ownerId, setOwnerId] = useState("");
   const [createdAt, setCreatedAt] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
@@ -73,15 +110,29 @@ export default function EditPropertyPage() {
         setDescription(p.description ?? "");
         setType(p.type);
         setListingType(p.listingType);
+        setFeatured(p.featured ?? false);
         setPrice(p.price > 0 ? String(p.price) : "");
+        setArea(p.area != null ? String(p.area) : "");
         setLocation(p.location ?? "");
+        setAddressDetails(p.addressDetails ?? "");
+        setContactPhone(p.contactPhone ?? "");
+        setDownPayment(p.downPayment ?? "");
+        setDeliveryStatus(p.deliveryStatus ?? "");
+        setMapsLink(p.mapsLink ?? "");
         setBedrooms(p.bedrooms != null ? String(p.bedrooms) : "");
         setBathrooms(p.bathrooms != null ? String(p.bathrooms) : "");
-        setArea(p.area != null ? String(p.area) : "");
+        setFloor(p.floor != null ? String(p.floor) : "");
+        setAmenities({
+          furnished: p.furnished ?? false,
+          parking: p.parking ?? false,
+          elevator: p.elevator ?? false,
+          pool: p.pool ?? false,
+          garden: p.garden ?? false,
+          basement: p.basement ?? false,
+        });
+        setFinishing(p.finishing ?? "");
         setImageUrls(p.imageUrls ?? []);
         setFloorPlanUrls(p.floorPlanUrls ?? []);
-        setMapsLink(p.mapsLink ?? "");
-        setContactPhone(p.contactPhone ?? "");
         setStatus(p.status);
         setOwnerId(p.ownerId);
         setCreatedAt(p.createdAt);
@@ -128,6 +179,10 @@ export default function EditPropertyPage() {
     }
   }
 
+  function toggleAmenity(key: string, val: boolean) {
+    setAmenities((prev) => ({ ...prev, [key]: val }));
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!id) return;
@@ -156,11 +211,23 @@ export default function EditPropertyPage() {
           description: description.trim(),
           type,
           listingType,
+          featured,
           price: Number(price) || 0,
           location: location.trim(),
+          addressDetails: addressDetails.trim() || null,
+          downPayment: downPayment.trim() || null,
+          deliveryStatus: deliveryStatus.trim() || null,
           bedrooms: bedrooms ? Number(bedrooms) : null,
           bathrooms: bathrooms ? Number(bathrooms) : null,
           area: area ? Number(area) : null,
+          floor: floor ? Number(floor) : null,
+          furnished: amenities.furnished,
+          parking: amenities.parking,
+          elevator: amenities.elevator,
+          pool: amenities.pool,
+          garden: amenities.garden,
+          basement: amenities.basement,
+          finishing: finishing || null,
           mainImageUrl: imageUrls[0] ?? null,
           imageUrls,
           floorPlanUrls,
@@ -190,17 +257,17 @@ export default function EditPropertyPage() {
       <div className="mx-auto w-full max-w-3xl">
         <h1 className="text-3xl font-bold text-foreground mb-2">تعديل العقار</h1>
         <p className="text-sm text-foreground/60 mb-6">
-          عدّل بيانات العقار والصور والمخطط ولينك جوجل ماب.
+          عدّل أي بيانات عن العقار من هنا.
         </p>
 
         <Card className="border-border/40 bg-background/60 backdrop-blur">
           <CardContent className="pt-6 pb-6 px-6">
-            <form onSubmit={onSubmit} className="grid gap-5">
+            <form onSubmit={onSubmit} className="grid gap-6">
+              {/* status block */}
               <div
                 className="grid gap-2 p-4 rounded-xl border"
                 style={{
                   borderColor: "var(--gold-dark)",
-                  background: "var(--gold)/5",
                 }}
               >
                 <Label htmlFor="status" className="font-semibold">
@@ -237,119 +304,304 @@ export default function EditPropertyPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-foreground/60">
-                  لما تختار "معتمد" العقار هيظهر للزوار في صفحة العقارات وصاحبه
-                  هيوصله إشعار.
+                  لما تختار "معتمد" العقار هيظهر للزوار في صفحة العقارات
+                  وصاحبه هيوصله إشعار.
                 </p>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="title">عنوان العقار *</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  maxLength={200}
-                  required
-                  data-testid="input-edit-title"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* basic */}
+              <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label>نوع العقار *</Label>
-                  <Select value={type} onValueChange={setType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(propertyTypeLabels).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>
-                          {v}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label>نوع العرض *</Label>
-                  <Select value={listingType} onValueChange={setListingType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(listingTypeLabels).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>
-                          {v}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="price">السعر (جنيه)</Label>
+                  <Label htmlFor="title">العنوان (عربي/إنجليزي) *</Label>
                   <Input
-                    id="price"
-                    type="number"
-                    min="0"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    dir="ltr"
-                    className="text-right"
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    maxLength={200}
+                    required
+                    data-testid="input-edit-title"
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>نوع العقار *</Label>
+                    <Select value={type} onValueChange={setType}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(propertyTypeLabels).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>الغرض *</Label>
+                    <Select value={listingType} onValueChange={setListingType}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(listingTypeLabels).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div
+                  className="grid gap-2 p-4 rounded-xl border"
+                  style={{ borderColor: "var(--gold-dark)" }}
+                >
+                  <Label className="font-semibold inline-flex items-center gap-2">
+                    <Star
+                      className="h-4 w-4"
+                      style={{ color: "var(--gold)" }}
+                    />
+                    حالة العقار / إضافة في صفحة الهوم
+                  </Label>
+                  <Select
+                    value={featured ? "featured" : "normal"}
+                    onValueChange={(v) => setFeatured(v === "featured")}
+                  >
+                    <SelectTrigger data-testid="select-featured">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">
+                        صفحة العقارات فقط (غير مميز)
+                      </SelectItem>
+                      <SelectItem value="featured">
+                        مميز - يظهر في الصفحة الرئيسية
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid gap-2">
-                  <Label htmlFor="location">المنطقة</Label>
+                  <Label htmlFor="desc">الوصف</Label>
+                  <Textarea
+                    id="desc"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={4}
+                    maxLength={5000}
+                  />
+                </div>
+              </div>
+
+              {/* price + location */}
+              <div className="grid gap-4">
+                <h2 className="text-lg font-bold text-foreground border-b border-border/40 pb-2">
+                  السعر والموقع
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="price">السعر (جنيه) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      min="0"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      dir="ltr"
+                      className="text-right"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="area">المساحة (م²) *</Label>
+                    <Input
+                      id="area"
+                      type="number"
+                      min="0"
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
+                      dir="ltr"
+                      className="text-right"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="location">المنطقة *</Label>
                   <Input
                     id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     maxLength={200}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="address">العنوان التفصيلي</Label>
+                  <Input
+                    id="address"
+                    value={addressDetails}
+                    onChange={(e) => setAddressDetails(e.target.value)}
+                    maxLength={200}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">رقم تواصل *</Label>
+                  <Input
+                    id="phone"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    dir="ltr"
+                    className="text-right"
+                    maxLength={30}
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="down">المقدم</Label>
+                    <Input
+                      id="down"
+                      value={downPayment}
+                      onChange={(e) => setDownPayment(e.target.value)}
+                      placeholder="مثال: مقدم 750,000 جنيه"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="delivery">حالة التسليم</Label>
+                    <Input
+                      id="delivery"
+                      value={deliveryStatus}
+                      onChange={(e) => setDeliveryStatus(e.target.value)}
+                      placeholder="مثال: استلام فوري"
+                      maxLength={100}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="maps">
+                    <span className="inline-flex items-center gap-1.5">
+                      <MapPin
+                        className="h-4 w-4"
+                        style={{ color: "var(--gold)" }}
+                      />
+                      رابط جوجل ماب (اختياري)
+                    </span>
+                  </Label>
+                  <Input
+                    id="maps"
+                    value={mapsLink}
+                    onChange={(e) => setMapsLink(e.target.value)}
+                    placeholder="https://maps.app.goo.gl/..."
+                    dir="ltr"
+                    className="text-right"
+                    maxLength={1000}
+                    data-testid="input-edit-maps-link"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="bedrooms">غرف</Label>
-                  <Input
-                    id="bedrooms"
-                    type="number"
-                    min="0"
-                    value={bedrooms}
-                    onChange={(e) => setBedrooms(e.target.value)}
-                    dir="ltr"
-                    className="text-right"
-                  />
+              {/* details */}
+              <div className="grid gap-4">
+                <h2 className="text-lg font-bold text-foreground border-b border-border/40 pb-2">
+                  التفاصيل
+                </h2>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="bedrooms">عدد الغرف</Label>
+                    <Input
+                      id="bedrooms"
+                      type="number"
+                      min="0"
+                      value={bedrooms}
+                      onChange={(e) => setBedrooms(e.target.value)}
+                      dir="ltr"
+                      className="text-right"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="bathrooms">عدد الحمامات</Label>
+                    <Input
+                      id="bathrooms"
+                      type="number"
+                      min="0"
+                      value={bathrooms}
+                      onChange={(e) => setBathrooms(e.target.value)}
+                      dir="ltr"
+                      className="text-right"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="floor">رقم الطابق</Label>
+                    <Input
+                      id="floor"
+                      type="number"
+                      value={floor}
+                      onChange={(e) => setFloor(e.target.value)}
+                      dir="ltr"
+                      className="text-right"
+                    />
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="bathrooms">حمامات</Label>
-                  <Input
-                    id="bathrooms"
-                    type="number"
-                    min="0"
-                    value={bathrooms}
-                    onChange={(e) => setBathrooms(e.target.value)}
-                    dir="ltr"
-                    className="text-right"
-                  />
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 rounded-xl border border-border/40 bg-foreground/5">
+                  {AMENITIES.map((a) => (
+                    <label
+                      key={a.key}
+                      className="flex items-center gap-2 cursor-pointer text-sm"
+                    >
+                      <Checkbox
+                        checked={amenities[a.key] ?? false}
+                        onCheckedChange={(v) =>
+                          toggleAmenity(a.key, v === true)
+                        }
+                        data-testid={`checkbox-edit-${a.key}`}
+                      />
+                      <span>{a.label}</span>
+                    </label>
+                  ))}
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="area">المساحة (م²)</Label>
-                  <Input
-                    id="area"
-                    type="number"
-                    min="0"
-                    value={area}
-                    onChange={(e) => setArea(e.target.value)}
-                    dir="ltr"
-                    className="text-right"
-                  />
+
+                <div className="grid gap-2 p-4 rounded-xl border border-border/40 bg-foreground/5">
+                  <Label className="font-semibold">التشطيب</Label>
+                  <RadioGroup
+                    value={finishing || ""}
+                    onValueChange={(v) =>
+                      setFinishing(v as PropertyFinishing)
+                    }
+                    className="grid grid-cols-2 md:grid-cols-4 gap-2"
+                  >
+                    {(Object.keys(finishingLabels) as PropertyFinishing[]).map(
+                      (k) => (
+                        <label
+                          key={k}
+                          className="flex items-center gap-2 cursor-pointer text-sm"
+                        >
+                          <RadioGroupItem
+                            value={k}
+                            data-testid={`radio-edit-finishing-${k}`}
+                          />
+                          <span>{finishingLabels[k]}</span>
+                        </label>
+                      ),
+                    )}
+                  </RadioGroup>
                 </div>
               </div>
 
+              {/* images */}
               <MultiImageUploader
                 values={imageUrls}
                 onChange={setImageUrls}
@@ -363,55 +615,14 @@ export default function EditPropertyPage() {
               <MultiImageUploader
                 values={floorPlanUrls}
                 onChange={setFloorPlanUrls}
-                label="صور المخطط (2D)"
+                label="مسقط أفقي (2D)"
                 description="أضف أو احذف صور المخطط."
                 buttonLabel="ارفع صور المخطط"
                 max={10}
                 testId="edit-property-floorplans"
               />
 
-              <div className="grid gap-2">
-                <Label htmlFor="maps">
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" style={{ color: "var(--gold)" }} />
-                    رابط جوجل ماب
-                  </span>
-                </Label>
-                <Input
-                  id="maps"
-                  value={mapsLink}
-                  onChange={(e) => setMapsLink(e.target.value)}
-                  placeholder="https://maps.app.goo.gl/..."
-                  dir="ltr"
-                  className="text-right"
-                  maxLength={1000}
-                  data-testid="input-edit-maps-link"
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="phone">رقم تواصل</Label>
-                <Input
-                  id="phone"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  dir="ltr"
-                  className="text-right"
-                  maxLength={30}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="desc">وصف العقار</Label>
-                <Textarea
-                  id="desc"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={5}
-                  maxLength={5000}
-                />
-              </div>
-
+              {/* admin info */}
               <div className="grid gap-2 p-4 rounded-xl border border-border/40 bg-foreground/5">
                 <Label className="font-semibold text-sm">
                   بيانات إدارية (للقراءة فقط)
