@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "LeLo - Modern SaaS Solution"
+title = "Bashak Developments"
 version = "1.0.0"
 id = "artifacts/lelo"
 router = "path"
