@@ -47,34 +47,47 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
 
 type NavChild = { label: string; href: string }
 type NavItem = { label: string; href: string; children?: NavChild[] }
-type NavGroup = NavItem[]
 
 type Lang = "ar" | "en"
 
-const NAV_BY_LANG: Record<Lang, NavGroup[]> = {
+const NAV_BY_LANG: Record<Lang, NavItem[]> = {
   ar: [
-    [{ label: "الرئيسية", href: "/" }],
-    [
-      { label: "عننا", href: "/#about" },
-      { label: "الإعلام", href: "/#media" },
-      { label: "العقارات", href: "/properties" },
-    ],
-    [
-      { label: "أضف", href: "/add-property" },
-      { label: "آخر القوائم", href: "/#past-projects" },
-    ],
+    {
+      label: "الرئيسية",
+      href: "/",
+      children: [
+        { label: "عننا", href: "/#about" },
+        { label: "الإعلام", href: "/#media" },
+      ],
+    },
+    {
+      label: "العقارات",
+      href: "/properties",
+      children: [
+        { label: "كل العقارات", href: "/properties" },
+        { label: "أضف عقار", href: "/add-property" },
+        { label: "آخر القوائم", href: "/#past-projects" },
+      ],
+    },
   ],
   en: [
-    [{ label: "Home", href: "/" }],
-    [
-      { label: "About", href: "/#about" },
-      { label: "Media", href: "/#media" },
-      { label: "Properties", href: "/properties" },
-    ],
-    [
-      { label: "Add", href: "/add-property" },
-      { label: "View Last List", href: "/#past-projects" },
-    ],
+    {
+      label: "Home",
+      href: "/",
+      children: [
+        { label: "About", href: "/#about" },
+        { label: "Media", href: "/#media" },
+      ],
+    },
+    {
+      label: "Properties",
+      href: "/properties",
+      children: [
+        { label: "All Properties", href: "/properties" },
+        { label: "Add Property", href: "/add-property" },
+        { label: "View Last List", href: "/#past-projects" },
+      ],
+    },
   ],
 }
 
@@ -324,18 +337,8 @@ export function Header() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-          {navLinks.map((group, gi) => (
-            <div key={gi} className="flex items-center gap-1 xl:gap-2">
-              {gi > 0 && (
-                <span
-                  aria-hidden="true"
-                  className="mx-1 xl:mx-2 h-5 w-px bg-border/60"
-                />
-              )}
-              {group.map((link) => (
-                <NavLinkItem key={link.label} link={link} />
-              ))}
-            </div>
+          {navLinks.map((link) => (
+            <NavLinkItem key={link.label} link={link} />
           ))}
         </nav>
 
@@ -421,66 +424,66 @@ export function Header() {
           `}
         >
           <nav className="flex flex-col gap-1">
-            {navLinks.map((group, gi) => (
-              <div key={gi} className="flex flex-col gap-1">
-                {gi > 0 && (
-                  <div
-                    aria-hidden="true"
-                    className="my-1 h-px w-full bg-border/50"
-                  />
-                )}
-                {group.map((link) => {
-                  if (!link.children || link.children.length === 0) {
-                    return (
+            {navLinks.map((link) => {
+              if (!link.children || link.children.length === 0) {
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setIsMobileOpen(false)}
+                    className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                )
+              }
+              const open = openMobileGroup === link.label
+              return (
+                <div key={link.label} className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenMobileGroup(open ? null : link.label)
+                    }
+                    className="flex items-center justify-between text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
+                  >
+                    <span>{link.label}</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        open ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {open && (
+                    <div className="ml-4 mt-1 flex flex-col border-l border-border/40 pl-3">
                       <a
-                        key={link.label}
                         href={link.href}
-                        onClick={() => setIsMobileOpen(false)}
-                        className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
+                        onClick={() => {
+                          setIsMobileOpen(false)
+                          setOpenMobileGroup(null)
+                        }}
+                        className="text-sm text-foreground/70 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
                       >
                         {link.label}
                       </a>
-                    )
-                  }
-                  const open = openMobileGroup === link.label
-                  return (
-                    <div key={link.label} className="flex flex-col">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setOpenMobileGroup(open ? null : link.label)
-                        }
-                        className="flex items-center justify-between text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
-                      >
-                        <span>{link.label}</span>
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${
-                            open ? "rotate-180" : ""
-                          }`}
-                        />
-                      </button>
-                      {open && (
-                        <div className="ml-4 mt-1 flex flex-col border-l border-border/40 pl-3">
-                          {link.children.map((child) => (
-                            <a
-                              key={child.label}
-                              href={child.href}
-                              onClick={() => {
-                                setIsMobileOpen(false)
-                                setOpenMobileGroup(null)
-                              }}
-                              className="text-sm text-foreground/70 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
-                            >
-                              {child.label}
-                            </a>
-                          ))}
-                        </div>
-                      )}
+                      {link.children.map((child) => (
+                        <a
+                          key={child.label}
+                          href={child.href}
+                          onClick={() => {
+                            setIsMobileOpen(false)
+                            setOpenMobileGroup(null)
+                          }}
+                          className="text-sm text-foreground/70 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
+                        >
+                          {child.label}
+                        </a>
+                      ))}
                     </div>
-                  )
-                })}
-              </div>
-            ))}
+                  )}
+                </div>
+              )
+            })}
           </nav>
           <div className="mt-3 flex flex-col gap-2">
             {isAuthenticated && user ? (
