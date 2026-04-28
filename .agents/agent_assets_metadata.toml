@@ -36,3 +36,21 @@ id = "BX0_4Yi6xUfJef53sIQVN"
 uri = "file://artifacts/lelo/src/assets/project-10.png"
 type = "image"
 title = "generated_image"
+
+[[generated]]
+id = "l8ntxFHrYga3K2bZazLAG"
+uri = "file://artifacts/lelo/public/seed/cairo-apartment.png"
+type = "image"
+title = "cairo luxury apartment"
+
+[[generated]]
+id = "GpEaRCOF_o7CRQnFGkGOI"
+uri = "file://artifacts/lelo/public/seed/cairo-villa.png"
+type = "image"
+title = "cairo luxury villa"
+
+[[generated]]
+id = "PI9p_xfxccGq6WbdkrdbM"
+uri = "file://artifacts/lelo/public/seed/cairo-penthouse.png"
+type = "image"
+title = "cairo penthouse interior"
