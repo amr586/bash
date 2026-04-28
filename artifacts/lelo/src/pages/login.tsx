@@ -8,6 +8,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LeLoLogo } from "@/components/lelo-logo";
+import { TermsDialog } from "@/components/terms-dialog";
 import {
   Loader2,
   LogIn,
@@ -59,6 +60,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -118,6 +120,10 @@ export default function LoginPage() {
       }
       if (password !== confirmPassword) {
         setError("كلمتي السر مش متطابقتين.");
+        return;
+      }
+      if (!acceptedTerms) {
+        setError("لازم توافق على الشروط والأحكام وسياسة الخصوصية.");
         return;
       }
     }
@@ -470,6 +476,51 @@ export default function LoginPage() {
                   data-testid="checkbox-remember"
                 />
                 <span>تذكّرني لمدة شهر</span>
+              </label>
+            )}
+
+            {mode === "signup" && (
+              <label
+                className="flex items-start gap-2 text-sm text-foreground/80 cursor-pointer select-none"
+                data-testid="label-accept-terms"
+              >
+                <Checkbox
+                  checked={acceptedTerms}
+                  onCheckedChange={(v) => setAcceptedTerms(v === true)}
+                  className="mt-0.5"
+                  data-testid="checkbox-accept-terms"
+                />
+                <span>
+                  أوافق على{" "}
+                  <TermsDialog
+                    defaultTab="terms"
+                    trigger={
+                      <button
+                        type="button"
+                        className="font-semibold underline underline-offset-2"
+                        style={{ color: "var(--gold-light)" }}
+                        data-testid="button-open-terms"
+                      >
+                        الشروط والأحكام
+                      </button>
+                    }
+                  />{" "}
+                  و{" "}
+                  <TermsDialog
+                    defaultTab="privacy"
+                    trigger={
+                      <button
+                        type="button"
+                        className="font-semibold underline underline-offset-2"
+                        style={{ color: "var(--gold-light)" }}
+                        data-testid="button-open-privacy"
+                      >
+                        سياسة الخصوصية
+                      </button>
+                    }
+                  />
+                  .
+                </span>
               </label>
             )}
 

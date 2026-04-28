@@ -6,14 +6,29 @@ import { HeroSlideshow } from "./hero-slideshow"
 import { RegisterNowDialog } from "./register-now-dialog"
 import { apiFetch, type Property } from "@/lib/api"
 import heroBg from "../assets/hero-bg.png"
+import project1 from "../assets/project-1.png"
+import project2 from "../assets/project-2.png"
+import project3 from "../assets/project-3.png"
+import project4 from "../assets/project-4.png"
+import project5 from "../assets/project-5.png"
+import project6 from "../assets/project-6.png"
+import project7 from "../assets/project-7.png"
+import project8 from "../assets/project-8.png"
+import project9 from "../assets/project-9.png"
+import project10 from "../assets/project-10.png"
 
-const BASE = import.meta.env.BASE_URL
 const fallbackImages = [
   heroBg,
-  `${BASE}images/project-1.png`,
-  `${BASE}images/project-2.png`,
-  `${BASE}images/project-3.png`,
-  `${BASE}images/project-4.png`,
+  project1,
+  project2,
+  project3,
+  project4,
+  project5,
+  project6,
+  project7,
+  project8,
+  project9,
+  project10,
 ]
 
 export function HeroSection() {
