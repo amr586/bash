@@ -276,6 +276,27 @@ export function Footer() {
           className="border-t mt-10 pt-6 text-center text-foreground/55 text-sm"
           style={{ borderColor: "var(--border)" }}
         >
+          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-3">
+            <a
+              href="https://drive.google.com/file/d/1g5_TQhDRrct9d-WLCIMN-5ivEODXAeNz/view?usp=sharing"
+              target="_blank"
+              rel="noreferrer"
+              data-testid="link-privacy-policy"
+              className="hover:text-[var(--gold-light)] transition-colors"
+            >
+              سياسة الخصوصية
+            </a>
+            <span aria-hidden="true" className="text-foreground/30">•</span>
+            <a
+              href="https://drive.google.com/file/d/15sNdLZObdiZTjjDYMC-sNgjUo5ehZTAW/view?usp=sharing"
+              target="_blank"
+              rel="noreferrer"
+              data-testid="link-terms-conditions"
+              className="hover:text-[var(--gold-light)] transition-colors"
+            >
+              الشروط والأحكام
+            </a>
+          </nav>
           <p>&copy; 2026 Bashak Developments. جميع الحقوق محفوظة.</p>
         </div>
       </div>
