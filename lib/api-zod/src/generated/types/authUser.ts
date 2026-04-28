@@ -21,4 +21,5 @@ export interface AuthUser {
   phone: string | null;
   isAdmin: boolean;
   role: AuthUserRole;
+  isDisabled: boolean;
 }

@@ -33,4 +33,10 @@ export interface UpdateUserRequest {
    */
   phone?: string | null;
   isAdmin?: boolean;
+  isDisabled?: boolean;
+  /**
+   * @minLength 8
+   * @maxLength 200
+   */
+  password?: string;
 }

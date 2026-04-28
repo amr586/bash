@@ -265,7 +265,7 @@ components:
         - status
     AuthUser:
       type: object
-      required: [id, email, firstName, lastName, profileImageUrl, phone, isAdmin, role]
+      required: [id, email, firstName, lastName, profileImageUrl, phone, isAdmin, role, isDisabled]
       properties:
         id:
           type: string
@@ -285,6 +285,8 @@ components:
         role:
           type: string
           enum: [user, demo, support, data_entry, property_manager, admin, super_admin]
+        isDisabled:
+          type: boolean
     AuthUserEnvelope:
       type: object
       required: [user]
@@ -337,6 +339,12 @@ components:
           maxLength: 30
         isAdmin:
           type: boolean
+        isDisabled:
+          type: boolean
+        password:
+          type: string
+          minLength: 8
+          maxLength: 200
     MobileTokenExchangeRequest:
       type: object
       required: [code, code_verifier, redirect_uri, state]

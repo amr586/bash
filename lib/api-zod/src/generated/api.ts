@@ -44,6 +44,7 @@ export const GetCurrentAuthUserResponse = zod.object({
         "admin",
         "super_admin",
       ]),
+      isDisabled: zod.boolean(),
     }),
     zod.null(),
   ]),
@@ -150,6 +151,7 @@ export const UpdateMyProfileResponse = zod.object({
         "admin",
         "super_admin",
       ]),
+      isDisabled: zod.boolean(),
     }),
     zod.null(),
   ]),
@@ -177,6 +179,7 @@ export const ListAllUsersResponse = zod.object({
         "admin",
         "super_admin",
       ]),
+      isDisabled: zod.boolean(),
     }),
   ),
 });
@@ -198,6 +201,9 @@ export const updateUserAsAdminBodyProfileImageUrlMax = 1000;
 
 export const updateUserAsAdminBodyPhoneMax = 30;
 
+export const updateUserAsAdminBodyPasswordMin = 8;
+export const updateUserAsAdminBodyPasswordMax = 200;
+
 export const UpdateUserAsAdminBody = zod.object({
   firstName: zod.string().max(updateUserAsAdminBodyFirstNameMax).nullish(),
   lastName: zod.string().max(updateUserAsAdminBodyLastNameMax).nullish(),
@@ -208,6 +214,12 @@ export const UpdateUserAsAdminBody = zod.object({
     .nullish(),
   phone: zod.string().max(updateUserAsAdminBodyPhoneMax).nullish(),
   isAdmin: zod.boolean().optional(),
+  isDisabled: zod.boolean().optional(),
+  password: zod
+    .string()
+    .min(updateUserAsAdminBodyPasswordMin)
+    .max(updateUserAsAdminBodyPasswordMax)
+    .optional(),
 });
 
 export const UpdateUserAsAdminResponse = zod.object({
@@ -229,6 +241,7 @@ export const UpdateUserAsAdminResponse = zod.object({
         "admin",
         "super_admin",
       ]),
+      isDisabled: zod.boolean(),
     }),
     zod.null(),
   ]),

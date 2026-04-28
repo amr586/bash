@@ -94,6 +94,14 @@ export async function authMiddleware(
     return;
   }
 
+  // If the account has been disabled by an admin, kill the session so the
+  // user is treated as logged out (and the next login attempt will fail too).
+  if (dbUser.isDisabled) {
+    await clearSession(res, sid);
+    next();
+    return;
+  }
+
   req.user = {
     id: dbUser.id,
     email: dbUser.email,
@@ -103,6 +111,7 @@ export async function authMiddleware(
     phone: dbUser.phone,
     isAdmin: dbUser.isAdmin,
     role: dbUser.role as AuthUser["role"],
+    isDisabled: dbUser.isDisabled,
   };
   next();
 }

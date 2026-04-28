@@ -35,6 +35,7 @@ export interface AuthUser {
   phone: string | null;
   isAdmin: boolean;
   role: AuthUserRole;
+  isDisabled: boolean;
 }
 
 export interface AuthUserEnvelope {
@@ -95,6 +96,12 @@ export interface UpdateUserRequest {
    */
   phone?: string | null;
   isAdmin?: boolean;
+  isDisabled?: boolean;
+  /**
+   * @minLength 8
+   * @maxLength 200
+   */
+  password?: string;
 }
 
 export interface MobileTokenExchangeRequest {

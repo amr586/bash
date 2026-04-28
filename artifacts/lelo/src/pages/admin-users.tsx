@@ -235,6 +235,9 @@ function UsersPanel({ me }: { me: AuthUser }) {
                         أدمن
                       </Badge>
                     )}
+                    {u.isDisabled && (
+                      <Badge variant="destructive">معطّل</Badge>
+                    )}
                     {u.id === me.id && (
                       <Badge variant="outline">حسابك</Badge>
                     )}
@@ -309,6 +312,8 @@ function EditUserDialog({
   const [phone, setPhone] = useState("");
   const [photo, setPhoto] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -319,6 +324,8 @@ function EditUserDialog({
       setPhone(user.phone ?? "");
       setPhoto(user.profileImageUrl ?? "");
       setIsAdmin(user.isAdmin);
+      setIsDisabled(user.isDisabled);
+      setNewPassword("");
     }
   }, [user]);
 
@@ -327,18 +334,31 @@ function EditUserDialog({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!user) return;
+    if (newPassword && newPassword.length < 8) {
+      toast({
+        title: "كلمة مرور قصيرة",
+        description: "كلمة المرور لازم 8 حروف على الأقل.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSaving(true);
     try {
+      const body: Record<string, unknown> = {
+        firstName: firstName.trim() || null,
+        lastName: lastName.trim() || null,
+        email: email.trim() || null,
+        phone: phone.trim() || null,
+        profileImageUrl: photo.trim() || null,
+        isAdmin,
+        isDisabled,
+      };
+      if (newPassword.trim().length > 0) {
+        body.password = newPassword;
+      }
       await apiFetch(`/api/admin/users/${user.id}`, {
         method: "PATCH",
-        body: JSON.stringify({
-          firstName: firstName.trim() || null,
-          lastName: lastName.trim() || null,
-          email: email.trim() || null,
-          phone: phone.trim() || null,
-          profileImageUrl: photo.trim() || null,
-          isAdmin,
-        }),
+        body: JSON.stringify(body),
       });
       toast({ title: "تم الحفظ", description: "تم تحديث المستخدم." });
       onSaved();
@@ -422,6 +442,35 @@ function EditUserDialog({
               onCheckedChange={setIsAdmin}
               disabled={user.id === currentUserId}
             />
+          </div>
+          <div className="flex items-center justify-between p-3 border border-border/40 rounded-lg">
+            <div>
+              <Label className="cursor-pointer">تعطيل الحساب</Label>
+              <p className="text-xs text-foreground/60 mt-1">
+                المستخدم مش هيقدر يدخل لما الحساب يبقى معطّل.
+              </p>
+            </div>
+            <Switch
+              checked={isDisabled}
+              onCheckedChange={setIsDisabled}
+              disabled={user.id === currentUserId}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>كلمة مرور جديدة (اختياري)</Label>
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="سيب فاضي لو مش عايز تغيرها"
+              dir="ltr"
+              className="text-right"
+              autoComplete="new-password"
+              maxLength={200}
+            />
+            <p className="text-xs text-foreground/60">
+              8 حروف على الأقل. هيحل محل كلمة المرور القديمة فوراً.
+            </p>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button type="button" variant="ghost" onClick={onClose}>

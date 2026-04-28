@@ -236,6 +236,12 @@ router.post("/auth/login", async (req: Request, res: Response) => {
     res.status(401).json({ error: "الإيميل أو كلمة المرور غير صحيحة." });
     return;
   }
+  if (user.isDisabled) {
+    res
+      .status(403)
+      .json({ error: "هذا الحساب معطّل. تواصل مع الإدارة." });
+    return;
+  }
 
   const challenge = createChallenge({
     kind: "login",

@@ -9,6 +9,7 @@ import {
   ListAllUsersResponse,
   DeleteUserAsAdminResponse,
 } from "@workspace/api-zod";
+import { hashPassword } from "../lib/password";
 
 const updateMeSchema = z.object({
   firstName: z.string().trim().max(100).nullish(),
@@ -30,6 +31,7 @@ function toAuthUser(row: typeof usersTable.$inferSelect) {
     phone: row.phone,
     isAdmin: row.isAdmin,
     role: row.role,
+    isDisabled: row.isDisabled,
   };
 }
 
@@ -116,6 +118,16 @@ router.patch("/admin/users/:id", async (req: Request, res: Response) => {
       return;
     }
     updates.isAdmin = parsed.data.isAdmin;
+  }
+  if (parsed.data.isDisabled !== undefined) {
+    if (targetId === req.user.id && parsed.data.isDisabled === true) {
+      res.status(400).json({ error: "لا يمكنك تعطيل حسابك بنفسك." });
+      return;
+    }
+    updates.isDisabled = parsed.data.isDisabled;
+  }
+  if (parsed.data.password !== undefined && parsed.data.password.length > 0) {
+    updates.passwordHash = await hashPassword(parsed.data.password);
   }
 
   const [updated] = await db
