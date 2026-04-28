@@ -29,6 +29,7 @@ function toAuthUser(row: typeof usersTable.$inferSelect) {
     profileImageUrl: row.profileImageUrl,
     phone: row.phone,
     isAdmin: row.isAdmin,
+    role: row.role,
   };
 }
 

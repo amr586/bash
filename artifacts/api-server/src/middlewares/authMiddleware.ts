@@ -102,6 +102,7 @@ export async function authMiddleware(
     profileImageUrl: dbUser.profileImageUrl,
     phone: dbUser.phone,
     isAdmin: dbUser.isAdmin,
+    role: dbUser.role as AuthUser["role"],
   };
   next();
 }

@@ -265,7 +265,7 @@ components:
         - status
     AuthUser:
       type: object
-      required: [id, email, firstName, lastName, profileImageUrl, phone, isAdmin]
+      required: [id, email, firstName, lastName, profileImageUrl, phone, isAdmin, role]
       properties:
         id:
           type: string
@@ -282,6 +282,9 @@ components:
           type: [string, 'null']
         isAdmin:
           type: boolean
+        role:
+          type: string
+          enum: [user, demo, support, data_entry, property_manager, admin, super_admin]
     AuthUserEnvelope:
       type: object
       required: [user]

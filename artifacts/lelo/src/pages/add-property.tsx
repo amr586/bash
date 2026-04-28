@@ -24,6 +24,7 @@ import {
   finishingLabels,
   type PropertyFinishing,
 } from "@/lib/api";
+import { isStaff } from "@/lib/roles";
 import { MultiImageUploader } from "@/components/multi-image-uploader";
 
 const AMENITIES: Array<{ key: string; label: string }> = [
@@ -39,6 +40,7 @@ export default function AddPropertyPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const canPublishDirectly = isStaff(user);
 
   // basic
   const [title, setTitle] = useState("");
@@ -164,7 +166,7 @@ export default function AddPropertyPage() {
           description: description.trim(),
           type,
           listingType,
-          featured: user?.isAdmin ? featured : false,
+          featured: canPublishDirectly ? featured : false,
           price: Number(price),
           location: location.trim(),
           addressDetails: addressDetails.trim() || null,
@@ -189,8 +191,8 @@ export default function AddPropertyPage() {
         }),
       });
       toast({
-        title: user?.isAdmin ? "تم النشر" : "تم الإرسال",
-        description: user?.isAdmin
+        title: canPublishDirectly ? "تم النشر" : "تم الإرسال",
+        description: canPublishDirectly
           ? "تم نشر العقار وإشعار اليوزرز."
           : "هنراجع العقار ونشعرك لما يتوافق.",
       });
@@ -215,8 +217,8 @@ export default function AddPropertyPage() {
       <div className="mx-auto w-full max-w-3xl">
         <h1 className="text-3xl font-bold text-foreground mb-2">أضف عقارك</h1>
         <p className="text-sm text-foreground/60 mb-6">
-          {user?.isAdmin
-            ? "إنت سوبر أدمن، عقارك هيتنشر مباشرة."
+          {canPublishDirectly
+            ? "إنت من فريق العمل، عقارك هيتنشر مباشرة."
             : "هنراجع العقار وهيظهر للناس بعد الموافقة."}
         </p>
 
@@ -271,7 +273,7 @@ export default function AddPropertyPage() {
                   </div>
                 </div>
 
-                {user?.isAdmin && (
+                {canPublishDirectly && (
                   <div
                     className="grid gap-2 p-4 rounded-xl border"
                     style={{ borderColor: "var(--gold-dark)" }}
@@ -587,7 +589,7 @@ export default function AddPropertyPage() {
                   ) : (
                     <Send className="ml-2 h-4 w-4" />
                   )}
-                  {user?.isAdmin ? "نشر العقار" : "إرسال العقار للمراجعة"}
+                  {canPublishDirectly ? "نشر العقار" : "إرسال العقار للمراجعة"}
                 </Button>
               </div>
             </form>

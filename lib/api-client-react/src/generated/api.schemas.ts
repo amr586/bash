@@ -9,6 +9,18 @@ export interface HealthStatus {
   status: string;
 }
 
+export type AuthUserRole = (typeof AuthUserRole)[keyof typeof AuthUserRole];
+
+export const AuthUserRole = {
+  user: "user",
+  demo: "demo",
+  support: "support",
+  data_entry: "data_entry",
+  property_manager: "property_manager",
+  admin: "admin",
+  super_admin: "super_admin",
+} as const;
+
 export interface AuthUser {
   id: string;
   /** @nullable */
@@ -22,6 +34,7 @@ export interface AuthUser {
   /** @nullable */
   phone: string | null;
   isAdmin: boolean;
+  role: AuthUserRole;
 }
 
 export interface AuthUserEnvelope {

@@ -285,6 +285,7 @@ router.post("/auth/verify-otp", async (req: Request, res: Response) => {
       profileImageUrl: user.profileImageUrl,
       phone: user.phone,
       isAdmin: user.isAdmin,
+      role: user.role,
     },
   });
 });

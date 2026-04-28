@@ -34,6 +34,7 @@ import {
   type Property,
   type PropertyFinishing,
 } from "@/lib/api";
+import { isStaff } from "@/lib/roles";
 import { MultiImageUploader } from "@/components/multi-image-uploader";
 
 const AMENITIES: Array<{ key: string; label: string }> = [
@@ -90,18 +91,20 @@ export default function EditPropertyPage() {
   const [updatedAt, setUpdatedAt] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const canEdit = isStaff(user);
+
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
         navigate(`/login?next=${encodeURIComponent(`/edit-property/${id ?? ""}`)}`);
-      } else if (!user?.isAdmin) {
+      } else if (!canEdit) {
         navigate("/dashboard");
       }
     }
-  }, [isLoading, isAuthenticated, user, navigate, id]);
+  }, [isLoading, isAuthenticated, canEdit, navigate, id]);
 
   useEffect(() => {
-    if (!id || !user?.isAdmin) return;
+    if (!id || !canEdit) return;
     setLoading(true);
     apiFetch<{ property: Property }>(`/api/properties/${id}`)
       .then((d) => {
@@ -141,9 +144,9 @@ export default function EditPropertyPage() {
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [id, user?.isAdmin]);
+  }, [id, canEdit]);
 
-  if (isLoading || !isAuthenticated || !user?.isAdmin || loading) {
+  if (isLoading || !isAuthenticated || !canEdit || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-[var(--gold)]" />

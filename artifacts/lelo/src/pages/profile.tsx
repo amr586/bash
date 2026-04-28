@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { resolveImageUrl } from "@/lib/api";
+import { isStaff } from "@/lib/roles";
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
@@ -165,7 +166,7 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-foreground">بروفايلك</h1>
           <div className="flex gap-2">
-            {user.isAdmin && (
+            {isStaff(user) && (
               <Button asChild variant="outline" className="rounded-xl">
                 <Link href="/admin">
                   <Settings className="ml-2 h-4 w-4" />

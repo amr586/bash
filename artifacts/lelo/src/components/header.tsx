@@ -16,6 +16,7 @@ import {
 import { ChevronDown, LayoutDashboard, LogOut, Moon, Settings, ShieldCheck, Sun, User as UserIcon } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import { useTheme } from "@/lib/theme"
+import { isStaff } from "@/lib/roles"
 
 function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const { theme, toggleTheme } = useTheme()
@@ -224,7 +225,7 @@ function UserMenu({ user, logout }: { user: AuthUser; logout: () => void }) {
             بروفايلي
           </Link>
         </DropdownMenuItem>
-        {user.isAdmin && (
+        {isStaff(user) && (
           <DropdownMenuItem asChild>
             <Link href="/admin" className="cursor-pointer">
               <Settings className="ml-2 h-4 w-4" />
@@ -496,7 +497,7 @@ export function Header() {
                   <UserIcon className="ml-2 h-4 w-4" />
                   بروفايلي
                 </Button>
-                {user.isAdmin && (
+                {isStaff(user) && (
                   <Button
                     variant="ghost"
                     className="w-full justify-start rounded-xl"
