@@ -57,7 +57,7 @@ export function ProjectsSection() {
               className="text-sm uppercase tracking-[0.3em] font-semibold"
               style={{ color: "var(--gold)" }}
             >
-              Featured Projects
+              Our Developments
             </span>
           </motion.div>
           <motion.h2
@@ -68,7 +68,7 @@ export function ProjectsSection() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            مشاريعنا المميزة
+            مشاريعنا اللي بنبنيها بنفسنا
           </motion.h2>
           <motion.p
             className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed"
@@ -77,7 +77,7 @@ export function ProjectsSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            مجموعة متكاملة من المشاريع العقارية الفاخرة المعتمدة على باشاك
+إحنا في باشاك بنطوّر وبنبني مشاريعنا بأنفسنا في قلب التجمع الخامس — كل وحدة من تصميمنا وتنفيذنا وتسليمنا.
           </motion.p>
         </div>
 

@@ -85,10 +85,10 @@ export function HeroSection() {
             className="text-xl md:text-2xl font-medium text-white/95 mb-8 text-balance leading-relaxed max-w-3xl mx-auto"
             style={{ fontFamily: "'Tajawal', sans-serif" }}
           >
-            شركة بشاك للتطوير العقاري بخبرة تمتد لأكثر من 10 أعوام في تقديم حلول عقارية مبتكرة وموثوقة.
+            شركة باشاك للتطوير العقاري — بنبني ونطوّر مشاريعنا بنفسنا في قلب التجمع الخامس بأكتر من 10 سنين خبرة.
             <br />
             <span style={{ color: "var(--gold-light)" }}>
-              نسعى دائمًا لتحويل رؤاكم إلى واقع ملموس بمعايير عالية من الجودة والمصداقية.
+              كل وحدة بتشوفها هنا من تصميمنا وتنفيذنا — إحنا المطوّر والمالك.
             </span>
           </p>
 
