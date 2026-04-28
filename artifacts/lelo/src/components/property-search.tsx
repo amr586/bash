@@ -16,10 +16,10 @@ const LISTING_TABS: { value: string; label: string }[] = [
 const QUICK_LOCATIONS = [
   "التجمع الخامس",
   "جولدن سكوير",
-  "العاصمة الإدارية",
-  "التجمع السادس",
-  "مصر الجديدة",
-  "الشيخ زايد",
+  "القطامية هايتس",
+  "ميفيدا",
+  "تاج سيتي",
+  "بيت الوطن",
 ];
 
 export function PropertySearch() {
@@ -64,10 +64,10 @@ export function PropertySearch() {
           >
             ابحث عن منزل أحلامك
             <br className="md:hidden" />
-            <span className="md:mr-2"> في قلب القاهرة</span>
+            <span className="md:mr-2"> في قلب التجمع الخامس</span>
           </h2>
           <p className="text-foreground/70 mt-2">
-            أكثر من 100 عقار في مختلف الأماكن · ابحث، قارن وتواصل معنا.
+            مشاريع باشاك للتطوير العقاري — وحدات سكنية وتجارية حصرية في قلب القاهرة الجديدة.
           </p>
         </div>
 

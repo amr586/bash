@@ -368,11 +368,14 @@ export default function AddPropertyPage() {
                     id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    placeholder="مثال: التجمع الخامس، العاصمة الإدارية..."
+                    placeholder="مثال: التجمع الخامس، جولدن سكوير، ميفيدا..."
                     maxLength={200}
                     required
                     data-testid="input-location"
                   />
+                  <p className="text-xs text-foreground/60">
+                    باشاك متخصصة في عقارات قلب التجمع الخامس بالقاهرة الجديدة فقط.
+                  </p>
                 </div>
 
                 <div className="grid gap-2">

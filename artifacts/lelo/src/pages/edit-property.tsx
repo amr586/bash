@@ -441,9 +441,13 @@ export default function EditPropertyPage() {
                     id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
+                    placeholder="مثال: التجمع الخامس، جولدن سكوير، ميفيدا..."
                     maxLength={200}
                     required
                   />
+                  <p className="text-xs text-foreground/60">
+                    باشاك متخصصة في عقارات قلب التجمع الخامس بالقاهرة الجديدة فقط.
+                  </p>
                 </div>
 
                 <div className="grid gap-2">
