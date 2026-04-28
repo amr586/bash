@@ -145,7 +145,10 @@ router.post("/properties", async (req: Request, res: Response) => {
       imageUrls: parsed.data.imageUrls ?? [],
       floorPlanUrls: parsed.data.floorPlanUrls ?? [],
       mapsLink: parsed.data.mapsLink ?? null,
-      contactPhone: parsed.data.contactPhone ?? null,
+      contactPhone:
+        (parsed.data.contactPhone && parsed.data.contactPhone.trim()) ||
+        req.user.phone ||
+        null,
       status: initialStatus,
     })
     .returning();

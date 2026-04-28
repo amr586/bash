@@ -42,6 +42,7 @@ The import was already structured as a pnpm_workspace Vite app (no Next.js conve
   - DB: `users` (with `phone`, `isAdmin`, `role` enum: `user`/`demo`/`support`/`data_entry`/`property_manager`/`admin`/`super_admin`) + `sessions` (Postgres-backed Express sessions).
   - Roles & permissions: `super_admin`, `admin`, `property_manager`, `data_entry` are all "staff" — they can add/edit/approve/feature properties (auto-publish on create, see admin panel link). User management (`/admin/users`) is gated more tightly to `isAdmin`/`super_admin` only. Frontend uses `isStaff(user)` and `isUserManager(user)` helpers from `artifacts/lelo/src/lib/roles.ts`. Backend `STAFF_ROLES` set in `properties.ts` already enforces this. `AuthUser.role` is exposed via `/api/auth/verify-otp` and the auth middleware.
   - Test accounts (password `Bashak@2026`, emails `*@bashak.test`): `super_admin`, `property_manager`, `data_entry`, `support`, `demo`.
+  - When a staff member adds a property, the contact phone defaults to their own profile phone: the frontend (`add-property.tsx`) prefills `contactPhone` from `user.phone`, and the backend (`POST /api/properties`) falls back to `req.user.phone` if the field is empty/whitespace.
   - Replit Auth (OIDC) wired through `lib/replit-auth` and `lib/replit-auth-web`.
   - Pages: `/login`, `/profile`, `/admin` (Arabic RTL, gold/black brand).
   - Header has auth-aware avatar dropdown; first signed-in user becomes super admin.
