@@ -251,26 +251,31 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Map */}
-        <a
-          href={addressMapsUrl}
-          target="_blank"
-          rel="noreferrer"
-          data-testid="link-map-embed"
-          className="block mt-10 rounded-xl overflow-hidden border hover:shadow-lg transition-shadow max-w-3xl mx-auto"
-          style={{ borderColor: "var(--gold-dark)" }}
-          aria-label="افتح موقع باشاك على خرائط جوجل"
-        >
-          <iframe
-            title="موقع شركة باشاك على الخريطة"
-            src={`https://www.google.com/maps?q=${encodeURIComponent(settings.address)}&output=embed`}
-            width="100%"
-            height="180"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            style={{ border: 0, display: "block", pointerEvents: "none" }}
-          />
-        </a>
+        {/* Map — circular, gold border */}
+        <div className="mt-10 flex justify-center">
+          <a
+            href={addressMapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="link-map-embed"
+            aria-label="افتح موقع باشاك على خرائط جوجل"
+            className="relative block rounded-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-2xl w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96"
+            style={{
+              border: "4px solid var(--gold)",
+              boxShadow:
+                "0 0 0 2px rgba(198,155,27,0.25), 0 10px 30px -10px rgba(198,155,27,0.45)",
+            }}
+          >
+            <iframe
+              title="موقع شركة باشاك على الخريطة"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(settings.address)}&output=embed`}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="absolute inset-0 w-full h-full"
+              style={{ border: 0, pointerEvents: "none" }}
+            />
+          </a>
+        </div>
 
         <div
           className="border-t mt-10 pt-6 text-center text-foreground/55 text-sm"
