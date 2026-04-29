@@ -65,7 +65,6 @@ const NAV_BY_LANG: Record<Lang, NavItem[]> = {
       href: "/properties",
       children: [
         { label: "كل العقارات", href: "/properties" },
-        { label: "أضف عقار", href: "/add-property" },
         { label: "آخر القوائم", href: "/#past-projects" },
       ],
     },
@@ -84,7 +83,6 @@ const NAV_BY_LANG: Record<Lang, NavItem[]> = {
       href: "/properties",
       children: [
         { label: "All Properties", href: "/properties" },
-        { label: "Add Property", href: "/add-property" },
         { label: "View Last List", href: "/#past-projects" },
       ],
     },
@@ -280,6 +278,7 @@ export function Header() {
     return (localStorage.getItem("bashak.lang") as Lang) || "ar"
   })
   const navLinks = NAV_BY_LANG[lang]
+  const showAddProperty = isStaff(user)
   const t = T[lang]
   const toggleLang = () => {
     const next: Lang = lang === "ar" ? "en" : "ar"
@@ -340,15 +339,17 @@ export function Header() {
           {navLinks.map((link) => (
             <NavLinkItem key={link.label} link={link} />
           ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/add-property")}
-            className="rounded-xl border-[var(--gold-dark)] text-[var(--gold-light)] hover:bg-[var(--gold)]/10 hover:text-[var(--gold-light)] font-semibold whitespace-nowrap mr-1 xl:mr-2"
-            data-testid="button-header-add-property"
-          >
-            {lang === "ar" ? "أضف عقارك" : "List Property"}
-          </Button>
+          {showAddProperty && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/add-property")}
+              className="rounded-xl border-[var(--gold-dark)] text-[var(--gold-light)] hover:bg-[var(--gold)]/10 hover:text-[var(--gold-light)] font-semibold whitespace-nowrap mr-1 xl:mr-2"
+              data-testid="button-header-add-property"
+            >
+              {lang === "ar" ? "أضف عقار" : "Add Property"}
+            </Button>
+          )}
         </nav>
 
         <div className="hidden lg:flex items-center gap-2 shrink-0">

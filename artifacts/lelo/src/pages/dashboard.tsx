@@ -127,16 +127,18 @@ export default function DashboardPage() {
                 البروفايل
               </Link>
             </Button>
-            <Button
-              asChild
-              className="rounded-xl text-black font-semibold"
-              style={{ background: "var(--gold)" }}
-            >
-              <Link href="/add-property">
-                <Plus className="ml-2 h-4 w-4" />
-                أضف عقار
-              </Link>
-            </Button>
+            {isStaff(user) && (
+              <Button
+                asChild
+                className="rounded-xl text-black font-semibold"
+                style={{ background: "var(--gold)" }}
+              >
+                <Link href="/add-property">
+                  <Plus className="ml-2 h-4 w-4" />
+                  أضف عقار
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -173,7 +175,7 @@ export default function DashboardPage() {
 
           <TabsContent value="my-properties" className="mt-6">
             <SectionWrapper
-              empty="ما عندكش عقارات لسه. ابدأ من زر «أضف عقار» في الأعلى."
+              empty="ما عندكش عقارات هنا حالياً."
               data={mine}
             >
               {mine && mine.length > 0 && (

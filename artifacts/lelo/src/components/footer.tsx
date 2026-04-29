@@ -8,7 +8,6 @@ const quickLinks = [
   { label: "جميع العقارات", href: "/properties" },
   { label: "عقارات للبيع", href: "/properties?listing=sale" },
   { label: "عقارات للإيجار", href: "/properties?listing=rent" },
-  { label: "أضف عقارك", href: "/add-property" },
   { label: "تواصل معنا", href: "/#contact" },
 ]
 

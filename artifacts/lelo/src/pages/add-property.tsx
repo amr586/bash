@@ -40,7 +40,7 @@ export default function AddPropertyPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const canPublishDirectly = isStaff(user);
+  const canAdd = isStaff(user);
 
   // basic
   const [title, setTitle] = useState("");
@@ -80,16 +80,20 @@ export default function AddPropertyPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate(`/login?next=${encodeURIComponent("/add-property")}`);
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        navigate(`/login?next=${encodeURIComponent("/add-property")}`);
+      } else if (!canAdd) {
+        navigate("/dashboard");
+      }
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [isLoading, isAuthenticated, canAdd, navigate]);
 
   useEffect(() => {
     if (user?.phone && !contactPhone) setContactPhone(user.phone);
   }, [user, contactPhone]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated || !canAdd) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-[var(--gold)]" />
@@ -166,7 +170,7 @@ export default function AddPropertyPage() {
           description: description.trim(),
           type,
           listingType,
-          featured: canPublishDirectly ? featured : false,
+          featured,
           price: Number(price),
           location: location.trim(),
           addressDetails: addressDetails.trim() || null,
@@ -191,10 +195,8 @@ export default function AddPropertyPage() {
         }),
       });
       toast({
-        title: canPublishDirectly ? "تم النشر" : "تم الإرسال",
-        description: canPublishDirectly
-          ? "تم نشر العقار وإشعار اليوزرز."
-          : "هنراجع العقار ونشعرك لما يتوافق.",
+        title: "تم النشر",
+        description: "تم نشر العقار وإشعار اليوزرز.",
       });
       navigate("/dashboard?tab=my-properties");
     } catch (err) {
@@ -215,11 +217,9 @@ export default function AddPropertyPage() {
   return (
     <div className="min-h-screen bg-background px-4 py-24" dir="rtl">
       <div className="mx-auto w-full max-w-3xl">
-        <h1 className="text-3xl font-bold text-foreground mb-2">أضف عقارك</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">أضف عقار جديد</h1>
         <p className="text-sm text-foreground/60 mb-6">
-          {canPublishDirectly
-            ? "إنت من فريق العمل، عقارك هيتنشر مباشرة."
-            : "هنراجع العقار وهيظهر للناس بعد الموافقة."}
+          إضافة عقار من فريق باشاك — هيتنشر مباشرة على الموقع.
         </p>
 
         <Card className="border-border/40 bg-background/60 backdrop-blur">
@@ -273,41 +273,39 @@ export default function AddPropertyPage() {
                   </div>
                 </div>
 
-                {canPublishDirectly && (
-                  <div
-                    className="grid gap-2 p-4 rounded-xl border"
-                    style={{ borderColor: "var(--gold-dark)" }}
+                <div
+                  className="grid gap-2 p-4 rounded-xl border"
+                  style={{ borderColor: "var(--gold-dark)" }}
+                >
+                  <Label className="font-semibold inline-flex items-center gap-2">
+                    <Star
+                      className="h-4 w-4"
+                      style={{ color: "var(--gold)" }}
+                    />
+                    حالة العقار / إضافة في صفحة الهوم
+                  </Label>
+                  <Select
+                    value={featured ? "featured" : "normal"}
+                    onValueChange={(v) => setFeatured(v === "featured")}
                   >
-                    <Label className="font-semibold inline-flex items-center gap-2">
-                      <Star
-                        className="h-4 w-4"
-                        style={{ color: "var(--gold)" }}
-                      />
-                      حالة العقار / إضافة في صفحة الهوم
-                    </Label>
-                    <Select
-                      value={featured ? "featured" : "normal"}
-                      onValueChange={(v) => setFeatured(v === "featured")}
-                    >
-                      <SelectTrigger data-testid="select-featured">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="normal">
-                          صفحة العقارات فقط (غير مميز)
-                        </SelectItem>
-                        <SelectItem value="featured">
-                          مميز - يظهر في الصفحة الرئيسية
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-foreground/60">
-                      {featured
-                        ? "هيظهر في قسم العقارات بالصفحة الرئيسية وكمان في صفحة العقارات."
-                        : "سيظهر في صفحة العقارات العادية فقط."}
-                    </p>
-                  </div>
-                )}
+                    <SelectTrigger data-testid="select-featured">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">
+                        صفحة العقارات فقط (غير مميز)
+                      </SelectItem>
+                      <SelectItem value="featured">
+                        مميز - يظهر في الصفحة الرئيسية
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-foreground/60">
+                    {featured
+                      ? "هيظهر في قسم العقارات بالصفحة الرئيسية وكمان في صفحة العقارات."
+                      : "سيظهر في صفحة العقارات العادية فقط."}
+                  </p>
+                </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="desc">الوصف</Label>
@@ -592,7 +590,7 @@ export default function AddPropertyPage() {
                   ) : (
                     <Send className="ml-2 h-4 w-4" />
                   )}
-                  {canPublishDirectly ? "نشر العقار" : "إرسال العقار للمراجعة"}
+                  نشر العقار
                 </Button>
               </div>
             </form>

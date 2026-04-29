@@ -9,7 +9,7 @@ import {
   propertyStatusValues,
 } from "@workspace/db";
 import { and, desc, eq, ne, sql } from "drizzle-orm";
-import { createNotification, notifyAllAdmins } from "../lib/notifications";
+import { createNotification } from "../lib/notifications";
 
 const router: IRouter = Router();
 
@@ -104,13 +104,17 @@ router.post("/properties", async (req: Request, res: Response) => {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
+  if (!isStaff(req.user)) {
+    res
+      .status(403)
+      .json({ error: "إضافة العقارات متاحة لفريق باشاك فقط." });
+    return;
+  }
   const parsed = propertyInputSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
     return;
   }
-  const isAdminCreator = isStaff(req.user);
-  const initialStatus = isAdminCreator ? "approved" : "pending";
 
   const [created] = await db
     .insert(propertiesTable)
@@ -136,7 +140,7 @@ router.post("/properties", async (req: Request, res: Response) => {
       garden: parsed.data.garden ?? false,
       basement: parsed.data.basement ?? false,
       finishing: parsed.data.finishing ?? null,
-      featured: isAdminCreator ? (parsed.data.featured ?? false) : false,
+      featured: parsed.data.featured ?? false,
       mainImageUrl:
         parsed.data.mainImageUrl ??
         (parsed.data.imageUrls && parsed.data.imageUrls.length > 0
@@ -149,39 +153,28 @@ router.post("/properties", async (req: Request, res: Response) => {
         (parsed.data.contactPhone && parsed.data.contactPhone.trim()) ||
         req.user.phone ||
         null,
-      status: initialStatus,
+      status: "approved",
     })
     .returning();
 
-  if (isAdminCreator) {
-    // Admin added a new property — notify all OTHER users so they see new listings
-    const others = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(ne(usersTable.id, req.user.id));
-    if (others.length > 0) {
-      await Promise.all(
-        others.map((u) =>
-          createNotification({
-            userId: u.id,
-            type: "admin_added_property",
-            title: "عقار جديد على باشاك",
-            body: `تمت إضافة عقار جديد: ${created.title}`,
-            link: `/dashboard?tab=recommended`,
-            relatedId: created.id,
-          }),
-        ),
-      );
-    }
-  } else {
-    // User submitted property — notify all admins for review
-    await notifyAllAdmins({
-      type: "property_pending_review",
-      title: "عقار جديد محتاج مراجعة",
-      body: `${[req.user.firstName, req.user.lastName].filter(Boolean).join(" ") || req.user.email || "مستخدم"} أضاف عقار "${created.title}"`,
-      link: "/admin?tab=properties",
-      relatedId: created.id,
-    });
+  // Admin added a new property — notify all OTHER users so they see new listings
+  const others = await db
+    .select({ id: usersTable.id })
+    .from(usersTable)
+    .where(ne(usersTable.id, req.user.id));
+  if (others.length > 0) {
+    await Promise.all(
+      others.map((u) =>
+        createNotification({
+          userId: u.id,
+          type: "admin_added_property",
+          title: "عقار جديد على باشاك",
+          body: `تمت إضافة عقار جديد: ${created.title}`,
+          link: `/dashboard?tab=recommended`,
+          relatedId: created.id,
+        }),
+      ),
+    );
   }
 
   res.status(201).json({ property: serializeProperty(created) });
