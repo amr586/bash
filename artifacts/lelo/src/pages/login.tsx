@@ -241,10 +241,10 @@ export default function LoginPage() {
                 {t("أكّد كود التحقق", "Confirm verification code")}
               </h1>
               <p className="text-sm text-foreground/70 leading-relaxed">
-                {t("بعتنا كود مكوّن من 6 أرقام إلى ", "We sent a 6-digit code to ")}
-                <span dir="ltr" className="font-semibold text-foreground">
-                  {otp.target}
-                </span>
+                {t(
+                  "بعتنالك كود مكوّن من 6 أرقام على إيميلك.",
+                  "We sent a 6-digit code to your email.",
+                )}
               </p>
             </div>
 
