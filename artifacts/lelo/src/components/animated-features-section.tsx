@@ -41,7 +41,6 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
       }}
     >
       <AnimatedGradient colors={colors} speed={0.05} blur="medium" />
-
       <div className="absolute inset-0 opacity-[0.05] pointer-events-none">
         <div
           className="w-full h-full"
@@ -52,7 +51,6 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
           }}
         />
       </div>
-
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
         <div
           className="w-full h-full animate-pulse"
@@ -64,13 +62,11 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
           }}
         />
       </div>
-
       <div className="absolute inset-0 opacity-80 transition-opacity duration-500">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full animate-[shine_4s_ease-in-out_infinite] w-[200%]" />
       </div>
-
       <motion.div
-        className="relative z-10 p-3 sm:p-5 md:p-8 text-foreground backdrop-blur-sm h-full flex flex-col justify-center"
+        className="relative z-10 p-3 sm:p-5 md:p-8 text-foreground backdrop-blur-sm h-full flex flex-col justify-center text-justify opacity-[1] bg-[#e3b71bb0]"
         variants={container}
         initial="hidden"
         animate="show"
@@ -88,7 +84,7 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
         )}
       </motion.div>
     </motion.div>
-  )
+  );
 }
 
 export function AnimatedFeaturesSection() {
