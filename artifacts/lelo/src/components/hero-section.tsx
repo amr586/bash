@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion";
 import { Button } from "./ui/button"
 import { ClipboardList } from "lucide-react"
 import { HeroSlideshow } from "./hero-slideshow"
@@ -82,12 +83,23 @@ export function HeroSection() {
             textShadow: "0 2px 18px rgba(0,0,0,0.55)",
           }}
         >
-          <span className="block text-[2.5rem] leading-none sm:text-6xl md:text-7xl lg:text-8xl">
+          <motion.span
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="block text-[2.5rem] leading-none sm:text-6xl md:text-7xl lg:text-8xl"
+          >
             Bashak
-          </span>
-          <span className="block text-xl sm:text-4xl md:text-5xl lg:text-6xl mt-1 sm:mt-2 tracking-[0.14em] sm:tracking-[0.18em]">
+          </motion.span>
+
+          <motion.span
+            initial={{ opacity: 0, y: 50, letterSpacing: "0.5em" }}
+            animate={{ opacity: 1, y: 0, letterSpacing: "0.18em" }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            className="block text-xl sm:text-4xl md:text-5xl lg:text-6xl mt-1 sm:mt-2 tracking-[0.14em] sm:tracking-[0.18em]"
+          >
             Developments
-          </span>
+          </motion.span>
         </h1>
       </div>
 

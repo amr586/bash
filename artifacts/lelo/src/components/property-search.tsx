@@ -184,7 +184,7 @@ export function PropertySearch() {
                       key={loc}
                       type="button"
                       onClick={() => goToResults({ q: loc })}
-                      className="px-3 py-1.5 rounded-full text-sm text-foreground/85 hover:text-black hover:bg-[var(--gold)] transition-all"
+                      className="px-3 py-1.5 rounded-full text-sm hover:text-black hover:bg-[var(--gold)] transition-all text-[#dec221]"
                       style={{
                         border: "1px solid rgba(212, 175, 55, 0.3)",
                         background: "rgba(255,255,255,0.02)",
