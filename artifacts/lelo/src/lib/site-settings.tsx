@@ -22,6 +22,7 @@ export interface SiteSettings {
   linkedinUrl: string;
   aiWelcomeMessage: string;
   aiCompanyFacts: string;
+  locations: string[];
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -40,6 +41,20 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   aiWelcomeMessage:
     "أهلاً بيك في باشاك! 👋 اسألني عن الشركة، أرقام التواصل، آخر مشاريعنا، أو العقارات المتاحة دلوقتي.",
   aiCompanyFacts: "",
+  locations: [
+    "التجمع الخامس",
+    "شارع 90 الشمالي",
+    "الحي الأول",
+    "الحي الثاني",
+    "الحي الخامس",
+    "النرجس",
+    "اللوتس",
+    "بيت الوطن",
+    "جولدن سكوير",
+    "القطامية هايتس",
+    "ميفيدا",
+    "تاج سيتي",
+  ],
 };
 
 interface SiteSettingsContextValue {

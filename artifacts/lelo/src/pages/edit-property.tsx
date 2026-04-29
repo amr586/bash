@@ -36,6 +36,7 @@ import {
 } from "@/lib/api";
 import { isStaff } from "@/lib/roles";
 import { MultiImageUploader } from "@/components/multi-image-uploader";
+import { LocationField } from "@/components/location-field";
 
 const AMENITIES: Array<{ key: string; label: string }> = [
   { key: "furnished", label: "مفروش" },
@@ -435,20 +436,13 @@ export default function EditPropertyPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="location">المنطقة *</Label>
-                  <Input
-                    id="location"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="مثال: التجمع الخامس، جولدن سكوير، ميفيدا..."
-                    maxLength={200}
-                    required
-                  />
-                  <p className="text-xs text-foreground/60">
-                    باشاك متخصصة في عقارات قلب التجمع الخامس بالقاهرة الجديدة فقط.
-                  </p>
-                </div>
+                <LocationField
+                  value={location}
+                  onChange={setLocation}
+                  required
+                  helpText="المناطق دي بتتدار من إعدادات الموقع. لو محتاج منطقة جديدة اختار 'منطقة أخرى' أو ضيفها من لوحة الأدمن."
+                  testIdPrefix="edit"
+                />
 
                 <div className="grid gap-2">
                   <Label htmlFor="address">العنوان التفصيلي</Label>

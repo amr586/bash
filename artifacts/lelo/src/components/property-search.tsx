@@ -4,6 +4,7 @@ import { Search, ChevronUp, ChevronDown, MapPin } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { listingTypeLabels } from "@/lib/api";
+import { useSiteSettings } from "@/lib/site-settings";
 
 const LISTING_TABS: { value: string; label: string }[] = [
   { value: "all", label: "الكل" },
@@ -13,17 +14,10 @@ const LISTING_TABS: { value: string; label: string }[] = [
   })),
 ];
 
-const QUICK_LOCATIONS = [
-  "التجمع الخامس",
-  "جولدن سكوير",
-  "القطامية هايتس",
-  "ميفيدا",
-  "تاج سيتي",
-  "بيت الوطن",
-];
-
 export function PropertySearch() {
   const [, setLocation] = useLocation();
+  const { settings } = useSiteSettings();
+  const quickLocations = settings.locations.slice(0, 8);
   const [listing, setListing] = useState<string>("all");
   const [q, setQ] = useState("");
   const [priceMin, setPriceMin] = useState("");
@@ -218,7 +212,7 @@ export function PropertySearch() {
                   مناطق سريعة
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {QUICK_LOCATIONS.map((loc) => (
+                  {quickLocations.map((loc) => (
                     <button
                       key={loc}
                       type="button"

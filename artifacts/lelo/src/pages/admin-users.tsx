@@ -41,7 +41,9 @@ import {
   Check,
   Inbox,
   Loader2,
+  MapPin,
   Pencil,
+  Plus,
   RefreshCcw,
   Save,
   Settings as SettingsIcon,
@@ -846,6 +848,7 @@ const TAB_LABELS = {
   brand: "العلامة + الشعار",
   contact: "أرقام التواصل",
   socials: "السوشيال ميديا",
+  locations: "المناطق",
   ai: "ردود المساعد الذكي",
 } as const;
 
@@ -1154,6 +1157,13 @@ function SettingsPanel() {
             </div>
           )}
 
+          {section === "locations" && (
+            <LocationsEditor
+              value={draft.locations}
+              onChange={(next) => update("locations", next)}
+            />
+          )}
+
           {section === "ai" && (
             <div className="space-y-4">
               <div className="grid gap-1.5">
@@ -1190,7 +1200,7 @@ function SettingsPanel() {
             </div>
           )}
 
-          <div className="flex justify-between items-center pt-4 border-t border-border/40">
+          <div className="flex justify-between items-center pt-4 border-t border-border/40 gap-2 flex-wrap">
             <Button
               type="button"
               variant="ghost"
@@ -1219,5 +1229,152 @@ function SettingsPanel() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+function LocationsEditor({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const { toast } = useToast();
+  const [draftItem, setDraftItem] = useState("");
+
+  function addItem() {
+    const trimmed = draftItem.trim();
+    if (trimmed.length === 0) return;
+    if (trimmed.length > 100) {
+      toast({
+        title: "اسم طويل",
+        description: "اسم المنطقة لازم يكون 100 حرف كحد أقصى.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (value.includes(trimmed)) {
+      toast({
+        title: "موجودة بالفعل",
+        description: "المنطقة دي مضافة قبل كده.",
+      });
+      setDraftItem("");
+      return;
+    }
+    onChange([...value, trimmed]);
+    setDraftItem("");
+  }
+
+  function removeAt(idx: number) {
+    onChange(value.filter((_, i) => i !== idx));
+  }
+
+  function move(idx: number, dir: -1 | 1) {
+    const target = idx + dir;
+    if (target < 0 || target >= value.length) return;
+    const next = [...value];
+    const [item] = next.splice(idx, 1);
+    next.splice(target, 0, item!);
+    onChange(next);
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label className="mb-2 block">المناطق المتاحة في الموقع</Label>
+        <p className="text-xs text-foreground/60">
+          المناطق دي بتظهر في فلتر البحث وفي فورم إضافة وتعديل العقار. الترتيب
+          هنا هو نفس الترتيب اللي بيشوفه الزائر.
+        </p>
+      </div>
+
+      <div className="flex gap-2">
+        <Input
+          value={draftItem}
+          onChange={(e) => setDraftItem(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addItem();
+            }
+          }}
+          placeholder="مثال: التجمع الأول"
+          maxLength={100}
+          data-testid="input-new-location"
+        />
+        <Button
+          type="button"
+          onClick={addItem}
+          disabled={draftItem.trim().length === 0}
+          className="rounded-xl text-black font-semibold whitespace-nowrap"
+          style={{ background: "var(--gold)" }}
+          data-testid="button-add-location"
+        >
+          <Plus className="ml-1 h-4 w-4" />
+          إضافة
+        </Button>
+      </div>
+
+      {value.length === 0 ? (
+        <div className="py-10 text-center text-foreground/60 border border-dashed border-border/40 rounded-xl">
+          مفيش مناطق مضافة. ضيف منطقة من فوق.
+        </div>
+      ) : (
+        <ul className="grid gap-2">
+          {value.map((loc, idx) => (
+            <li
+              key={`${loc}-${idx}`}
+              className="flex items-center gap-2 p-3 border border-border/40 rounded-xl bg-background/40"
+              data-testid={`location-row-${idx}`}
+            >
+              <MapPin
+                className="h-4 w-4 shrink-0"
+                style={{ color: "var(--gold)" }}
+              />
+              <span className="flex-1 text-sm truncate">{loc}</span>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => move(idx, -1)}
+                disabled={idx === 0}
+                className="h-8 w-8 p-0"
+                data-testid={`button-location-up-${idx}`}
+                title="تحريك لأعلى"
+              >
+                ▲
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => move(idx, 1)}
+                disabled={idx === value.length - 1}
+                className="h-8 w-8 p-0"
+                data-testid={`button-location-down-${idx}`}
+                title="تحريك لأسفل"
+              >
+                ▼
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => removeAt(idx)}
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                data-testid={`button-location-remove-${idx}`}
+                title="حذف"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="text-xs text-foreground/50">
+        لا تنسى الضغط على "حفظ" في الأسفل لتطبيق التعديلات.
+      </p>
+    </div>
   );
 }
