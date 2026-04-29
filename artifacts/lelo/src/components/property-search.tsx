@@ -3,22 +3,12 @@ import { useLocation } from "wouter";
 import { Search, ChevronUp, ChevronDown, MapPin } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { listingTypeLabels } from "@/lib/api";
 import { useSiteSettings } from "@/lib/site-settings";
-
-const LISTING_TABS: { value: string; label: string }[] = [
-  { value: "all", label: "الكل" },
-  ...Object.entries(listingTypeLabels).map(([value, label]) => ({
-    value,
-    label,
-  })),
-];
 
 export function PropertySearch() {
   const [, setLocation] = useLocation();
   const { settings } = useSiteSettings();
   const quickLocations = settings.locations.slice(0, 8);
-  const [listing, setListing] = useState<string>("all");
   const [q, setQ] = useState("");
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
@@ -28,7 +18,6 @@ export function PropertySearch() {
 
   const goToResults = (overrides?: Record<string, string>) => {
     const params = new URLSearchParams();
-    if (listing !== "all") params.set("listing", listing);
     if (q.trim()) params.set("q", q.trim());
     if (priceMin) params.set("priceMin", priceMin);
     if (priceMax) params.set("priceMax", priceMax);
@@ -72,36 +61,6 @@ export function PropertySearch() {
             borderColor: "rgba(212, 175, 55, 0.25)",
           }}
         >
-          {/* Listing tabs */}
-          <div className="flex items-center gap-2 mb-4 overflow-x-auto">
-            {LISTING_TABS.map((tab) => {
-              const active = tab.value === listing;
-              return (
-                <button
-                  key={tab.value}
-                  type="button"
-                  onClick={() => setListing(tab.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
-                    active
-                      ? "text-black"
-                      : "text-foreground/70 hover:text-[var(--gold-light)]"
-                  }`}
-                  style={
-                    active
-                      ? { background: "var(--gold)" }
-                      : {
-                          border: "1px solid rgba(212, 175, 55, 0.25)",
-                          background: "rgba(255,255,255,0.02)",
-                        }
-                  }
-                  data-testid={`tab-listing-${tab.value}`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
           {/* Search row */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3">
             <div className="relative">

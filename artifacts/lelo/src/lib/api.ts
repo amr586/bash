@@ -84,7 +84,6 @@ export const propertyTypeLabels: Record<string, string> = {
 
 export const listingTypeLabels: Record<string, string> = {
   sale: "للبيع",
-  rent: "للإيجار",
 };
 
 export const statusLabels: Record<string, { label: string; color: string }> = {

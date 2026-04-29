@@ -20,7 +20,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
   apiFetch,
   propertyTypeLabels,
-  listingTypeLabels,
   finishingLabels,
   type PropertyFinishing,
 } from "@/lib/api";
@@ -46,7 +45,7 @@ export default function AddPropertyPage() {
   // basic
   const [title, setTitle] = useState("");
   const [type, setType] = useState("apartment");
-  const [listingType, setListingType] = useState("sale");
+  const listingType = "sale";
   const [featured, setFeatured] = useState(false);
   const [description, setDescription] = useState("");
 
@@ -241,37 +240,20 @@ export default function AddPropertyPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label>نوع العقار *</Label>
-                    <Select value={type} onValueChange={setType}>
-                      <SelectTrigger data-testid="select-type">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(propertyTypeLabels).map(([k, v]) => (
-                          <SelectItem key={k} value={k}>
-                            {v}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>الغرض *</Label>
-                    <Select value={listingType} onValueChange={setListingType}>
-                      <SelectTrigger data-testid="select-listing-type">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(listingTypeLabels).map(([k, v]) => (
-                          <SelectItem key={k} value={k}>
-                            {v}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="grid gap-2">
+                  <Label>نوع العقار *</Label>
+                  <Select value={type} onValueChange={setType}>
+                    <SelectTrigger data-testid="select-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(propertyTypeLabels).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>
+                          {v}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div

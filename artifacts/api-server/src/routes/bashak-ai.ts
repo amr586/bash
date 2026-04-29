@@ -68,7 +68,7 @@ function formatProperty(p: typeof propertiesTable.$inferSelect): string {
     p.priceLabel ? `- السعر: ${p.priceLabel}` : "",
     p.bedrooms ? `- ${p.bedrooms} غرف نوم` : "",
     p.area ? `- المساحة: ${p.area} م²` : "",
-    p.listingType === "rent" ? "- للإيجار" : "- للبيع",
+    "- للبيع",
   ].filter(Boolean);
   return parts.join(" ");
 }

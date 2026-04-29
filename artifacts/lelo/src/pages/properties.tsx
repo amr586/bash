@@ -18,7 +18,6 @@ import { Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import {
   apiFetch,
   finishingLabels,
-  listingTypeLabels,
   propertyTypeLabels,
   type Property,
   type PropertyFinishing,
@@ -27,11 +26,6 @@ import {
 const TYPE_OPTIONS = [
   { value: "all", label: "كل الأنواع" },
   ...Object.entries(propertyTypeLabels).map(([value, label]) => ({ value, label })),
-];
-
-const LISTING_OPTIONS = [
-  { value: "all", label: "بيع وإيجار" },
-  ...Object.entries(listingTypeLabels).map(([value, label]) => ({ value, label })),
 ];
 
 const FINISHING_OPTIONS: Array<{ value: string; label: string }> = [
@@ -65,9 +59,6 @@ export default function PropertiesPage() {
   const initial = useMemo(() => new URLSearchParams(search), [search]);
 
   const [type, setType] = useState<string>(initial.get("type") || "all");
-  const [listing, setListing] = useState<string>(
-    initial.get("listing") || "all",
-  );
   const [q, setQ] = useState<string>(initial.get("q") || "");
   const [locationFilter, setLocationFilter] = useState<string>(
     initial.get("location") || "all",
@@ -89,7 +80,6 @@ export default function PropertiesPage() {
   // Sync state when URL search params change
   useEffect(() => {
     setType(initial.get("type") || "all");
-    setListing(initial.get("listing") || "all");
     setQ(initial.get("q") || "");
     setLocationFilter(initial.get("location") || "all");
     setPriceMin(initial.get("priceMin") || "");
@@ -101,14 +91,13 @@ export default function PropertiesPage() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (type !== "all") params.set("type", type);
-    if (listing !== "all") params.set("listingType", listing);
     setItems(null);
     apiFetch<{ properties: Property[] }>(
       `/api/properties${params.toString() ? `?${params.toString()}` : ""}`,
     )
       .then((d) => setItems(d.properties))
       .catch(() => setItems([]));
-  }, [type, listing]);
+  }, [type]);
 
   // Auto-extract distinct locations from loaded items
   const locationOptions = useMemo(() => {
@@ -167,7 +156,6 @@ export default function PropertiesPage() {
 
   function resetFilters() {
     setType("all");
-    setListing("all");
     setQ("");
     setLocationFilter("all");
     setPriceMin("");
@@ -181,7 +169,6 @@ export default function PropertiesPage() {
 
   const activeFilterCount = [
     type !== "all",
-    listing !== "all",
     locationFilter !== "all",
     priceMin !== "",
     priceMax !== "",
@@ -221,22 +208,6 @@ export default function PropertiesPage() {
             </SelectTrigger>
             <SelectContent>
               {TYPE_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid gap-2">
-          <Label className="text-xs">الغرض</Label>
-          <Select value={listing} onValueChange={setListing}>
-            <SelectTrigger data-testid="filter-listing">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LISTING_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
                   {o.label}
                 </SelectItem>

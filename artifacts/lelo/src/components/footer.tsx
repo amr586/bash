@@ -6,8 +6,6 @@ import { useSiteSettings } from "@/lib/site-settings"
 const quickLinks = [
   { label: "الرئيسية", href: "/" },
   { label: "جميع العقارات", href: "/properties" },
-  { label: "عقارات للبيع", href: "/properties?listing=sale" },
-  { label: "عقارات للإيجار", href: "/properties?listing=rent" },
   { label: "تواصل معنا", href: "/#contact" },
 ]
 

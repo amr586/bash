@@ -24,7 +24,7 @@ export const propertyTypeValues = [
 ] as const;
 export type PropertyType = (typeof propertyTypeValues)[number];
 
-export const propertyListingValues = ["sale", "rent"] as const;
+export const propertyListingValues = ["sale"] as const;
 export type PropertyListing = (typeof propertyListingValues)[number];
 
 export const propertyFinishingValues = [

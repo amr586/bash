@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { Button } from "./ui/button"
 import { ClipboardList } from "lucide-react"
-import { ParticleTextEffect } from "./particle-text-effect"
 import { HeroSlideshow } from "./hero-slideshow"
 import { RegisterNowDialog } from "./register-now-dialog"
 import { apiFetch, type Property } from "@/lib/api"
@@ -73,8 +72,22 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="flex-1 flex items-start justify-center pt-20 relative z-10">
-        <ParticleTextEffect words={["BASHAK", "DEVELOPMENTS"]} />
+      <div className="flex-1 flex items-start justify-center pt-20 relative z-10 px-4">
+        <h1
+          className="text-center font-bold leading-[1.05] tracking-[0.08em] uppercase text-balance"
+          style={{
+            color: "var(--gold)",
+            fontFamily: "'Tajawal', sans-serif",
+            textShadow: "0 2px 18px rgba(0,0,0,0.55)",
+          }}
+        >
+          <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+            Bashak
+          </span>
+          <span className="block text-3xl sm:text-4xl md:text-5xl lg:text-6xl mt-2 tracking-[0.18em]">
+            Developments
+          </span>
+        </h1>
       </div>
 
       <div className="container mx-auto text-center relative z-10 pb-8">
