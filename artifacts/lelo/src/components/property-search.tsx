@@ -133,7 +133,7 @@ export function PropertySearch() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-foreground/60 mb-1 block">
+                  <label className="text-xs mb-1 block text-[#cf902799]">
                     {t("السعر الأقصى", "Max price")}
                   </label>
                   <Input
