@@ -1,8 +1,11 @@
 import { Link } from "wouter";
+import { useState } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Bath, BedDouble, MapPin, Maximize2 } from "lucide-react";
+import { Bath, BedDouble, Heart, MapPin, Maximize2 } from "lucide-react";
 import {
+  addFavorite,
+  removeFavorite,
   resolveImageUrl,
   useFormatPrice,
   useListingTypeLabels,
@@ -11,18 +14,54 @@ import {
   type Property,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@workspace/replit-auth-web";
+import { useLocation } from "wouter";
 
 export function PropertyCard({
   property,
   showStatus = false,
   actions,
   href,
+  isFavorite,
+  onFavoriteChange,
+  hideFavorite = false,
 }: {
   property: Property;
   showStatus?: boolean;
   actions?: React.ReactNode;
   href?: string;
+  isFavorite?: boolean;
+  onFavoriteChange?: (next: boolean) => void;
+  hideFavorite?: boolean;
 }) {
+  const { isAuthenticated } = useAuth();
+  const [, navigate] = useLocation();
+  const [favPending, setFavPending] = useState(false);
+  const [favLocal, setFavLocal] = useState<boolean>(!!isFavorite);
+  const fav = isFavorite ?? favLocal;
+
+  async function toggleFavorite(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (favPending) return;
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    setFavPending(true);
+    const next = !fav;
+    try {
+      if (next) await addFavorite(property.id);
+      else await removeFavorite(property.id);
+      setFavLocal(next);
+      onFavoriteChange?.(next);
+    } catch {
+      // ignore — keep previous state
+    } finally {
+      setFavPending(false);
+    }
+  }
+
   const { lang, t } = useLang();
   const formatPrice = useFormatPrice();
   const propertyTypeLabels = usePropertyTypeLabels();
@@ -62,6 +101,28 @@ export function PropertyCard({
             <Badge className={`${status.color} border-0`}>{status.label}</Badge>
           )}
         </div>
+        {!hideFavorite && (
+          <button
+            type="button"
+            onClick={toggleFavorite}
+            disabled={favPending}
+            aria-label={
+              fav
+                ? t("إزالة من المفضلة", "Remove from favorites")
+                : t("أضف للمفضلة", "Add to favorites")
+            }
+            className={`absolute top-2 ${
+              lang === "ar" ? "left-2" : "right-2"
+            } z-[3] h-9 w-9 rounded-full flex items-center justify-center bg-black/55 hover:bg-black/75 backdrop-blur transition-colors`}
+            data-testid={`button-favorite-${property.id}`}
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${
+                fav ? "fill-red-500 text-red-500" : "text-white"
+              }`}
+            />
+          </button>
+        )}
       </div>
       <Link
         href={linkTo}

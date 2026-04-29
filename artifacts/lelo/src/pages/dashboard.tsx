@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@workspace/replit-auth-web";
 import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,45 +10,81 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Bell,
+  CheckCircle2,
   Heart,
   Inbox,
   Loader2,
+  MessageSquare,
   Plus,
+  Send,
   User as UserIcon,
 } from "lucide-react";
 import { PropertyCard } from "@/components/property-card";
 import {
   apiFetch,
+  fetchFavoriteIds,
   formatRelative,
   type ContactRequest,
   type Notification,
   type Property,
 } from "@/lib/api";
+import { isStaff } from "@/lib/roles";
 
-const TAB_KEYS = [
+const ALL_TABS = [
   "recommended",
+  "favorites",
+  "contact-us",
   "my-properties",
   "contact-requests",
   "notifications",
 ] as const;
-type TabKey = (typeof TAB_KEYS)[number];
+type TabKey = (typeof ALL_TABS)[number];
 
-function readTabFromHash(): TabKey {
-  if (typeof window === "undefined") return "recommended";
+function readTabFromHash(allowed: readonly TabKey[]): TabKey {
+  if (typeof window === "undefined") return allowed[0];
   const params = new URLSearchParams(window.location.search);
   const t = params.get("tab");
-  if (t && (TAB_KEYS as readonly string[]).includes(t)) return t as TabKey;
-  return "recommended";
+  if (t && (allowed as readonly string[]).includes(t)) return t as TabKey;
+  return allowed[0];
 }
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
-  const [tab, setTab] = useState<TabKey>(readTabFromHash);
+
+  const staff = isStaff(user);
+  const allowedTabs: readonly TabKey[] = useMemo(
+    () =>
+      staff
+        ? [
+            "recommended",
+            "my-properties",
+            "contact-requests",
+            "favorites",
+            "contact-us",
+            "notifications",
+          ]
+        : ["recommended", "favorites", "contact-us", "notifications"],
+    [staff],
+  );
+
+  const [tab, setTab] = useState<TabKey>(() => readTabFromHash(allowedTabs));
 
   const [recommended, setRecommended] = useState<Property[] | null>(null);
+  const [favorites, setFavorites] = useState<Property[] | null>(null);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [mine, setMine] = useState<Property[] | null>(null);
   const [contacts, setContacts] = useState<ContactRequest[] | null>(null);
   const [notifications, setNotifications] = useState<Notification[] | null>(
@@ -61,21 +97,34 @@ export default function DashboardPage() {
 
   useEffect(() => {
     function onPop() {
-      setTab(readTabFromHash());
+      setTab(readTabFromHash(allowedTabs));
     }
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, []);
+  }, [allowedTabs]);
+
+  // If the active tab is no longer in the allowed list (role changed), reset.
+  useEffect(() => {
+    if (!(allowedTabs as readonly string[]).includes(tab)) {
+      setTab(allowedTabs[0]);
+    }
+  }, [allowedTabs, tab]);
 
   function changeTab(t: string) {
-    const next = (TAB_KEYS as readonly string[]).includes(t)
+    const next = (allowedTabs as readonly string[]).includes(t)
       ? (t as TabKey)
-      : "recommended";
+      : allowedTabs[0];
     setTab(next);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", next);
     window.history.replaceState({}, "", url.toString());
   }
+
+  // Pre-load favorite IDs once so the heart icon reflects state on any tab.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetchFavoriteIds().then(setFavoriteIds).catch(() => undefined);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -83,6 +132,13 @@ export default function DashboardPage() {
       apiFetch<{ properties: Property[] }>("/api/me/recommended-properties")
         .then((d) => setRecommended(d.properties))
         .catch(() => setRecommended([]));
+    } else if (tab === "favorites" && favorites == null) {
+      apiFetch<{ properties: Property[] }>("/api/me/favorites")
+        .then((d) => {
+          setFavorites(d.properties);
+          setFavoriteIds(new Set(d.properties.map((p) => p.id)));
+        })
+        .catch(() => setFavorites([]));
     } else if (tab === "my-properties" && mine == null) {
       apiFetch<{ properties: Property[] }>("/api/me/properties")
         .then((d) => setMine(d.properties))
@@ -98,7 +154,25 @@ export default function DashboardPage() {
         .then((d) => setNotifications(d.notifications))
         .catch(() => setNotifications([]));
     }
-  }, [tab, isAuthenticated, recommended, mine, contacts, notifications]);
+  }, [tab, isAuthenticated, recommended, favorites, mine, contacts, notifications]);
+
+  function onFavoriteChange(propertyId: string, next: boolean) {
+    setFavoriteIds((prev) => {
+      const copy = new Set(prev);
+      if (next) copy.add(propertyId);
+      else copy.delete(propertyId);
+      return copy;
+    });
+    if (!next) {
+      // Optimistically remove from the list when on favorites tab.
+      setFavorites((prev) =>
+        prev ? prev.filter((p) => p.id !== propertyId) : prev,
+      );
+    } else {
+      // Force refetch next time we open favorites.
+      setFavorites(null);
+    }
+  }
 
   if (isLoading || !user) {
     return (
@@ -117,7 +191,7 @@ export default function DashboardPage() {
               أهلاً، {user.firstName ?? "بك"}
             </h1>
             <p className="text-sm text-foreground/60 mt-1">
-              من هنا تتابع عقاراتك، إشعاراتك، وطلبات التواصل.
+              من هنا تتابع العقارات الموصى بها، المفضلة، وتتواصل مع باشاك.
             </p>
           </div>
           <div className="flex gap-2">
@@ -127,7 +201,7 @@ export default function DashboardPage() {
                 البروفايل
               </Link>
             </Button>
-            {isStaff(user) && (
+            {staff && (
               <Button
                 asChild
                 className="rounded-xl text-black font-semibold"
@@ -143,17 +217,31 @@ export default function DashboardPage() {
         </div>
 
         <Tabs value={tab} onValueChange={changeTab} dir="rtl">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto">
-            <TabsTrigger value="recommended" className="gap-1.5">
+          <TabsList
+            className={`grid grid-cols-2 ${
+              staff ? "md:grid-cols-6" : "md:grid-cols-4"
+            } w-full h-auto`}
+          >
+            <TabsTrigger value="recommended" className="gap-1.5" data-testid="tab-recommended">
               <Heart className="h-4 w-4" /> موصى بها
             </TabsTrigger>
-            <TabsTrigger value="my-properties" className="gap-1.5">
-              <Plus className="h-4 w-4" /> عقاراتي
+            {staff && (
+              <TabsTrigger value="my-properties" className="gap-1.5" data-testid="tab-my-properties">
+                <Plus className="h-4 w-4" /> عقاراتي
+              </TabsTrigger>
+            )}
+            {staff && (
+              <TabsTrigger value="contact-requests" className="gap-1.5" data-testid="tab-contact-requests">
+                <Inbox className="h-4 w-4" /> طلبات على عقاراتي
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="favorites" className="gap-1.5" data-testid="tab-favorites">
+              <Heart className="h-4 w-4" /> المفضلة
             </TabsTrigger>
-            <TabsTrigger value="contact-requests" className="gap-1.5">
-              <Inbox className="h-4 w-4" /> طلبات التواصل
+            <TabsTrigger value="contact-us" className="gap-1.5" data-testid="tab-contact-us">
+              <MessageSquare className="h-4 w-4" /> تواصل معنا
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-1.5">
+            <TabsTrigger value="notifications" className="gap-1.5" data-testid="tab-notifications">
               <Bell className="h-4 w-4" /> الإشعارات
             </TabsTrigger>
           </TabsList>
@@ -166,91 +254,136 @@ export default function DashboardPage() {
               {recommended && recommended.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {recommended.map((p) => (
-                    <PropertyCard key={p.id} property={p} />
+                    <PropertyCard
+                      key={p.id}
+                      property={p}
+                      isFavorite={favoriteIds.has(p.id)}
+                      onFavoriteChange={(next) => onFavoriteChange(p.id, next)}
+                    />
                   ))}
                 </div>
               )}
             </SectionWrapper>
           </TabsContent>
 
-          <TabsContent value="my-properties" className="mt-6">
+          <TabsContent value="favorites" className="mt-6">
             <SectionWrapper
-              empty="ما عندكش عقارات هنا حالياً."
-              data={mine}
+              empty="ما عندكش عقارات مفضلة لسه. اضغط على القلب على أي عقار."
+              data={favorites}
             >
-              {mine && mine.length > 0 && (
+              {favorites && favorites.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mine.map((p) => (
-                    <PropertyCard key={p.id} property={p} showStatus />
+                  {favorites.map((p) => (
+                    <PropertyCard
+                      key={p.id}
+                      property={p}
+                      isFavorite={true}
+                      onFavoriteChange={(next) => onFavoriteChange(p.id, next)}
+                    />
                   ))}
                 </div>
               )}
             </SectionWrapper>
           </TabsContent>
 
-          <TabsContent value="contact-requests" className="mt-6">
-            <SectionWrapper
-              empty="مفيش طلبات تواصل على عقاراتك حتى الآن."
-              data={contacts}
-            >
-              {contacts && contacts.length > 0 && (
-                <Card className="border-border/40 bg-background/60 backdrop-blur">
-                  <CardContent className="p-0">
-                    <ul className="divide-y divide-border/30">
-                      {contacts.map((c) => (
-                        <li key={c.id} className="p-4 space-y-1">
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <div className="font-semibold">
-                              {c.name}{" "}
-                              {!c.isRead && (
-                                <Badge
-                                  className="border-0 text-black font-semibold"
-                                  style={{ background: "var(--gold)" }}
+          <TabsContent value="contact-us" className="mt-6">
+            <ContactUsPanel
+              defaultName={
+                [user.firstName, user.lastName].filter(Boolean).join(" ").trim()
+              }
+              defaultPhone={user.phone ?? ""}
+              defaultEmail={user.email ?? ""}
+            />
+          </TabsContent>
+
+          {staff && (
+            <TabsContent value="my-properties" className="mt-6">
+              <SectionWrapper
+                empty="ما عندكش عقارات هنا حالياً."
+                data={mine}
+              >
+                {mine && mine.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {mine.map((p) => (
+                      <PropertyCard
+                        key={p.id}
+                        property={p}
+                        showStatus
+                        isFavorite={favoriteIds.has(p.id)}
+                        onFavoriteChange={(next) => onFavoriteChange(p.id, next)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </SectionWrapper>
+            </TabsContent>
+          )}
+
+          {staff && (
+            <TabsContent value="contact-requests" className="mt-6">
+              <SectionWrapper
+                empty="مفيش طلبات تواصل على عقاراتك حتى الآن."
+                data={contacts}
+              >
+                {contacts && contacts.length > 0 && (
+                  <Card className="border-border/40 bg-background/60 backdrop-blur">
+                    <CardContent className="p-0">
+                      <ul className="divide-y divide-border/30">
+                        {contacts.map((c) => (
+                          <li key={c.id} className="p-4 space-y-1">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <div className="font-semibold">
+                                {c.name}{" "}
+                                {!c.isRead && (
+                                  <Badge
+                                    className="border-0 text-black font-semibold"
+                                    style={{ background: "var(--gold)" }}
+                                  >
+                                    جديد
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-xs text-foreground/60">
+                                {formatRelative(c.createdAt)}
+                              </div>
+                            </div>
+                            {c.propertyTitle && (
+                              <div className="text-xs text-foreground/70">
+                                عن عقار: {c.propertyTitle}
+                              </div>
+                            )}
+                            <div className="text-sm text-foreground/80">
+                              {c.message}
+                            </div>
+                            <div className="flex gap-3 text-xs text-foreground/60">
+                              {c.phone && (
+                                <a
+                                  href={`tel:${c.phone}`}
+                                  dir="ltr"
+                                  className="hover:text-foreground"
                                 >
-                                  جديد
-                                </Badge>
+                                  {c.phone}
+                                </a>
+                              )}
+                              {c.email && (
+                                <a
+                                  href={`mailto:${c.email}`}
+                                  dir="ltr"
+                                  className="hover:text-foreground"
+                                >
+                                  {c.email}
+                                </a>
                               )}
                             </div>
-                            <div className="text-xs text-foreground/60">
-                              {formatRelative(c.createdAt)}
-                            </div>
-                          </div>
-                          {c.propertyTitle && (
-                            <div className="text-xs text-foreground/70">
-                              عن عقار: {c.propertyTitle}
-                            </div>
-                          )}
-                          <div className="text-sm text-foreground/80">
-                            {c.message}
-                          </div>
-                          <div className="flex gap-3 text-xs text-foreground/60">
-                            {c.phone && (
-                              <a
-                                href={`tel:${c.phone}`}
-                                dir="ltr"
-                                className="hover:text-foreground"
-                              >
-                                {c.phone}
-                              </a>
-                            )}
-                            {c.email && (
-                              <a
-                                href={`mailto:${c.email}`}
-                                dir="ltr"
-                                className="hover:text-foreground"
-                              >
-                                {c.email}
-                              </a>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-            </SectionWrapper>
-          </TabsContent>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+              </SectionWrapper>
+            </TabsContent>
+          )}
 
           <TabsContent value="notifications" className="mt-6">
             <SectionWrapper
@@ -334,4 +467,205 @@ function SectionWrapper({
     );
   }
   return <>{children}</>;
+}
+
+function ContactUsPanel({
+  defaultName,
+  defaultPhone,
+  defaultEmail,
+}: {
+  defaultName: string;
+  defaultPhone: string;
+  defaultEmail: string;
+}) {
+  const [name, setName] = useState(defaultName);
+  const [phone, setPhone] = useState(defaultPhone);
+  const [email, setEmail] = useState(defaultEmail);
+  const [reason, setReason] = useState<string>("buy");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const REASONS: { value: string; label: string }[] = [
+    { value: "buy", label: "شراء عقار" },
+    { value: "general", label: "استفسار عام" },
+    { value: "partner", label: "طلب شراكة" },
+  ];
+
+  function reset() {
+    setMessage("");
+    setReason("buy");
+    setSuccess(false);
+    setError(null);
+  }
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (name.trim().length < 2) {
+      setError("اكتب اسمك من فضلك.");
+      return;
+    }
+    if (phone.trim().length < 6 && (!email || email.trim().length < 5)) {
+      setError("اكتب رقم تليفون أو إيميل على الأقل.");
+      return;
+    }
+    if (message.trim().length < 2) {
+      setError("اكتب رسالتك.");
+      return;
+    }
+    setSubmitting(true);
+    const reasonLabel =
+      REASONS.find((r) => r.value === reason)?.label ?? "تواصل عام";
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim() || undefined,
+          email: email.trim() || undefined,
+          reason,
+          message: `[${reasonLabel}] ${message.trim()}`,
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? "حصل خطأ، حاول تاني.");
+      }
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حصل خطأ، حاول تاني.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (success) {
+    return (
+      <Card className="border-border/40 bg-background/60 backdrop-blur">
+        <CardContent className="py-12 flex flex-col items-center text-center gap-3">
+          <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+          <p className="text-lg font-semibold">تم استلام رسالتك!</p>
+          <p className="text-sm text-foreground/70 max-w-md">
+            فريق باشاك هيتواصل معاك قريبًا على البيانات اللي بعتها.
+          </p>
+          <Button
+            type="button"
+            onClick={reset}
+            variant="outline"
+            className="mt-2 rounded-xl"
+            data-testid="button-contact-send-another"
+          >
+            ابعت رسالة تانية
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-border/40 bg-background/60 backdrop-blur">
+      <CardContent className="p-6">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold" style={{ color: "var(--gold-light)" }}>
+            تواصل مع باشاك
+          </h2>
+          <p className="text-sm text-foreground/60 mt-1">
+            ابعت رسالتك مباشرة لفريق باشاك ولينا الشرف نخدمك.
+          </p>
+        </div>
+        <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cu-name">الاسم</Label>
+            <Input
+              id="cu-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              data-testid="input-contact-name"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cu-phone">رقم الموبايل</Label>
+            <Input
+              id="cu-phone"
+              type="tel"
+              dir="ltr"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="01xxxxxxxxx"
+              data-testid="input-contact-phone"
+            />
+          </div>
+          <div className="flex flex-col gap-2 md:col-span-2">
+            <Label htmlFor="cu-email">الإيميل (اختياري)</Label>
+            <Input
+              id="cu-email"
+              type="email"
+              dir="ltr"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              data-testid="input-contact-email"
+            />
+          </div>
+          <div className="flex flex-col gap-2 md:col-span-2">
+            <Label htmlFor="cu-reason">سبب التواصل</Label>
+            <Select value={reason} onValueChange={setReason}>
+              <SelectTrigger id="cu-reason" data-testid="select-contact-reason">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {REASONS.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-2 md:col-span-2">
+            <Label htmlFor="cu-message">الرسالة</Label>
+            <Textarea
+              id="cu-message"
+              rows={5}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="اكتب تفاصيل طلبك..."
+              required
+              data-testid="input-contact-message"
+            />
+          </div>
+          {error && (
+            <div
+              className="md:col-span-2 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3"
+              data-testid="text-contact-error"
+            >
+              {error}
+            </div>
+          )}
+          <div className="md:col-span-2 flex justify-end">
+            <Button
+              type="submit"
+              disabled={submitting}
+              size="lg"
+              className="rounded-xl text-black font-semibold"
+              style={{ background: "var(--gold)" }}
+              data-testid="button-contact-submit"
+            >
+              {submitting ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="ml-2 h-4 w-4" />
+              )}
+              {submitting ? "جاري الإرسال..." : "إرسال"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
 }

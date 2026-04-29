@@ -59,6 +59,17 @@ The import was already structured as a pnpm_workspace Vite app (no Next.js conve
   - Bashak AI assistant: floating bottom-left FAB ("مساعد باشاك") opens a chat sheet (`components/bashak-ai-chat.tsx`) with welcome + 4 quick prompts.
   - Backend: `POST /api/bashak-ai/chat` (`routes/bashak-ai.ts`) calls Gemini 2.5 Flash via Replit AI Integrations proxy (`@google/genai`, `httpOptions: { apiVersion: "", baseUrl }`). System instruction = static `COMPANY_FACTS` + dynamically fetched top 8 approved properties (title/location/price/bedrooms/area/listingType). Replies in Egyptian Arabic, ≤5 sentences, refers to hotline 17327 / WhatsApp +20 11 5131 3999 / "سجّل الآن" for closing actions.
   - Env vars `AI_INTEGRATIONS_GEMINI_BASE_URL` + `AI_INTEGRATIONS_GEMINI_API_KEY` provisioned via setupReplitAIIntegrations (free-tier compliant — no user API key required).
+- **Phase 2.6 — Favorites + Contact-us tab + dashboard rework (DONE)**
+  - DB: `favorites` table (`user_id`, `property_id`, unique on the pair). Schema in `lib/db/src/schema/properties.ts`.
+  - API (`artifacts/api-server/src/routes/favorites.ts`): `GET /api/me/favorites` (full property objects), `GET /api/me/favorites/ids` (just ids — used to render the heart state on listings), `POST /api/favorites/:id`, `DELETE /api/favorites/:id`. All require auth.
+  - `PropertyCard` shows a heart toggle in the top corner (opposite of the listing badge). Anonymous taps redirect to `/login`. Cards accept `isFavorite` + `onFavoriteChange` for parent-controlled state, otherwise track locally.
+  - Dashboard tabs are now role-aware:
+    - All users: `recommended`, `favorites`, `contact-us`, `notifications`.
+    - Staff (super_admin / admin / property_manager / data_entry / legacy isAdmin): the above + `my-properties` and `contact-requests`.
+  - `contact-us` tab embeds an inline form (name/phone/email/reason/message) that POSTs to `/api/contact`. Pre-fills name/phone/email from the logged-in user.
+  - Bug fix: dashboard previously used `isStaff(user)` without importing it — now imported from `@/lib/roles`.
+  - Test accounts seeded by `pnpm --filter db run seed` (script: `lib/db/scripts/seed-test-users.mjs`). Re-run is idempotent (`ON CONFLICT (email) DO UPDATE`). Also chained from `scripts/post-merge.sh` so merges keep accounts in sync.
+  - All test accounts use password `Bashak@2026`: `superadmin@bashak.test` (super_admin), `manager@bashak.test` (property_manager), `dataentry@bashak.test` (data_entry), `support@bashak.test` (support), `demo@bashak.test` (demo). Login is via `POST /api/auth/login` → returns 6-digit OTP challenge (dev OTP shown on the login page in non-prod) → `POST /api/auth/verify-otp` finalises the session.
 - **Phase 3 — Media library (planned)**: YouTube videos curated by admin, public gallery.
 - **Phase 4 — Site polish (planned)**: EN/AR toggle, Google Maps footer, full-screen loader, public property listings + filters + detail page.
 

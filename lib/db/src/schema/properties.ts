@@ -164,3 +164,27 @@ export const notificationsTable = pgTable(
 
 export type Notification = typeof notificationsTable.$inferSelect;
 export type NewNotification = typeof notificationsTable.$inferInsert;
+
+export const favoritesTable = pgTable(
+  "favorites",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    propertyId: varchar("property_id")
+      .notNull()
+      .references(() => propertiesTable.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_favorites_user").on(table.userId),
+    index("idx_favorites_property").on(table.propertyId),
+    index("uniq_favorites_user_property").on(table.userId, table.propertyId),
+  ],
+);
+
+export type Favorite = typeof favoritesTable.$inferSelect;
+export type NewFavorite = typeof favoritesTable.$inferInsert;

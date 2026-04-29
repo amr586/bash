@@ -154,6 +154,23 @@ export function useAmenityLabels(): Record<string, string> {
   return lang === "ar" ? amenityLabels : amenityLabelsEn;
 }
 
+export async function addFavorite(propertyId: string): Promise<void> {
+  await apiFetch(`/api/favorites/${propertyId}`, { method: "POST" });
+}
+
+export async function removeFavorite(propertyId: string): Promise<void> {
+  await apiFetch(`/api/favorites/${propertyId}`, { method: "DELETE" });
+}
+
+export async function fetchFavoriteIds(): Promise<Set<string>> {
+  try {
+    const data = await apiFetch<{ ids: string[] }>("/api/me/favorites/ids");
+    return new Set(data.ids);
+  } catch {
+    return new Set();
+  }
+}
+
 export async function apiFetch<T>(
   url: string,
   init: RequestInit = {},
