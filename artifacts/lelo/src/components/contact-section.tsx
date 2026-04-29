@@ -15,9 +15,7 @@ export function ContactSection() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [reason, setReason] = useState<"general" | "buy" | "follow_up" | "partner" | "sell">(
-    "general",
-  );
+  const [reason, setReason] = useState<"buy" | "general" | "partner">("buy");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -133,11 +131,9 @@ export function ContactSection() {
                   className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                   data-testid="select-contact-reason"
                 >
-                  <option value="general">استفسار عام</option>
                   <option value="buy">شراء عقار</option>
-                  <option value="follow_up">متابعة طلب سابق</option>
-                  <option value="partner">شراكة / استثمار</option>
-                  <option value="sell">بيع / عرض عقار</option>
+                  <option value="general">استفسار</option>
+                  <option value="partner">طلب شراكة</option>
                 </select>
               </div>
               <div className="grid gap-2">

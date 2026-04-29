@@ -21,12 +21,9 @@ import {
 import { Loader2, CheckCircle2 } from "lucide-react";
 
 const REASONS = [
-  { value: "buy_apartment", label: "أريد شراء شقة" },
-  { value: "buy_villa", label: "أريد شراء فيلا" },
-  { value: "rent", label: "أريد إيجار وحدة" },
-  { value: "investment", label: "استشارة استثمارية" },
-  { value: "list_property", label: "عندي عقار للبيع/الإيجار" },
-  { value: "other", label: "سبب آخر" },
+  { value: "buy", label: "شراء عقار" },
+  { value: "general", label: "استفسار" },
+  { value: "partner", label: "طلب شراكة" },
 ] as const;
 
 interface Props {

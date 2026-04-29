@@ -15,7 +15,7 @@ const contactInputSchema = z.object({
   email: z.string().email().max(255).optional().nullable(),
   phone: z.string().trim().min(3).max(30).optional().nullable(),
   reason: z
-    .enum(["general", "buy", "follow_up", "partner", "sell"])
+    .enum(["general", "buy", "partner"])
     .optional()
     .default("general"),
   message: z.string().trim().min(2).max(5000),

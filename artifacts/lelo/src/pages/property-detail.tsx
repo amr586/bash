@@ -38,11 +38,9 @@ import {
 } from "@/lib/api";
 
 const REASON_OPTIONS: { value: string; label: string }[] = [
-  { value: "viewing", label: "حجز معاينة" },
-  { value: "price", label: "استفسار عن السعر والتقسيط" },
-  { value: "availability", label: "التأكد من توفّر الوحدة" },
-  { value: "negotiation", label: "تفاوض / عرض" },
-  { value: "other", label: "سبب آخر" },
+  { value: "buy", label: "شراء عقار" },
+  { value: "general", label: "استفسار" },
+  { value: "partner", label: "طلب شراكة" },
 ];
 
 export default function PropertyDetailPage() {
