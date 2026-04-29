@@ -1020,7 +1020,7 @@ function SettingsPanel() {
                         }}
                       />
                     ) : (
-                      <span className="text-xs text-white/40">
+                      <span className="text-xs text-foreground/40">
                         الشعار الافتراضي
                       </span>
                     )}

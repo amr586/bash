@@ -69,7 +69,7 @@ export function ServicesSection() {
             خدماتنا العقارية
           </motion.h2>
           <motion.p
-            className="text-xl text-white/80 max-w-2xl mx-auto"
+            className="text-xl text-foreground/80 max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -86,7 +86,7 @@ export function ServicesSection() {
               className="group relative p-8 rounded-2xl border overflow-hidden"
               style={{
                 borderColor: "var(--border)",
-                background: "linear-gradient(135deg, rgba(20,17,10,0.8) 0%, rgba(0,0,0,0.6) 100%)",
+                background: "var(--card)",
               }}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -113,7 +113,7 @@ export function ServicesSection() {
               >
                 {service.title}
               </h3>
-              <p className="text-white/75 leading-relaxed relative">{service.description}</p>
+              <p className="text-foreground/75 leading-relaxed relative">{service.description}</p>
             </motion.div>
           ))}
         </div>

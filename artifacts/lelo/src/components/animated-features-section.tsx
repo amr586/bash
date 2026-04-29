@@ -31,7 +31,7 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
 
   return (
     <motion.div
-      className="relative overflow-hidden h-full bg-black rounded-lg border border-border/20 group"
+      className="relative overflow-hidden h-full bg-card rounded-lg border border-border/20 group"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay }}
@@ -92,7 +92,7 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
 
 export function AnimatedFeaturesSection() {
   return (
-    <section id="features" className="py-20 px-4 bg-black">
+    <section id="features" className="py-20 px-4 bg-background">
       <svg width="0" height="0" className="absolute">
         <defs>
           <filter id="noise" x="0%" y="0%" width="100%" height="100%">
@@ -114,7 +114,7 @@ export function AnimatedFeaturesSection() {
           >
             لماذا باشاك؟
           </h2>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
             أكثر من 10 أعوام من الخبرة في التطوير العقاري — نحوّل رؤاكم إلى واقع ملموس.
           </p>
         </div>

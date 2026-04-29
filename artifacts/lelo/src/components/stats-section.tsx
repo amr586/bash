@@ -41,11 +41,7 @@ const stats = [
 export function StatsSection() {
   return (
     <section
-      className="relative py-20 px-4 overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(180deg, #000 0%, #0d0a04 50%, #000 100%)",
-      }}
+      className="relative py-20 px-4 overflow-hidden bg-background"
     >
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div
@@ -81,7 +77,7 @@ export function StatsSection() {
               className="relative text-center p-6 md:p-8 rounded-2xl border backdrop-blur-sm"
               style={{
                 borderColor: "var(--gold-dark)",
-                background: "rgba(20, 17, 10, 0.6)",
+                background: "var(--card)",
               }}
               initial={{ opacity: 0, y: 40, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -108,7 +104,7 @@ export function StatsSection() {
               >
                 <Counter to={stat.value} suffix={stat.suffix} />
               </div>
-              <p className="text-white/80 text-base md:text-lg font-medium">{stat.label}</p>
+              <p className="text-foreground/80 text-base md:text-lg font-medium">{stat.label}</p>
             </motion.div>
           ))}
         </div>

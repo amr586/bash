@@ -63,7 +63,7 @@ export function FAQSection() {
             الأسئلة الشائعة
           </motion.h2>
           <motion.p
-            className="text-xl text-white/80 max-w-2xl mx-auto"
+            className="text-xl text-foreground/80 max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -85,10 +85,10 @@ export function FAQSection() {
               viewport={{ once: true }}
             >
               <button
-                className="w-full px-6 py-4 text-right flex items-center justify-between hover:bg-white/5 transition-colors rounded-lg"
+                className="w-full px-6 py-4 text-right flex items-center justify-between hover:bg-foreground/5 transition-colors rounded-lg"
                 onClick={() => toggleFAQ(index)}
               >
-                <span className="text-lg font-medium text-white pl-4">{faq.question}</span>
+                <span className="text-lg font-medium text-foreground pl-4">{faq.question}</span>
                 <ChevronDown
                   className={`h-5 w-5 transition-transform flex-shrink-0 ${
                     openIndex === index ? "rotate-180" : ""
@@ -107,7 +107,7 @@ export function FAQSection() {
                 className="overflow-hidden"
               >
                 <div className="px-6 pb-4">
-                  <p className="text-white/80 leading-relaxed">{faq.answer}</p>
+                  <p className="text-foreground/80 leading-relaxed">{faq.answer}</p>
                 </div>
               </motion.div>
             </motion.div>

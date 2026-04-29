@@ -39,7 +39,7 @@ export function ProjectsSection() {
   if (properties != null && properties.length === 0) return null
 
   return (
-    <section id="projects" className="py-20 px-4 bg-black overflow-hidden">
+    <section id="projects" className="py-20 px-4 bg-background overflow-hidden">
       <div
         className="container mx-auto"
         dir="rtl"
@@ -71,7 +71,7 @@ export function ProjectsSection() {
             مشاريعنا اللي بنبنيها بنفسنا
           </motion.h2>
           <motion.p
-            className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed"
+            className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -167,7 +167,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
             {property.title}
           </h3>
           {property.location && (
-            <div className="flex items-center gap-1 text-white/80 text-sm">
+            <div className="flex items-center gap-1 text-white/90 text-sm">
               <MapPin className="h-4 w-4" style={{ color: "var(--gold)" }} />
               <span>{property.location}</span>
             </div>
@@ -176,7 +176,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
       </div>
 
       <div className="p-6 relative">
-        <p className="text-white/90 mb-4 font-medium">
+        <p className="text-foreground/90 mb-4 font-medium">
           {propertyTypeLabels[property.type] ?? property.type}
         </p>
         <div className="grid grid-cols-2 gap-3 mb-5">
@@ -185,7 +185,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
             style={{ background: "rgba(212, 175, 55, 0.06)" }}
           >
             <BedDouble className="h-4 w-4" style={{ color: "var(--gold)" }} />
-            <span className="text-sm text-white/80">
+            <span className="text-sm text-foreground/80">
               {property.bedrooms != null ? `${property.bedrooms} غرف` : "—"}
             </span>
           </div>
@@ -194,7 +194,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
             style={{ background: "rgba(212, 175, 55, 0.06)" }}
           >
             <Maximize className="h-4 w-4" style={{ color: "var(--gold)" }} />
-            <span className="text-sm text-white/80">
+            <span className="text-sm text-foreground/80">
               {property.area != null ? `${property.area} م²` : "—"}
             </span>
           </div>
@@ -204,7 +204,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
               style={{ background: "rgba(212, 175, 55, 0.06)" }}
             >
               <Bath className="h-4 w-4" style={{ color: "var(--gold)" }} />
-              <span className="text-sm text-white/80">
+              <span className="text-sm text-foreground/80">
                 {property.bathrooms} حمامات
               </span>
             </div>
