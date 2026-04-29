@@ -160,6 +160,24 @@ export default function DashboardPage() {
     }
   }, [tab, isAuthenticated, recommended, favorites, mine, contacts, notifications]);
 
+  async function onNotificationClick(n: Notification) {
+    if (!n.isRead) {
+      setNotifications((prev) =>
+        prev ? prev.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)) : prev,
+      );
+      try {
+        await apiFetch(`/api/me/notifications/${n.id}/read`, {
+          method: "PATCH",
+        });
+      } catch {
+        /* ignore — UI already updated optimistically */
+      }
+    }
+    if (n.link) {
+      navigate(n.link);
+    }
+  }
+
   function onFavoriteChange(propertyId: string, next: boolean) {
     setFavoriteIds((prev) => {
       const copy = new Set(prev);
@@ -422,38 +440,42 @@ export default function DashboardPage() {
                       {notifications.map((n) => (
                         <li
                           key={n.id}
-                          className={`p-4 ${
-                            n.isRead ? "" : "bg-[var(--gold)]/5"
-                          }`}
+                          className={`${n.isRead ? "" : "bg-[var(--gold)]/5"}`}
                         >
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <div className="font-semibold">
-                              {!n.isRead && (
-                                <span
-                                  className="inline-block h-2 w-2 rounded-full ml-2"
-                                  style={{ background: "var(--gold)" }}
-                                />
-                              )}
-                              {n.title}
+                          <button
+                            type="button"
+                            onClick={() => onNotificationClick(n)}
+                            className={`w-full ${isAr ? "text-right" : "text-left"} p-4 hover:bg-foreground/5 transition-colors`}
+                            data-testid={`notification-row-${n.id}`}
+                          >
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <div className="font-semibold">
+                                {!n.isRead && (
+                                  <span
+                                    className={`inline-block h-2 w-2 rounded-full ${isAr ? "ml-2" : "mr-2"}`}
+                                    style={{ background: "var(--gold)" }}
+                                  />
+                                )}
+                                {n.title}
+                              </div>
+                              <div className="text-xs text-foreground/60">
+                                {formatRelative(n.createdAt)}
+                              </div>
                             </div>
-                            <div className="text-xs text-foreground/60">
-                              {formatRelative(n.createdAt)}
-                            </div>
-                          </div>
-                          {n.body && (
-                            <div className="text-sm text-foreground/70 mt-1">
-                              {n.body}
-                            </div>
-                          )}
-                          {n.link && (
-                            <button
-                              onClick={() => navigate(n.link!)}
-                              className="text-xs mt-2 underline"
-                              style={{ color: "var(--gold-light)" }}
-                            >
-                              {t("افتح", "Open")}
-                            </button>
-                          )}
+                            {n.body && (
+                              <div className="text-sm text-foreground/70 mt-1">
+                                {n.body}
+                              </div>
+                            )}
+                            {n.link && (
+                              <div
+                                className="text-xs mt-2 underline"
+                                style={{ color: "var(--gold-light)" }}
+                              >
+                                {t("افتح", "Open")}
+                              </div>
+                            )}
+                          </button>
                         </li>
                       ))}
                     </ul>

@@ -157,9 +157,9 @@ router.post("/properties", async (req: Request, res: Response) => {
     })
     .returning();
 
-  // Admin added a new property — notify all OTHER users so they see new listings
+  // Notify all OTHER users so they see new listings, and admins so they can review.
   const others = await db
-    .select({ id: usersTable.id })
+    .select({ id: usersTable.id, isAdmin: usersTable.isAdmin })
     .from(usersTable)
     .where(ne(usersTable.id, req.user.id));
   if (others.length > 0) {
@@ -168,9 +168,13 @@ router.post("/properties", async (req: Request, res: Response) => {
         createNotification({
           userId: u.id,
           type: "admin_added_property",
-          title: "عقار جديد على باشاك",
-          body: `تمت إضافة عقار جديد: ${created.title}`,
-          link: `/dashboard?tab=recommended`,
+          title: u.isAdmin
+            ? "عقار جديد محتاج مراجعة"
+            : "عقار جديد على باشاك",
+          body: u.isAdmin
+            ? `تم إضافة عقار جديد للمراجعة: ${created.title}`
+            : `تمت إضافة عقار جديد: ${created.title}`,
+          link: `/properties/${created.id}`,
           relatedId: created.id,
         }),
       ),
