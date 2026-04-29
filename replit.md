@@ -70,6 +70,11 @@ The import was already structured as a pnpm_workspace Vite app (no Next.js conve
   - Bug fix: dashboard previously used `isStaff(user)` without importing it — now imported from `@/lib/roles`.
   - Test accounts seeded by `pnpm --filter db run seed` (script: `lib/db/scripts/seed-test-users.mjs`). Re-run is idempotent (`ON CONFLICT (email) DO UPDATE`). Also chained from `scripts/post-merge.sh` so merges keep accounts in sync.
   - All test accounts use password `Bashak@2026`: `superadmin@bashak.test` (super_admin), `manager@bashak.test` (property_manager), `dataentry@bashak.test` (data_entry), `support@bashak.test` (support), `demo@bashak.test` (demo). Login is via `POST /api/auth/login` → returns 6-digit OTP challenge (dev OTP shown on the login page in non-prod) → `POST /api/auth/verify-otp` finalises the session.
+- **Phase 2.7 — i18n + light-mode logo (DONE)**
+  - Logo (`components/lelo-logo.tsx`) is theme-aware: when `theme === "light"` it gets a black rounded backdrop with a gold ring so the white/gold artwork stays visible in both header and footer.
+  - New `lib/locations.ts` exports `translateLocation(loc, lang)` with an Arabic→English map of common Cairo/Egypt areas (التجمع الخامس → Fifth Settlement, etc). The DB still stores the canonical Arabic string; only the displayed label switches with `lang`. Used by `LocationField` (dropdown options + placeholder), `PropertyCard` (location row), `PropertySearch` (quick-location chips). Unknown locations fall back to the original string.
+  - `LocationField` placeholder, label, custom-area input, and "other area" option now go through `useLang().t(...)`.
+  - Pages translated end-to-end via `useLang()`: `pages/login.tsx` (login + signup tabs, all field labels, password rules, OTP screen, error toasts), `pages/profile.tsx` (header buttons, avatar buttons, all form fields + helper text + toast titles/descriptions), `pages/dashboard.tsx` (welcome header, action buttons, all 6 tab labels, every empty-state message, contact-us inline form including reasons select labels). All three pages also flip `dir` and icon margin (ml/mr) based on `lang`.
 - **Phase 3 — Media library (planned)**: YouTube videos curated by admin, public gallery.
 - **Phase 4 — Site polish (planned)**: EN/AR toggle, Google Maps footer, full-screen loader, public property listings + filters + detail page.
 

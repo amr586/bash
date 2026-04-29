@@ -14,6 +14,7 @@ import {
   type Property,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { translateLocation } from "@/lib/locations";
 import { useAuth } from "@workspace/replit-auth-web";
 import { useLocation } from "wouter";
 
@@ -137,7 +138,9 @@ export function PropertyCard({
           <div className="text-xs text-foreground/60 mt-1 flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             <span className="truncate">
-              {property.location || t("بدون منطقة", "No location")} ·{" "}
+              {translateLocation(property.location, lang) ||
+                t("بدون منطقة", "No location")}{" "}
+              ·{" "}
               {propertyTypeLabels[property.type] ?? property.type}
             </span>
           </div>

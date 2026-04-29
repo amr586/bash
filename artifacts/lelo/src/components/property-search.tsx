@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useSiteSettings } from "@/lib/site-settings";
 import { useLang } from "@/lib/i18n";
+import { translateLocation } from "@/lib/locations";
 
 export function PropertySearch() {
   const { lang, t } = useLang();
@@ -191,7 +192,7 @@ export function PropertySearch() {
                       }}
                       data-testid={`chip-location-${loc}`}
                     >
-                      {loc}
+                      {translateLocation(loc, lang)}
                     </button>
                   ))}
                   <button

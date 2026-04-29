@@ -9,6 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSiteSettings } from "@/lib/site-settings";
+import { useLang } from "@/lib/i18n";
+import { translateLocation } from "@/lib/locations";
 
 const CUSTOM_VALUE = "__custom__";
 
@@ -28,6 +30,7 @@ export function LocationField({
   testIdPrefix = "loc",
 }: Props) {
   const { settings, loading } = useSiteSettings();
+  const { lang, t } = useLang();
   const knownLocations = useMemo(
     () => settings.locations ?? [],
     [settings.locations],
@@ -62,7 +65,9 @@ export function LocationField({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={`${testIdPrefix}-location-select`}>المنطقة *</Label>
+      <Label htmlFor={`${testIdPrefix}-location-select`}>
+        {t("المنطقة *", "Area *")}
+      </Label>
 
       <Select
         value={mode === "custom" ? CUSTOM_VALUE : value || ""}
@@ -72,15 +77,17 @@ export function LocationField({
           id={`${testIdPrefix}-location-select`}
           data-testid={`select-${testIdPrefix}-location`}
         >
-          <SelectValue placeholder="اختر منطقة" />
+          <SelectValue placeholder={t("اختر منطقة", "Pick an area")} />
         </SelectTrigger>
         <SelectContent>
           {knownLocations.map((loc) => (
             <SelectItem key={loc} value={loc}>
-              {loc}
+              {translateLocation(loc, lang)}
             </SelectItem>
           ))}
-          <SelectItem value={CUSTOM_VALUE}>منطقة أخرى (أكتب يدوي)</SelectItem>
+          <SelectItem value={CUSTOM_VALUE}>
+            {t("منطقة أخرى (أكتب يدوي)", "Other (type manually)")}
+          </SelectItem>
         </SelectContent>
       </Select>
 
@@ -89,7 +96,7 @@ export function LocationField({
           autoFocus
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="اكتب اسم المنطقة"
+          placeholder={t("اكتب اسم المنطقة", "Type the area name")}
           maxLength={200}
           required={required}
           data-testid={`input-${testIdPrefix}-location-custom`}

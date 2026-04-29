@@ -41,6 +41,7 @@ import {
   type Property,
 } from "@/lib/api";
 import { isStaff } from "@/lib/roles";
+import { useLang } from "@/lib/i18n";
 
 const ALL_TABS = [
   "recommended",
@@ -63,6 +64,9 @@ function readTabFromHash(allowed: readonly TabKey[]): TabKey {
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
+  const { lang, t } = useLang();
+  const isAr = lang === "ar";
+  const iconMargin = isAr ? "ml-2" : "mr-2";
 
   const staff = isStaff(user);
   const allowedTabs: readonly TabKey[] = useMemo(
@@ -183,22 +187,29 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-24" dir="rtl">
+    <div
+      className="min-h-screen bg-background px-4 py-24"
+      dir={isAr ? "rtl" : "ltr"}
+    >
       <div className="mx-auto w-full max-w-6xl space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              أهلاً، {user.firstName ?? "بك"}
+              {t("أهلاً، ", "Hi, ")}
+              {user.firstName ?? t("بك", "there")}
             </h1>
             <p className="text-sm text-foreground/60 mt-1">
-              من هنا تتابع العقارات الموصى بها، المفضلة، وتتواصل مع باشاك.
+              {t(
+                "من هنا تتابع العقارات الموصى بها، المفضلة، وتتواصل مع باشاك.",
+                "Here you can browse recommended and saved properties, and reach out to Bashak.",
+              )}
             </p>
           </div>
           <div className="flex gap-2">
             <Button asChild variant="outline" className="rounded-xl">
               <Link href="/profile">
-                <UserIcon className="ml-2 h-4 w-4" />
-                البروفايل
+                <UserIcon className={`${iconMargin} h-4 w-4`} />
+                {t("البروفايل", "Profile")}
               </Link>
             </Button>
             {staff && (
@@ -208,47 +219,51 @@ export default function DashboardPage() {
                 style={{ background: "var(--gold)" }}
               >
                 <Link href="/add-property">
-                  <Plus className="ml-2 h-4 w-4" />
-                  أضف عقار
+                  <Plus className={`${iconMargin} h-4 w-4`} />
+                  {t("أضف عقار", "Add property")}
                 </Link>
               </Button>
             )}
           </div>
         </div>
 
-        <Tabs value={tab} onValueChange={changeTab} dir="rtl">
+        <Tabs value={tab} onValueChange={changeTab} dir={isAr ? "rtl" : "ltr"}>
           <TabsList
             className={`grid grid-cols-2 ${
               staff ? "md:grid-cols-6" : "md:grid-cols-4"
             } w-full h-auto`}
           >
             <TabsTrigger value="recommended" className="gap-1.5" data-testid="tab-recommended">
-              <Heart className="h-4 w-4" /> موصى بها
+              <Heart className="h-4 w-4" /> {t("موصى بها", "Recommended")}
             </TabsTrigger>
             {staff && (
               <TabsTrigger value="my-properties" className="gap-1.5" data-testid="tab-my-properties">
-                <Plus className="h-4 w-4" /> عقاراتي
+                <Plus className="h-4 w-4" /> {t("عقاراتي", "My properties")}
               </TabsTrigger>
             )}
             {staff && (
               <TabsTrigger value="contact-requests" className="gap-1.5" data-testid="tab-contact-requests">
-                <Inbox className="h-4 w-4" /> طلبات على عقاراتي
+                <Inbox className="h-4 w-4" />{" "}
+                {t("طلبات على عقاراتي", "Requests on my listings")}
               </TabsTrigger>
             )}
             <TabsTrigger value="favorites" className="gap-1.5" data-testid="tab-favorites">
-              <Heart className="h-4 w-4" /> المفضلة
+              <Heart className="h-4 w-4" /> {t("المفضلة", "Favorites")}
             </TabsTrigger>
             <TabsTrigger value="contact-us" className="gap-1.5" data-testid="tab-contact-us">
-              <MessageSquare className="h-4 w-4" /> تواصل معنا
+              <MessageSquare className="h-4 w-4" /> {t("تواصل معنا", "Contact us")}
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-1.5" data-testid="tab-notifications">
-              <Bell className="h-4 w-4" /> الإشعارات
+              <Bell className="h-4 w-4" /> {t("الإشعارات", "Notifications")}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recommended" className="mt-6">
             <SectionWrapper
-              empty="مفيش عقارات موصى بها لسه. اطلب من الأدمن يضيف."
+              empty={t(
+                "مفيش عقارات موصى بها لسه. اطلب من الأدمن يضيف.",
+                "No recommended properties yet. Ask the admin to add some.",
+              )}
               data={recommended}
             >
               {recommended && recommended.length > 0 && (
@@ -268,7 +283,10 @@ export default function DashboardPage() {
 
           <TabsContent value="favorites" className="mt-6">
             <SectionWrapper
-              empty="ما عندكش عقارات مفضلة لسه. اضغط على القلب على أي عقار."
+              empty={t(
+                "ما عندكش عقارات مفضلة لسه. اضغط على القلب على أي عقار.",
+                "No favorites yet. Tap the heart on any property to save it.",
+              )}
               data={favorites}
             >
               {favorites && favorites.length > 0 && (
@@ -299,7 +317,10 @@ export default function DashboardPage() {
           {staff && (
             <TabsContent value="my-properties" className="mt-6">
               <SectionWrapper
-                empty="ما عندكش عقارات هنا حالياً."
+                empty={t(
+                  "ما عندكش عقارات هنا حالياً.",
+                  "You have no properties here yet.",
+                )}
                 data={mine}
               >
                 {mine && mine.length > 0 && (
@@ -322,7 +343,10 @@ export default function DashboardPage() {
           {staff && (
             <TabsContent value="contact-requests" className="mt-6">
               <SectionWrapper
-                empty="مفيش طلبات تواصل على عقاراتك حتى الآن."
+                empty={t(
+                  "مفيش طلبات تواصل على عقاراتك حتى الآن.",
+                  "No contact requests on your listings yet.",
+                )}
                 data={contacts}
               >
                 {contacts && contacts.length > 0 && (
@@ -339,7 +363,7 @@ export default function DashboardPage() {
                                     className="border-0 text-black font-semibold"
                                     style={{ background: "var(--gold)" }}
                                   >
-                                    جديد
+                                    {t("جديد", "New")}
                                   </Badge>
                                 )}
                               </div>
@@ -349,7 +373,8 @@ export default function DashboardPage() {
                             </div>
                             {c.propertyTitle && (
                               <div className="text-xs text-foreground/70">
-                                عن عقار: {c.propertyTitle}
+                                {t("عن عقار: ", "About: ")}
+                                {c.propertyTitle}
                               </div>
                             )}
                             <div className="text-sm text-foreground/80">
@@ -387,7 +412,7 @@ export default function DashboardPage() {
 
           <TabsContent value="notifications" className="mt-6">
             <SectionWrapper
-              empty="مفيش إشعارات لسه."
+              empty={t("مفيش إشعارات لسه.", "No notifications yet.")}
               data={notifications}
             >
               {notifications && notifications.length > 0 && (
@@ -426,7 +451,7 @@ export default function DashboardPage() {
                               className="text-xs mt-2 underline"
                               style={{ color: "var(--gold-light)" }}
                             >
-                              افتح
+                              {t("افتح", "Open")}
                             </button>
                           )}
                         </li>
@@ -478,6 +503,10 @@ function ContactUsPanel({
   defaultPhone: string;
   defaultEmail: string;
 }) {
+  const { lang, t } = useLang();
+  const isAr = lang === "ar";
+  const iconMargin = isAr ? "ml-2" : "mr-2";
+
   const [name, setName] = useState(defaultName);
   const [phone, setPhone] = useState(defaultPhone);
   const [email, setEmail] = useState(defaultEmail);
@@ -487,10 +516,10 @@ function ContactUsPanel({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const REASONS: { value: string; label: string }[] = [
-    { value: "buy", label: "شراء عقار" },
-    { value: "general", label: "استفسار عام" },
-    { value: "partner", label: "طلب شراكة" },
+  const REASONS: { value: string; labelAr: string; labelEn: string }[] = [
+    { value: "buy", labelAr: "شراء عقار", labelEn: "Buy a property" },
+    { value: "general", labelAr: "استفسار عام", labelEn: "General inquiry" },
+    { value: "partner", labelAr: "طلب شراكة", labelEn: "Partnership request" },
   ];
 
   function reset() {
@@ -504,20 +533,29 @@ function ContactUsPanel({
     e.preventDefault();
     setError(null);
     if (name.trim().length < 2) {
-      setError("اكتب اسمك من فضلك.");
+      setError(t("اكتب اسمك من فضلك.", "Please enter your name."));
       return;
     }
     if (phone.trim().length < 6 && (!email || email.trim().length < 5)) {
-      setError("اكتب رقم تليفون أو إيميل على الأقل.");
+      setError(
+        t(
+          "اكتب رقم تليفون أو إيميل على الأقل.",
+          "Enter a phone number or email at minimum.",
+        ),
+      );
       return;
     }
     if (message.trim().length < 2) {
-      setError("اكتب رسالتك.");
+      setError(t("اكتب رسالتك.", "Write your message."));
       return;
     }
     setSubmitting(true);
-    const reasonLabel =
-      REASONS.find((r) => r.value === reason)?.label ?? "تواصل عام";
+    const reasonRow = REASONS.find((r) => r.value === reason);
+    const reasonLabel = reasonRow
+      ? isAr
+        ? reasonRow.labelAr
+        : reasonRow.labelEn
+      : t("تواصل عام", "General contact");
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -533,11 +571,15 @@ function ContactUsPanel({
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(body.error ?? "حصل خطأ، حاول تاني.");
+        throw new Error(body.error ?? t("حصل خطأ، حاول تاني.", "Something went wrong, please try again."));
       }
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حصل خطأ، حاول تاني.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : t("حصل خطأ، حاول تاني.", "Something went wrong, please try again."),
+      );
     } finally {
       setSubmitting(false);
     }
@@ -548,9 +590,14 @@ function ContactUsPanel({
       <Card className="border-border/40 bg-background/60 backdrop-blur">
         <CardContent className="py-12 flex flex-col items-center text-center gap-3">
           <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-          <p className="text-lg font-semibold">تم استلام رسالتك!</p>
+          <p className="text-lg font-semibold">
+            {t("تم استلام رسالتك!", "Your message has been received!")}
+          </p>
           <p className="text-sm text-foreground/70 max-w-md">
-            فريق باشاك هيتواصل معاك قريبًا على البيانات اللي بعتها.
+            {t(
+              "فريق باشاك هيتواصل معاك قريبًا على البيانات اللي بعتها.",
+              "The Bashak team will contact you soon using the info you provided.",
+            )}
           </p>
           <Button
             type="button"
@@ -559,7 +606,7 @@ function ContactUsPanel({
             className="mt-2 rounded-xl"
             data-testid="button-contact-send-another"
           >
-            ابعت رسالة تانية
+            {t("ابعت رسالة تانية", "Send another message")}
           </Button>
         </CardContent>
       </Card>
@@ -571,15 +618,18 @@ function ContactUsPanel({
       <CardContent className="p-6">
         <div className="mb-4">
           <h2 className="text-xl font-bold" style={{ color: "var(--gold-light)" }}>
-            تواصل مع باشاك
+            {t("تواصل مع باشاك", "Contact Bashak")}
           </h2>
           <p className="text-sm text-foreground/60 mt-1">
-            ابعت رسالتك مباشرة لفريق باشاك ولينا الشرف نخدمك.
+            {t(
+              "ابعت رسالتك مباشرة لفريق باشاك ولينا الشرف نخدمك.",
+              "Send your message directly to the Bashak team — we're glad to help.",
+            )}
           </p>
         </div>
         <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="cu-name">الاسم</Label>
+            <Label htmlFor="cu-name">{t("الاسم", "Name")}</Label>
             <Input
               id="cu-name"
               value={name}
@@ -589,7 +639,7 @@ function ContactUsPanel({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="cu-phone">رقم الموبايل</Label>
+            <Label htmlFor="cu-phone">{t("رقم الموبايل", "Mobile number")}</Label>
             <Input
               id="cu-phone"
               type="tel"
@@ -601,7 +651,9 @@ function ContactUsPanel({
             />
           </div>
           <div className="flex flex-col gap-2 md:col-span-2">
-            <Label htmlFor="cu-email">الإيميل (اختياري)</Label>
+            <Label htmlFor="cu-email">
+              {t("الإيميل (اختياري)", "Email (optional)")}
+            </Label>
             <Input
               id="cu-email"
               type="email"
@@ -613,7 +665,7 @@ function ContactUsPanel({
             />
           </div>
           <div className="flex flex-col gap-2 md:col-span-2">
-            <Label htmlFor="cu-reason">سبب التواصل</Label>
+            <Label htmlFor="cu-reason">{t("سبب التواصل", "Reason")}</Label>
             <Select value={reason} onValueChange={setReason}>
               <SelectTrigger id="cu-reason" data-testid="select-contact-reason">
                 <SelectValue />
@@ -621,20 +673,20 @@ function ContactUsPanel({
               <SelectContent>
                 {REASONS.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
-                    {r.label}
+                    {isAr ? r.labelAr : r.labelEn}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-2 md:col-span-2">
-            <Label htmlFor="cu-message">الرسالة</Label>
+            <Label htmlFor="cu-message">{t("الرسالة", "Message")}</Label>
             <Textarea
               id="cu-message"
               rows={5}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="اكتب تفاصيل طلبك..."
+              placeholder={t("اكتب تفاصيل طلبك...", "Type the details of your request…")}
               required
               data-testid="input-contact-message"
             />
@@ -657,11 +709,13 @@ function ContactUsPanel({
               data-testid="button-contact-submit"
             >
               {submitting ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                <Loader2 className={`${iconMargin} h-4 w-4 animate-spin`} />
               ) : (
-                <Send className="ml-2 h-4 w-4" />
+                <Send className={`${iconMargin} h-4 w-4`} />
               )}
-              {submitting ? "جاري الإرسال..." : "إرسال"}
+              {submitting
+                ? t("جاري الإرسال...", "Sending…")
+                : t("إرسال", "Send")}
             </Button>
           </div>
         </form>

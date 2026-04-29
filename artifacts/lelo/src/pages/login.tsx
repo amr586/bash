@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LeLoLogo } from "@/components/lelo-logo";
 import { TermsDialog } from "@/components/terms-dialog";
+import { useLang } from "@/lib/i18n";
 import {
   Loader2,
   LogIn,
@@ -16,6 +17,7 @@ import {
   ShieldCheck,
   KeyRound,
   ArrowLeft,
+  ArrowRight,
   Check,
   X,
 } from "lucide-react";
@@ -44,6 +46,8 @@ function pwScore(s: string) {
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
+  const { lang, t } = useLang();
+  const isAr = lang === "ar";
 
   const nextUrl = (() => {
     if (typeof window === "undefined") return "/profile";
@@ -107,23 +111,33 @@ export default function LoginPage() {
 
     if (mode === "signup") {
       if (firstName.trim().length < 1) {
-        setError("اكتب اسمك الأول.");
+        setError(t("اكتب اسمك الأول.", "Enter your first name."));
         return;
       }
       if (phone.trim().length < 8) {
-        setError("اكتب رقم موبايل صحيح.");
+        setError(t("اكتب رقم موبايل صحيح.", "Enter a valid mobile number."));
         return;
       }
       if (pwScore(password) < 4) {
-        setError("كلمة السر لازم 8 أحرف على الأقل وفيها حرف كبير ورقم ورمز.");
+        setError(
+          t(
+            "كلمة السر لازم 8 أحرف على الأقل وفيها حرف كبير ورقم ورمز.",
+            "Password must be at least 8 chars with an uppercase letter, a digit and a symbol.",
+          ),
+        );
         return;
       }
       if (password !== confirmPassword) {
-        setError("كلمتي السر مش متطابقتين.");
+        setError(t("كلمتي السر مش متطابقتين.", "Passwords do not match."));
         return;
       }
       if (!acceptedTerms) {
-        setError("لازم توافق على الشروط والأحكام وسياسة الخصوصية.");
+        setError(
+          t(
+            "لازم توافق على الشروط والأحكام وسياسة الخصوصية.",
+            "You must accept the Terms and Privacy Policy.",
+          ),
+        );
         return;
       }
     }
@@ -156,7 +170,7 @@ export default function LoginPage() {
         error?: string;
       };
       if (!res.ok || !data.needsOtp || !data.challengeId || !data.devOtp) {
-        setError(data.error ?? "حدث خطأ، حاول تاني.");
+        setError(data.error ?? t("حدث خطأ، حاول تاني.", "Something went wrong, please try again."));
         return;
       }
       setOtp({
@@ -168,7 +182,7 @@ export default function LoginPage() {
       });
       setCode("");
     } catch {
-      setError("تعذّر الاتصال بالسيرفر.");
+      setError(t("تعذّر الاتصال بالسيرفر.", "Could not reach the server."));
     } finally {
       setSubmitting(false);
     }
@@ -191,22 +205,25 @@ export default function LoginPage() {
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? "الكود غلط أو انتهت صلاحيته.");
+        setError(data.error ?? t("الكود غلط أو انتهت صلاحيته.", "Invalid or expired code."));
         return;
       }
       window.location.href = nextUrl;
     } catch {
-      setError("تعذّر التحقق. حاول تاني.");
+      setError(t("تعذّر التحقق. حاول تاني.", "Verification failed, try again."));
     } finally {
       setVerifying(false);
     }
   };
 
+  const Back = isAr ? ArrowLeft : ArrowRight;
+  const iconMargin = isAr ? "ml-2" : "mr-2";
+
   if (otp) {
     return (
       <div
         className="min-h-screen flex items-center justify-center bg-background px-4 py-10"
-        dir="rtl"
+        dir={isAr ? "rtl" : "ltr"}
       >
         <Card className="w-full max-w-md border-border/40 bg-background/80 backdrop-blur">
           <CardContent className="pt-8 pb-8 px-8 flex flex-col items-center text-center gap-6">
@@ -221,10 +238,10 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold mb-2 text-foreground">
-                أكّد كود التحقق
+                {t("أكّد كود التحقق", "Confirm verification code")}
               </h1>
               <p className="text-sm text-foreground/70 leading-relaxed">
-                بعتنا كود مكوّن من 6 أرقام إلى{" "}
+                {t("بعتنا كود مكوّن من 6 أرقام إلى ", "We sent a 6-digit code to ")}
                 <span dir="ltr" className="font-semibold text-foreground">
                   {otp.target}
                 </span>
@@ -240,7 +257,10 @@ export default function LoginPage() {
               data-testid="otp-display"
             >
               <p className="text-xs text-foreground/70 mb-2">
-                الكود الخاص بك (يظهر هنا تلقائيًا للتجربة):
+                {t(
+                  "الكود الخاص بك (يظهر هنا تلقائيًا للتجربة):",
+                  "Your code (shown here automatically for demo):",
+                )}
               </p>
               <div
                 className="text-4xl font-extrabold tracking-[0.5em] font-mono"
@@ -250,7 +270,7 @@ export default function LoginPage() {
                 {otp.devOtp}
               </div>
               <p className="text-xs text-foreground/60 mt-2">
-                ينتهي خلال{" "}
+                {t("ينتهي خلال ", "Expires in ")}
                 <span dir="ltr" className="font-bold">
                   {Math.floor(secondsLeft / 60)}:
                   {String(secondsLeft % 60).padStart(2, "0")}
@@ -260,7 +280,9 @@ export default function LoginPage() {
 
             <form onSubmit={onVerify} className="w-full flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="otp-input">اكتب الكود</Label>
+                <Label htmlFor="otp-input">
+                  {t("اكتب الكود", "Enter the code")}
+                </Label>
                 <Input
                   id="otp-input"
                   value={code}
@@ -293,11 +315,11 @@ export default function LoginPage() {
                 data-testid="button-verify-otp"
               >
                 {verifying ? (
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  <Loader2 className={`${iconMargin} h-4 w-4 animate-spin`} />
                 ) : (
-                  <KeyRound className="ml-2 h-4 w-4" />
+                  <KeyRound className={`${iconMargin} h-4 w-4`} />
                 )}
-                تأكيد الكود
+                {t("تأكيد الكود", "Confirm code")}
               </Button>
 
               <button
@@ -310,8 +332,8 @@ export default function LoginPage() {
                 className="inline-flex items-center justify-center gap-1 text-sm text-foreground/70 hover:text-foreground"
                 data-testid="button-otp-back"
               >
-                <ArrowLeft className="h-4 w-4" />
-                رجوع وتعديل البيانات
+                <Back className="h-4 w-4" />
+                {t("رجوع وتعديل البيانات", "Back and edit details")}
               </button>
             </form>
           </CardContent>
@@ -323,7 +345,7 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-background px-4 py-10"
-      dir="rtl"
+      dir={isAr ? "rtl" : "ltr"}
     >
       <Card className="w-full max-w-md border-border/40 bg-background/80 backdrop-blur">
         <CardContent className="pt-8 pb-8 px-8 flex flex-col items-center text-center gap-6">
@@ -331,12 +353,18 @@ export default function LoginPage() {
 
           <div>
             <h1 className="text-2xl font-bold mb-2 text-foreground">
-              مرحبًا بك في باشاك
+              {t("مرحبًا بك في باشاك", "Welcome to Bashak")}
             </h1>
             <p className="text-sm text-foreground/70 leading-relaxed">
               {mode === "login"
-                ? "ادخل إيميلك وكلمة المرور وهنبعتلك كود تحقق."
-                : "املأ بياناتك وهيتعمل لك حساب جديد بعد كود التحقق."}
+                ? t(
+                    "ادخل إيميلك وكلمة المرور وهنبعتلك كود تحقق.",
+                    "Enter your email and password and we'll send you a verification code.",
+                  )
+                : t(
+                    "املأ بياناتك وهيتعمل لك حساب جديد بعد كود التحقق.",
+                    "Fill in your details and we'll create your account after the verification code.",
+                  )}
             </p>
           </div>
 
@@ -351,7 +379,7 @@ export default function LoginPage() {
               }`}
               data-testid="tab-login"
             >
-              تسجيل الدخول
+              {t("تسجيل الدخول", "Login")}
             </button>
             <button
               type="button"
@@ -363,16 +391,21 @@ export default function LoginPage() {
               }`}
               data-testid="tab-signup"
             >
-              إنشاء حساب جديد
+              {t("إنشاء حساب جديد", "Create new account")}
             </button>
           </div>
 
-          <form onSubmit={onSubmit} className="w-full flex flex-col gap-4 text-right">
+          <form
+            onSubmit={onSubmit}
+            className={`w-full flex flex-col gap-4 ${isAr ? "text-right" : "text-left"}`}
+          >
             {mode === "signup" && (
               <>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="firstName">الاسم الأول *</Label>
+                    <Label htmlFor="firstName">
+                      {t("الاسم الأول *", "First name *")}
+                    </Label>
                     <Input
                       id="firstName"
                       value={firstName}
@@ -382,7 +415,9 @@ export default function LoginPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="lastName">الاسم الأخير</Label>
+                    <Label htmlFor="lastName">
+                      {t("الاسم الأخير", "Last name")}
+                    </Label>
                     <Input
                       id="lastName"
                       value={lastName}
@@ -392,7 +427,9 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="phone">رقم الموبايل *</Label>
+                  <Label htmlFor="phone">
+                    {t("رقم الموبايل *", "Mobile number *")}
+                  </Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -408,7 +445,7 @@ export default function LoginPage() {
             )}
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">الإيميل *</Label>
+              <Label htmlFor="email">{t("الإيميل *", "Email *")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -422,12 +459,18 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">كلمة المرور *</Label>
+              <Label htmlFor="password">
+                {t("كلمة المرور *", "Password *")}
+              </Label>
               <PasswordInput
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === "signup" ? "8 أحرف، حرف كبير، رقم، رمز" : ""}
+                placeholder={
+                  mode === "signup"
+                    ? t("8 أحرف، حرف كبير، رقم، رمز", "8 chars, uppercase, digit, symbol")
+                    : ""
+                }
                 dir="ltr"
                 minLength={mode === "signup" ? 8 : undefined}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
@@ -436,17 +479,31 @@ export default function LoginPage() {
               />
               {mode === "signup" && password.length > 0 && (
                 <ul className="text-xs space-y-1 mt-1">
-                  <PwRule ok={PW_RULES.len(password)} label="8 أحرف على الأقل" />
-                  <PwRule ok={PW_RULES.upper(password)} label="حرف إنجليزي كبير (A-Z)" />
-                  <PwRule ok={PW_RULES.digit(password)} label="رقم (0-9)" />
-                  <PwRule ok={PW_RULES.symbol(password)} label="رمز خاص (!@#$...)" />
+                  <PwRule
+                    ok={PW_RULES.len(password)}
+                    label={t("8 أحرف على الأقل", "At least 8 characters")}
+                  />
+                  <PwRule
+                    ok={PW_RULES.upper(password)}
+                    label={t("حرف إنجليزي كبير (A-Z)", "Uppercase letter (A-Z)")}
+                  />
+                  <PwRule
+                    ok={PW_RULES.digit(password)}
+                    label={t("رقم (0-9)", "Digit (0-9)")}
+                  />
+                  <PwRule
+                    ok={PW_RULES.symbol(password)}
+                    label={t("رمز خاص (!@#$...)", "Special symbol (!@#$...)")}
+                  />
                 </ul>
               )}
             </div>
 
             {mode === "signup" && (
               <div className="flex flex-col gap-2">
-                <Label htmlFor="confirmPassword">تأكيد كلمة المرور *</Label>
+                <Label htmlFor="confirmPassword">
+                  {t("تأكيد كلمة المرور *", "Confirm password *")}
+                </Label>
                 <PasswordInput
                   id="confirmPassword"
                   value={confirmPassword}
@@ -459,7 +516,11 @@ export default function LoginPage() {
                 {confirmPassword.length > 0 && (
                   <PwRule
                     ok={password === confirmPassword}
-                    label={password === confirmPassword ? "متطابقة" : "غير متطابقة"}
+                    label={
+                      password === confirmPassword
+                        ? t("متطابقة", "Match")
+                        : t("غير متطابقة", "Do not match")
+                    }
                   />
                 )}
               </div>
@@ -475,7 +536,7 @@ export default function LoginPage() {
                   onCheckedChange={(v) => setRemember(v === true)}
                   data-testid="checkbox-remember"
                 />
-                <span>تذكّرني لمدة شهر</span>
+                <span>{t("تذكّرني لمدة شهر", "Remember me for a month")}</span>
               </label>
             )}
 
@@ -491,7 +552,7 @@ export default function LoginPage() {
                   data-testid="checkbox-accept-terms"
                 />
                 <span>
-                  أوافق على{" "}
+                  {t("أوافق على ", "I agree to the ")}
                   <TermsDialog
                     defaultTab="terms"
                     trigger={
@@ -501,11 +562,11 @@ export default function LoginPage() {
                         style={{ color: "var(--gold-light)" }}
                         data-testid="button-open-terms"
                       >
-                        الشروط والأحكام
+                        {t("الشروط والأحكام", "Terms & Conditions")}
                       </button>
                     }
-                  />{" "}
-                  و{" "}
+                  />
+                  {t(" و ", " and ")}
                   <TermsDialog
                     defaultTab="privacy"
                     trigger={
@@ -515,7 +576,7 @@ export default function LoginPage() {
                         style={{ color: "var(--gold-light)" }}
                         data-testid="button-open-privacy"
                       >
-                        سياسة الخصوصية
+                        {t("سياسة الخصوصية", "Privacy Policy")}
                       </button>
                     }
                   />
@@ -542,18 +603,23 @@ export default function LoginPage() {
               data-testid="button-submit"
             >
               {submitting ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                <Loader2 className={`${iconMargin} h-4 w-4 animate-spin`} />
               ) : mode === "login" ? (
-                <LogIn className="ml-2 h-4 w-4" />
+                <LogIn className={`${iconMargin} h-4 w-4`} />
               ) : (
-                <UserPlus className="ml-2 h-4 w-4" />
+                <UserPlus className={`${iconMargin} h-4 w-4`} />
               )}
-              {mode === "login" ? "إرسال كود التحقق" : "إنشاء الحساب"}
+              {mode === "login"
+                ? t("إرسال كود التحقق", "Send verification code")
+                : t("إنشاء الحساب", "Create account")}
             </Button>
           </form>
 
           <p className="text-xs text-foreground/50">
-            بتسجيل دخولك أو إنشاء حسابك أنت موافق على شروط استخدام موقع باشاك.
+            {t(
+              "بتسجيل دخولك أو إنشاء حسابك أنت موافق على شروط استخدام موقع باشاك.",
+              "By logging in or creating an account, you agree to Bashak's terms of use.",
+            )}
           </p>
         </CardContent>
       </Card>
