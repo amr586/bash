@@ -1,7 +1,6 @@
 import { HeroSection } from "@/components/hero-section";
 import { PropertySearch } from "@/components/property-search";
 import { StatsSection } from "@/components/stats-section";
-import { PartnersMarquee } from "@/components/partners-marquee";
 import { AnimatedFeaturesSection } from "@/components/animated-features-section";
 import { AboutSection } from "@/components/about-section";
 import { ProjectsSection } from "@/components/projects-section";
@@ -21,7 +20,6 @@ export default function HomePage() {
         <HeroSection />
         <PropertySearch />
         <StatsSection />
-        <PartnersMarquee />
         <AboutSection />
         <ProjectsSection />
         <PastProjectsSection />
