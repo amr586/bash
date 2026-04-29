@@ -32,7 +32,7 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
 
   return (
     <motion.div
-      className="relative overflow-hidden h-full bg-card rounded-lg border border-border/20 group"
+      className="relative overflow-hidden h-full min-h-[180px] sm:min-h-[200px] bg-card rounded-lg border border-border/20 group"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay }}
@@ -94,7 +94,7 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
 export function AnimatedFeaturesSection() {
   const { lang, t } = useLang()
   return (
-    <section id="features" className="py-20 px-4 bg-background">
+    <section id="features" className="py-12 sm:py-16 md:py-20 px-4 bg-background">
       <svg width="0" height="0" className="absolute">
         <defs>
           <filter id="noise" x="0%" y="0%" width="100%" height="100%">
@@ -109,14 +109,14 @@ export function AnimatedFeaturesSection() {
       </svg>
 
       <div className="container mx-auto" dir={lang === "ar" ? "rtl" : "ltr"} style={{ fontFamily: "'Tajawal', sans-serif" }}>
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-12 md:mb-16">
           <h2
-            className="text-4xl font-bold mb-4"
+            className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4"
             style={{ color: "var(--gold-light)" }}
           >
             {t("لماذا باشاك؟", "Why Bashak?")}
           </h2>
-          <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
             {t(
               "أكثر من 10 أعوام من الخبرة في التطوير العقاري — نحوّل رؤاكم إلى واقع ملموس.",
               "Over 10 years of real estate development experience — turning your vision into reality.",
@@ -124,7 +124,7 @@ export function AnimatedFeaturesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6 md:h-[600px] auto-rows-min md:auto-rows-auto">
           <div className="md:col-span-2">
             <BentoCard
               title={t("خبرة 10 سنوات", "10 Years of Experience")}

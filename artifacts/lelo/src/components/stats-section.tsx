@@ -42,7 +42,7 @@ export function StatsSection() {
   ]
 
   return (
-    <section className="relative py-20 px-4 overflow-hidden bg-background">
+    <section className="relative py-12 sm:py-16 md:py-20 px-4 overflow-hidden bg-background">
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div
           className="absolute inset-0"
@@ -59,22 +59,22 @@ export function StatsSection() {
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-10 md:mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: "var(--gold-light)" }}>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight" style={{ color: "var(--gold-light)" }}>
             {t("أرقام تتحدث عن نجاحنا", "Numbers That Speak for Our Success")}
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5 md:gap-6 max-w-5xl mx-auto">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              className="relative text-center p-6 md:p-8 rounded-2xl border backdrop-blur-sm"
+              className="relative text-center p-4 sm:p-6 md:p-8 rounded-2xl border backdrop-blur-sm"
               style={{
                 borderColor: "var(--gold-dark)",
                 background: "var(--card)",
@@ -90,13 +90,13 @@ export function StatsSection() {
               }}
             >
               <div
-                className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4"
+                className="inline-flex items-center justify-center w-11 h-11 sm:w-14 sm:h-14 rounded-full mb-3 sm:mb-4"
                 style={{ background: "rgba(212, 175, 55, 0.12)" }}
               >
-                <stat.icon className="h-7 w-7" style={{ color: "var(--gold)" }} />
+                <stat.icon className="h-5 w-5 sm:h-7 sm:w-7" style={{ color: "var(--gold)" }} />
               </div>
               <div
-                className="text-6xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-none tracking-tight"
+                className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold mb-2 sm:mb-3 leading-none tracking-tight"
                 style={{
                   color: "var(--gold-light)",
                   textShadow: "0 4px 24px rgba(212, 175, 55, 0.35)",
@@ -104,7 +104,7 @@ export function StatsSection() {
               >
                 <Counter to={stat.value} suffix={stat.suffix} />
               </div>
-              <p className="text-foreground/80 text-base md:text-lg font-medium">{stat.label}</p>
+              <p className="text-foreground/80 text-xs sm:text-base md:text-lg font-medium leading-snug">{stat.label}</p>
             </motion.div>
           ))}
         </div>

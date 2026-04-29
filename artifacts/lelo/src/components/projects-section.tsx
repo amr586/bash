@@ -41,13 +41,13 @@ export function ProjectsSection() {
   if (properties != null && properties.length === 0) return null
 
   return (
-    <section id="projects" className="py-20 px-4 bg-background overflow-hidden">
+    <section id="projects" className="py-12 sm:py-16 md:py-20 px-4 bg-background overflow-hidden">
       <div
         className="container mx-auto"
         dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-12 md:mb-16">
           <motion.div
             className="inline-block mb-4"
             initial={{ opacity: 0, y: 20 }}
@@ -63,7 +63,7 @@ export function ProjectsSection() {
             </span>
           </motion.div>
           <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4"
             style={{ color: "var(--gold-light)" }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -73,7 +73,7 @@ export function ProjectsSection() {
             {t("مشاريعنا اللي بنبنيها بنفسنا", "Projects We Build Ourselves")}
           </motion.h2>
           <motion.p
-            className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -92,13 +92,13 @@ export function ProjectsSection() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-8 max-w-6xl mx-auto">
               {properties.slice(0, 4).map((p, i) => (
                 <FeaturedCard key={p.id} property={p} index={i} />
               ))}
             </div>
             <motion.div
-              className="mt-12 flex justify-center"
+              className="mt-8 sm:mt-10 md:mt-12 flex justify-center"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -171,9 +171,9 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
             {listingTypeLabels[property.listingType] ?? property.listingType}
           </span>
         </div>
-        <div className="absolute bottom-0 right-0 left-0 p-6">
+        <div className="absolute bottom-0 right-0 left-0 p-4 sm:p-6">
           <h3
-            className="text-2xl font-bold mb-1"
+            className="text-xl sm:text-2xl font-bold mb-1 line-clamp-2"
             style={{ color: "var(--gold-light)" }}
           >
             {property.title}
@@ -187,7 +187,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
         </div>
       </div>
 
-      <div className="p-6 relative">
+      <div className="p-4 sm:p-6 relative">
         <p className="text-foreground/90 mb-4 font-medium">
           {propertyTypeLabels[property.type] ?? property.type}
         </p>

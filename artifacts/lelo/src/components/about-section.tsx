@@ -3,11 +3,11 @@ import { useLang } from "@/lib/i18n"
 export function AboutSection() {
   const { lang, t } = useLang()
   return (
-    <section id="about" className="py-20 px-4 bg-background" dir={lang === "ar" ? "rtl" : "ltr"}>
+    <section id="about" className="py-12 sm:py-16 md:py-20 px-4 bg-background" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="max-w-5xl mx-auto" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-        <div className="text-center mb-10">
+        <div className="text-center mb-8 sm:mb-10">
           <h2
-            className="text-4xl md:text-5xl font-bold mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4"
             style={{ color: "var(--gold)" }}
             data-testid="heading-about"
           >
@@ -19,12 +19,12 @@ export function AboutSection() {
           />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 items-stretch">
-          <div className="rounded-2xl border p-6 bg-card/50 backdrop-blur-sm">
-            <h3 className="text-2xl font-bold mb-3" style={{ color: "var(--gold-light)" }}>
+        <div className="grid md:grid-cols-2 gap-5 sm:gap-6 md:gap-8 items-stretch">
+          <div className="rounded-2xl border p-5 sm:p-6 bg-card/50 backdrop-blur-sm">
+            <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: "var(--gold-light)" }}>
               {t("من نحن", "Who We Are")}
             </h3>
-            <p className="text-foreground/80 leading-relaxed">
+            <p className="text-foreground/80 leading-relaxed text-sm sm:text-base">
               {t(
                 <>
                   <strong>شركة باشاك للتطوير العقاري</strong> — أكتر من <strong>10 سنوات</strong> خبرة في
@@ -42,11 +42,11 @@ export function AboutSection() {
             </p>
           </div>
 
-          <div className="rounded-2xl border p-6 bg-card/50 backdrop-blur-sm">
-            <h3 className="text-2xl font-bold mb-3" style={{ color: "var(--gold-light)" }}>
+          <div className="rounded-2xl border p-5 sm:p-6 bg-card/50 backdrop-blur-sm">
+            <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: "var(--gold-light)" }}>
               {t("قيمنا", "Our Values")}
             </h3>
-            <ul className="space-y-2 text-foreground/80 leading-relaxed">
+            <ul className="space-y-2 text-foreground/80 leading-relaxed text-sm sm:text-base">
               <li>{t("• الشفافية الكاملة في كل تعاملاتنا.", "• Complete transparency in everything we do.")}</li>
               <li>{t("• جودة بناء وتشطيب على أعلى مستوى.", "• Top-tier construction and finishing quality.")}</li>
               <li>{t("• فريق خدمة عملاء متاح طول الوقت.", "• A customer service team available around the clock.")}</li>

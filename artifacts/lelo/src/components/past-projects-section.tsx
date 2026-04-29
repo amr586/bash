@@ -40,7 +40,7 @@ export function PastProjectsSection() {
   return (
     <section
       id="past-projects"
-      className="py-20 px-4"
+      className="py-12 sm:py-16 md:py-20 px-4"
       dir={lang === "ar" ? "rtl" : "ltr"}
       style={{
         background: "linear-gradient(180deg, var(--background), color-mix(in srgb, var(--gold) 6%, var(--background)))",
@@ -48,11 +48,11 @@ export function PastProjectsSection() {
       }}
     >
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "var(--gold)" }}>
+        <div className="text-center mb-8 sm:mb-10 md:mb-12">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4" style={{ color: "var(--gold)" }}>
             {t("مشاريعنا السابقة", "Our Past Projects")}
           </h2>
-          <p className="text-foreground/70 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-foreground/70 max-w-2xl mx-auto">
             {t(
               "مجموعة من المشاريع اللي تم تسليمها بنجاح على مدار سنين خبرتنا.",
               "A selection of projects successfully delivered throughout our years of experience.",
@@ -61,11 +61,11 @@ export function PastProjectsSection() {
           <div className="w-20 h-1 mx-auto rounded-full mt-4" style={{ background: "var(--gold)" }} />
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {PAST.map((p) => (
             <div
               key={p.name}
-              className="rounded-2xl border p-6 bg-card/60 backdrop-blur-sm hover:shadow-xl transition-all hover:-translate-y-1"
+              className="rounded-2xl border p-5 sm:p-6 bg-card/60 backdrop-blur-sm hover:shadow-xl transition-all hover:-translate-y-1"
               data-testid={`past-project-${p.name}`}
             >
               <div
@@ -84,7 +84,7 @@ export function PastProjectsSection() {
                 <span>•</span>
                 <span>{p.units}</span>
               </div>
-              <p className="text-foreground/80 leading-relaxed">{p.description}</p>
+              <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">{p.description}</p>
               <div
                 className="mt-4 inline-block text-xs font-bold px-3 py-1 rounded-full"
                 style={{

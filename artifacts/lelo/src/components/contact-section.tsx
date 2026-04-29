@@ -71,7 +71,7 @@ export function ContactSection() {
   return (
     <section
       id="contact"
-      className="relative py-20 px-4 bg-background"
+      className="relative py-12 sm:py-16 md:py-20 px-4 bg-background"
       dir={lang === "ar" ? "rtl" : "ltr"}
     >
       <div className="container mx-auto max-w-3xl">
@@ -90,7 +90,7 @@ export function ContactSection() {
           </p>
         </div>
         <Card className="border-border/40 bg-background/60 backdrop-blur">
-          <CardContent className="pt-6 pb-6 px-6">
+          <CardContent className="p-4 sm:p-6">
             <form onSubmit={onSubmit} className="grid gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">

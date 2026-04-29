@@ -59,13 +59,13 @@ export function ServicesSection() {
   ]
 
   return (
-    <section id="services" className="py-20 px-4 bg-background overflow-hidden">
+    <section id="services" className="py-12 sm:py-16 md:py-20 px-4 bg-background overflow-hidden">
       <div
         className="container mx-auto"
         dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-12 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -80,7 +80,7 @@ export function ServicesSection() {
             </span>
           </motion.div>
           <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-4 mt-3"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 mt-3"
             style={{ color: "var(--gold-light)" }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -90,7 +90,7 @@ export function ServicesSection() {
             {t("خدماتنا العقارية", "Our Real Estate Services")}
           </motion.h2>
           <motion.p
-            className="text-xl text-foreground/80 max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -103,11 +103,11 @@ export function ServicesSection() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 max-w-6xl mx-auto">
           {services.map((service, i) => (
             <motion.div
               key={service.title}
-              className="group relative p-8 rounded-2xl border overflow-hidden"
+              className="group relative p-6 sm:p-7 md:p-8 rounded-2xl border overflow-hidden"
               style={{
                 borderColor: "var(--border)",
                 background: "var(--card)",
@@ -126,18 +126,18 @@ export function ServicesSection() {
                 }}
               />
               <div
-                className="relative inline-flex items-center justify-center w-14 h-14 rounded-xl mb-5 transition-transform group-hover:scale-110 group-hover:rotate-3"
+                className="relative inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl mb-4 sm:mb-5 transition-transform group-hover:scale-110 group-hover:rotate-3"
                 style={{ background: "rgba(212, 175, 55, 0.1)" }}
               >
-                <service.icon className="h-7 w-7" style={{ color: "var(--gold)" }} />
+                <service.icon className="h-6 w-6 sm:h-7 sm:w-7" style={{ color: "var(--gold)" }} />
               </div>
               <h3
-                className="text-xl font-bold mb-3 relative"
+                className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 relative"
                 style={{ color: "var(--gold-light)" }}
               >
                 {service.title}
               </h3>
-              <p className="text-foreground/75 leading-relaxed relative">{service.description}</p>
+              <p className="text-sm sm:text-base text-foreground/75 leading-relaxed relative">{service.description}</p>
             </motion.div>
           ))}
         </div>

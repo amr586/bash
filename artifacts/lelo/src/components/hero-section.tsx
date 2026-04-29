@@ -60,7 +60,7 @@ export function HeroSection() {
   const slideshowImages = propertyImages.length > 0 ? propertyImages : fallbackImages
 
   return (
-    <section className="py-20 px-4 relative overflow-hidden min-h-screen flex flex-col justify-between">
+    <section className="py-16 sm:py-20 px-4 relative overflow-hidden min-h-screen flex flex-col justify-between">
       <HeroSlideshow images={slideshowImages} intervalMs={3000} />
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/70 to-black/95" />
@@ -73,19 +73,19 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="flex-1 flex items-start justify-center pt-20 relative z-10 px-4">
+      <div className="flex-1 flex items-start justify-center pt-16 sm:pt-20 relative z-10 px-4">
         <h1
-          className="text-center font-bold leading-[1.05] tracking-[0.08em] uppercase text-balance"
+          className="text-center font-bold leading-[1.05] tracking-[0.06em] sm:tracking-[0.08em] uppercase text-balance"
           style={{
             color: "var(--gold)",
             fontFamily: "'Tajawal', sans-serif",
             textShadow: "0 2px 18px rgba(0,0,0,0.55)",
           }}
         >
-          <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+          <span className="block text-[2.5rem] leading-none sm:text-6xl md:text-7xl lg:text-8xl">
             Bashak
           </span>
-          <span className="block text-3xl sm:text-4xl md:text-5xl lg:text-6xl mt-2 tracking-[0.18em]">
+          <span className="block text-xl sm:text-4xl md:text-5xl lg:text-6xl mt-1 sm:mt-2 tracking-[0.14em] sm:tracking-[0.18em]">
             Developments
           </span>
         </h1>
@@ -96,7 +96,7 @@ export function HeroSection() {
           <p
             dir={lang === "ar" ? "rtl" : "ltr"}
             lang={lang}
-            className="text-xl md:text-2xl font-medium text-white/95 mb-8 text-balance leading-relaxed max-w-3xl mx-auto"
+            className="text-base sm:text-lg md:text-2xl font-medium text-white/95 mb-6 sm:mb-8 text-balance leading-relaxed max-w-3xl mx-auto px-2"
             style={{ fontFamily: "'Tajawal', sans-serif" }}
           >
             {t(

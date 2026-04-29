@@ -65,15 +65,15 @@ export function FAQSection() {
   }
 
   return (
-    <section id="faq" className="py-20 px-4 bg-background">
+    <section id="faq" className="py-12 sm:py-16 md:py-20 px-4 bg-background">
       <div
         className="container mx-auto max-w-4xl"
         dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-12 md:mb-16">
           <motion.h2
-            className="text-4xl font-bold mb-4"
+            className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4"
             style={{ color: "var(--gold-light)" }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -83,7 +83,7 @@ export function FAQSection() {
             {t("الأسئلة الشائعة", "Frequently Asked Questions")}
           </motion.h2>
           <motion.p
-            className="text-xl text-foreground/80 max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -108,10 +108,10 @@ export function FAQSection() {
               viewport={{ once: true }}
             >
               <button
-                className={`w-full px-6 py-4 ${lang === "ar" ? "text-right" : "text-left"} flex items-center justify-between hover:bg-foreground/5 transition-colors rounded-lg`}
+                className={`w-full px-4 sm:px-6 py-3 sm:py-4 ${lang === "ar" ? "text-right" : "text-left"} flex items-center justify-between hover:bg-foreground/5 transition-colors rounded-lg`}
                 onClick={() => toggleFAQ(index)}
               >
-                <span className={`text-lg font-medium text-foreground ${lang === "ar" ? "pl-4" : "pr-4"}`}>
+                <span className={`text-sm sm:text-base md:text-lg font-medium text-foreground ${lang === "ar" ? "pl-3" : "pr-3"}`}>
                   {faq.question}
                 </span>
                 <ChevronDown
@@ -131,8 +131,8 @@ export function FAQSection() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <div className="px-6 pb-4">
-                  <p className="text-foreground/80 leading-relaxed">{faq.answer}</p>
+                <div className="px-4 sm:px-6 pb-4">
+                  <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">{faq.answer}</p>
                 </div>
               </motion.div>
             </motion.div>

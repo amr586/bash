@@ -8,15 +8,15 @@ export function LeLoLogo({ className = "" }: { className?: string }) {
 
   return (
     <div
-      className={`flex items-center ${className}`}
-      style={{ width: 160, height: 56 }}
+      className={`flex items-center w-[120px] h-[44px] sm:w-[160px] sm:h-[56px] ${className}`}
     >
       <img
         src={src}
         alt="Bashak Developments"
         loading="eager"
         decoding="sync"
-        style={{ width: 160, height: 56, objectFit: "contain", display: "block" }}
+        className="w-full h-full"
+        style={{ objectFit: "contain", display: "block" }}
       />
     </div>
   )
