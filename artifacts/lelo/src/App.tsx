@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteSettingsProvider } from "@/lib/site-settings";
 import { ThemeProvider } from "@/lib/theme";
+import { LangProvider } from "@/lib/i18n";
 import { Header } from "@/components/header";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
@@ -43,6 +44,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        <LangProvider>
         <SiteSettingsProvider>
           <TooltipProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -51,6 +53,7 @@ function App() {
             <Toaster />
           </TooltipProvider>
         </SiteSettingsProvider>
+        </LangProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

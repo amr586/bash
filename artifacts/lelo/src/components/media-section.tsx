@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { Youtube, ExternalLink, Play } from "lucide-react";
+import { useLang } from "@/lib/i18n";
 
-type Video = { id: string; title: string };
+type Video = { id: string; titleAr: string; titleEn: string };
 
 const VIDEOS: Video[] = [
-  { id: "EOvgM4AxKY4", title: "جولة في مشاريع باشاك" },
-  { id: "7gMMPnWzpqk", title: "لحظات من تسليم العملاء" },
-  { id: "1Oal6cCM3Q8", title: "تعرّف على فريق باشاك" },
+  { id: "EOvgM4AxKY4", titleAr: "جولة في مشاريع باشاك", titleEn: "Tour of Bashak's Projects" },
+  { id: "7gMMPnWzpqk", titleAr: "لحظات من تسليم العملاء", titleEn: "Moments from Client Handovers" },
+  { id: "1Oal6cCM3Q8", titleAr: "تعرّف على فريق باشاك", titleEn: "Meet the Bashak Team" },
 ];
 
 const THUMB_FALLBACKS = ["maxresdefault", "sddefault", "hqdefault", "mqdefault"];
 
 function VideoCard({ video }: { video: Video }) {
+  const { lang, t } = useLang();
+  const title = lang === "ar" ? video.titleAr : video.titleEn;
   const [playing, setPlaying] = useState(false);
   const [thumbIdx, setThumbIdx] = useState(0);
   const watchUrl = `https://www.youtube.com/watch?v=${video.id}`;
@@ -28,7 +31,7 @@ function VideoCard({ video }: { video: Video }) {
           <iframe
             className="absolute inset-0 w-full h-full"
             src={embedUrl}
-            title={video.title}
+            title={title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
@@ -38,12 +41,12 @@ function VideoCard({ video }: { video: Video }) {
             type="button"
             onClick={() => setPlaying(true)}
             className="group absolute inset-0 w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
-            aria-label={`تشغيل: ${video.title}`}
+            aria-label={t(`تشغيل: ${title}`, `Play: ${title}`)}
             data-testid={`play-video-${video.id}`}
           >
             <img
               src={thumbUrl}
-              alt={video.title}
+              alt={title}
               className="absolute inset-0 w-full h-full object-cover"
               loading="lazy"
               onError={() => {
@@ -66,7 +69,7 @@ function VideoCard({ video }: { video: Video }) {
       </div>
       <div className="p-4">
         <h3 className="font-bold" style={{ color: "var(--gold-light)" }}>
-          {video.title}
+          {title}
         </h3>
         <a
           href={watchUrl}
@@ -75,7 +78,7 @@ function VideoCard({ video }: { video: Video }) {
           className="inline-flex items-center gap-1 mt-2 text-sm text-foreground/60 hover:text-foreground"
           data-testid={`link-video-${video.id}`}
         >
-          <Youtube className="h-4 w-4" /> فتح على يوتيوب
+          <Youtube className="h-4 w-4" /> {t("فتح على يوتيوب", "Open on YouTube")}
         </a>
       </div>
     </div>
@@ -83,20 +86,24 @@ function VideoCard({ video }: { video: Video }) {
 }
 
 export function MediaSection() {
+  const { lang, t } = useLang();
   return (
     <section
       id="media"
       className="py-20 px-4"
-      dir="rtl"
+      dir={lang === "ar" ? "rtl" : "ltr"}
       style={{ background: "var(--background)", fontFamily: "'Tajawal', sans-serif" }}
     >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "var(--gold)" }}>
-            المكتبة الإعلامية
+            {t("المكتبة الإعلامية", "Media Library")}
           </h2>
           <p className="text-foreground/70 max-w-2xl mx-auto">
-            فيديوهاتنا على يوتيوب — جولات في المشاريع، لقاءات ولحظات تسليم.
+            {t(
+              "فيديوهاتنا على يوتيوب — جولات في المشاريع، لقاءات ولحظات تسليم.",
+              "Our YouTube videos — project tours, interviews and handover moments.",
+            )}
           </p>
           <div className="w-20 h-1 mx-auto rounded-full mt-4" style={{ background: "var(--gold)" }} />
         </div>
@@ -117,7 +124,7 @@ export function MediaSection() {
             style={{ background: "var(--gold)" }}
           >
             <Youtube className="h-5 w-5" />
-            عرض المزيد على قناتنا
+            {t("عرض المزيد على قناتنا", "More on Our Channel")}
             <ExternalLink className="h-4 w-4" />
           </a>
         </div>

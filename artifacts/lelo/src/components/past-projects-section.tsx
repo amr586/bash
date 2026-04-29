@@ -1,35 +1,47 @@
 import { Building2 } from "lucide-react";
-
-const PAST = [
-  {
-    name: "كمبوند الواحة",
-    location: "التجمع الخامس",
-    year: "2018",
-    units: "120 وحدة",
-    description: "مشروع سكني فاخر تم تسليمه بالكامل، بمساحات خضراء وحديقة مركزية.",
-  },
-  {
-    name: "أبراج النخيل",
-    location: "المعادي الجديدة",
-    year: "2020",
-    units: "85 وحدة",
-    description: "أبراج إدارية وسكنية تم بيعها بالكامل خلال سنة من الإطلاق.",
-  },
-  {
-    name: "فيلات السلام",
-    location: "الشيخ زايد",
-    year: "2022",
-    units: "32 فيلا",
-    description: "مجموعة فيلات مستقلة بتشطيب فاخر، تسليم 100% في الموعد المحدد.",
-  },
-];
+import { useLang } from "@/lib/i18n";
 
 export function PastProjectsSection() {
+  const { lang, t } = useLang();
+
+  const PAST = [
+    {
+      name: t("كمبوند الواحة", "Al-Waha Compound"),
+      location: t("التجمع الخامس", "5th Settlement"),
+      year: "2018",
+      units: t("120 وحدة", "120 units"),
+      description: t(
+        "مشروع سكني فاخر تم تسليمه بالكامل، بمساحات خضراء وحديقة مركزية.",
+        "A premium residential project, fully delivered with green spaces and a central garden.",
+      ),
+    },
+    {
+      name: t("أبراج النخيل", "Al-Nakheel Towers"),
+      location: t("المعادي الجديدة", "New Maadi"),
+      year: "2020",
+      units: t("85 وحدة", "85 units"),
+      description: t(
+        "أبراج إدارية وسكنية تم بيعها بالكامل خلال سنة من الإطلاق.",
+        "Office and residential towers — fully sold out within a year of launch.",
+      ),
+    },
+    {
+      name: t("فيلات السلام", "Al-Salam Villas"),
+      location: t("الشيخ زايد", "Sheikh Zayed"),
+      year: "2022",
+      units: t("32 فيلا", "32 villas"),
+      description: t(
+        "مجموعة فيلات مستقلة بتشطيب فاخر، تسليم 100% في الموعد المحدد.",
+        "A collection of detached villas with luxury finishing — delivered 100% on schedule.",
+      ),
+    },
+  ];
+
   return (
     <section
       id="past-projects"
       className="py-20 px-4"
-      dir="rtl"
+      dir={lang === "ar" ? "rtl" : "ltr"}
       style={{
         background: "linear-gradient(180deg, var(--background), color-mix(in srgb, var(--gold) 6%, var(--background)))",
         fontFamily: "'Tajawal', sans-serif",
@@ -38,10 +50,13 @@ export function PastProjectsSection() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "var(--gold)" }}>
-            مشاريعنا السابقة
+            {t("مشاريعنا السابقة", "Our Past Projects")}
           </h2>
           <p className="text-foreground/70 max-w-2xl mx-auto">
-            مجموعة من المشاريع اللي تم تسليمها بنجاح على مدار سنين خبرتنا.
+            {t(
+              "مجموعة من المشاريع اللي تم تسليمها بنجاح على مدار سنين خبرتنا.",
+              "A selection of projects successfully delivered throughout our years of experience.",
+            )}
           </p>
           <div className="w-20 h-1 mx-auto rounded-full mt-4" style={{ background: "var(--gold)" }} />
         </div>
@@ -77,7 +92,7 @@ export function PastProjectsSection() {
                   color: "var(--gold-light)",
                 }}
               >
-                تم التسليم بالكامل ✓
+                {t("تم التسليم بالكامل ✓", "Fully Delivered ✓")}
               </div>
             </div>
           ))}

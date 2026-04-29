@@ -41,6 +41,13 @@ export const finishingLabels: Record<PropertyFinishing, string> = {
   super_lux: "سوبر لوكس",
 };
 
+const finishingLabelsEn: Record<PropertyFinishing, string> = {
+  full: "Fully finished",
+  semi: "Semi-finished",
+  three_quarters: "3/4 finished",
+  super_lux: "Super lux",
+};
+
 export const amenityLabels: Record<string, string> = {
   furnished: "مفروش",
   parking: "موقف سيارات",
@@ -48,6 +55,15 @@ export const amenityLabels: Record<string, string> = {
   pool: "حمام سباحة",
   garden: "حديقة",
   basement: "بيزمنت",
+};
+
+const amenityLabelsEn: Record<string, string> = {
+  furnished: "Furnished",
+  parking: "Parking",
+  elevator: "Elevator",
+  pool: "Pool",
+  garden: "Garden",
+  basement: "Basement",
 };
 
 export type ContactRequest = {
@@ -73,6 +89,8 @@ export type Notification = {
   createdAt: string;
 };
 
+import { useLang } from "./i18n";
+
 export const propertyTypeLabels: Record<string, string> = {
   apartment: "شقة",
   villa: "فيلا",
@@ -82,15 +100,59 @@ export const propertyTypeLabels: Record<string, string> = {
   land: "أرض",
 };
 
+const propertyTypeLabelsEn: Record<string, string> = {
+  apartment: "Apartment",
+  villa: "Villa",
+  office: "Office",
+  chalet: "Chalet",
+  shop: "Shop",
+  land: "Land",
+};
+
 export const listingTypeLabels: Record<string, string> = {
   sale: "للبيع",
 };
+
+const listingTypeLabelsEn: Record<string, string> = {
+  sale: "For Sale",
+};
+
+export function usePropertyTypeLabels(): Record<string, string> {
+  const { lang } = useLang();
+  return lang === "ar" ? propertyTypeLabels : propertyTypeLabelsEn;
+}
+
+export function useListingTypeLabels(): Record<string, string> {
+  const { lang } = useLang();
+  return lang === "ar" ? listingTypeLabels : listingTypeLabelsEn;
+}
 
 export const statusLabels: Record<string, { label: string; color: string }> = {
   pending: { label: "قيد المراجعة", color: "bg-yellow-500/20 text-yellow-300" },
   approved: { label: "منشور", color: "bg-green-500/20 text-green-300" },
   rejected: { label: "مرفوض", color: "bg-red-500/20 text-red-300" },
 };
+
+const statusLabelsEn: Record<string, { label: string; color: string }> = {
+  pending: { label: "Pending", color: "bg-yellow-500/20 text-yellow-300" },
+  approved: { label: "Published", color: "bg-green-500/20 text-green-300" },
+  rejected: { label: "Rejected", color: "bg-red-500/20 text-red-300" },
+};
+
+export function useStatusLabels(): Record<string, { label: string; color: string }> {
+  const { lang } = useLang();
+  return lang === "ar" ? statusLabels : statusLabelsEn;
+}
+
+export function useFinishingLabels(): Record<PropertyFinishing, string> {
+  const { lang } = useLang();
+  return lang === "ar" ? finishingLabels : finishingLabelsEn;
+}
+
+export function useAmenityLabels(): Record<string, string> {
+  const { lang } = useLang();
+  return lang === "ar" ? amenityLabels : amenityLabelsEn;
+}
 
 export async function apiFetch<T>(
   url: string,
@@ -120,17 +182,36 @@ export function resolveImageUrl(url: string | null | undefined): string {
   return url;
 }
 
-export function formatPrice(n: number): string {
-  if (!n || n <= 0) return "السعر عند الطلب";
+export function formatPrice(n: number, lang: "ar" | "en" = "ar"): string {
+  if (!n || n <= 0) return lang === "ar" ? "السعر عند الطلب" : "Price on request";
+  if (lang === "en") {
+    return new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 0,
+    }).format(n) + " EGP";
+  }
   return new Intl.NumberFormat("ar-EG", {
     maximumFractionDigits: 0,
   }).format(n) + " جنيه";
 }
 
-export function formatRelative(iso: string): string {
+export function useFormatPrice(): (n: number) => string {
+  const { lang } = useLang();
+  return (n: number) => formatPrice(n, lang);
+}
+
+export function formatRelative(iso: string, lang: "ar" | "en" = "ar"): string {
   const d = new Date(iso);
   const diffMs = Date.now() - d.getTime();
   const m = Math.round(diffMs / 60_000);
+  if (lang === "en") {
+    if (m < 1) return "just now";
+    if (m < 60) return `${m} min ago`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `${h} h ago`;
+    const days = Math.round(h / 24);
+    if (days < 30) return `${days} d ago`;
+    return d.toLocaleDateString("en-US");
+  }
   if (m < 1) return "دلوقتي";
   if (m < 60) return `من ${m} دقيقة`;
   const h = Math.round(m / 60);

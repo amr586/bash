@@ -2,21 +2,7 @@ import { Link } from "wouter"
 import { LeLoLogo } from "./lelo-logo"
 import { Phone, MapPin, Mail } from "lucide-react"
 import { useSiteSettings } from "@/lib/site-settings"
-
-const quickLinks = [
-  { label: "الرئيسية", href: "/" },
-  { label: "جميع العقارات", href: "/properties" },
-  { label: "تواصل معنا", href: "/#contact" },
-]
-
-const propertyTypes = [
-  { label: "شقة", href: "/properties?type=apartment" },
-  { label: "فيلا", href: "/properties?type=villa" },
-  { label: "مكتب", href: "/properties?type=office" },
-  { label: "شاليه", href: "/properties?type=chalet" },
-  { label: "محل تجاري", href: "/properties?type=shop" },
-  { label: "أرض", href: "/properties?type=land" },
-]
+import { useLang } from "@/lib/i18n"
 
 const buildSocials = (s: {
   facebookUrl: string
@@ -116,6 +102,7 @@ function ContactItem({
   children: React.ReactNode
   ltr?: boolean
 }) {
+  const { lang } = useLang()
   return (
     <a
       href={href}
@@ -132,7 +119,7 @@ function ContactItem({
       >
         {icon}
       </span>
-      <span dir={ltr ? "ltr" : "rtl"} className="leading-snug text-right flex-1">
+      <span dir={ltr ? "ltr" : lang === "ar" ? "rtl" : "ltr"} className={`leading-snug ${lang === "ar" ? "text-right" : "text-left"} flex-1`}>
         {children}
       </span>
     </a>
@@ -140,15 +127,31 @@ function ContactItem({
 }
 
 export function Footer() {
+  const { lang, t } = useLang()
   const { settings } = useSiteSettings()
   const socials = buildSocials(settings)
   const addressMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     settings.address,
   )}`
 
+  const quickLinks = [
+    { label: t("الرئيسية", "Home"), href: "/" },
+    { label: t("جميع العقارات", "All Properties"), href: "/properties" },
+    { label: t("تواصل معنا", "Contact Us"), href: "/#contact" },
+  ]
+
+  const propertyTypes = [
+    { label: t("شقة", "Apartment"), href: "/properties?type=apartment" },
+    { label: t("فيلا", "Villa"), href: "/properties?type=villa" },
+    { label: t("مكتب", "Office"), href: "/properties?type=office" },
+    { label: t("شاليه", "Chalet"), href: "/properties?type=chalet" },
+    { label: t("محل تجاري", "Shop"), href: "/properties?type=shop" },
+    { label: t("أرض", "Land"), href: "/properties?type=land" },
+  ]
+
   return (
     <footer
-      dir="rtl"
+      dir={lang === "ar" ? "rtl" : "ltr"}
       className="border-t pt-14 pb-8 px-4 bg-background text-foreground"
       style={{
         borderColor: "var(--border)",
@@ -157,7 +160,6 @@ export function Footer() {
     >
       <div className="container mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Column 1 (rightmost in RTL) — Brand + description + socials */}
           <div>
             <Link
               href="/"
@@ -168,8 +170,10 @@ export function Footer() {
               <LeLoLogo />
             </Link>
             <p className="text-foreground/70 text-sm leading-relaxed mb-5">
-              شركة باشاك للتطوير العقاري — شركة مصرية متخصصة في تقديم خدمات
-              عقارية شاملة في مجالات متعددة بخبرة تمتد لأكثر من 10 أعوام.
+              {t(
+                "شركة باشاك للتطوير العقاري — شركة مصرية متخصصة في تقديم خدمات عقارية شاملة في مجالات متعددة بخبرة تمتد لأكثر من 10 أعوام.",
+                "Bashak Developments — an Egyptian company specialised in comprehensive real estate services across multiple fields, with over 10 years of experience.",
+              )}
             </p>
             <div className="flex gap-2 flex-wrap">
               {socials.map((s) => (
@@ -192,9 +196,8 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2 — Quick Links */}
           <div>
-            <ColumnTitle>روابط سريعة</ColumnTitle>
+            <ColumnTitle>{t("روابط سريعة", "Quick Links")}</ColumnTitle>
             <nav className="flex flex-col">
               {quickLinks.map((link) => (
                 <FooterLink key={link.label} href={link.href}>
@@ -204,9 +207,8 @@ export function Footer() {
             </nav>
           </div>
 
-          {/* Column 3 — Property Types */}
           <div>
-            <ColumnTitle>أنواع العقارات</ColumnTitle>
+            <ColumnTitle>{t("أنواع العقارات", "Property Types")}</ColumnTitle>
             <nav className="flex flex-col">
               {propertyTypes.map((link) => (
                 <FooterLink key={link.label} href={link.href}>
@@ -216,9 +218,8 @@ export function Footer() {
             </nav>
           </div>
 
-          {/* Column 4 (leftmost in RTL) — Contact Info */}
           <div>
-            <ColumnTitle>معلومات التواصل</ColumnTitle>
+            <ColumnTitle>{t("معلومات التواصل", "Contact Info")}</ColumnTitle>
             <div className="flex flex-col">
               <ContactItem href={addressMapsUrl} icon={<MapPin className="h-4 w-4" />}>
                 {settings.address}
@@ -248,14 +249,13 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Map — circular, gold border */}
         <div className="mt-10 flex justify-center">
           <a
             href={addressMapsUrl}
             target="_blank"
             rel="noreferrer"
             data-testid="link-map-embed"
-            aria-label="افتح موقع باشاك على خرائط جوجل"
+            aria-label={t("افتح موقع باشاك على خرائط جوجل", "Open Bashak's location on Google Maps")}
             className="relative block rounded-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-2xl w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96"
             style={{
               border: "4px solid var(--gold)",
@@ -264,7 +264,7 @@ export function Footer() {
             }}
           >
             <iframe
-              title="موقع شركة باشاك على الخريطة"
+              title={t("موقع شركة باشاك على الخريطة", "Bashak's location on the map")}
               src={`https://www.google.com/maps?q=${encodeURIComponent(settings.address)}&output=embed`}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -286,7 +286,7 @@ export function Footer() {
               data-testid="link-privacy-policy"
               className="hover:text-[var(--gold-light)] transition-colors"
             >
-              سياسة الخصوصية
+              {t("سياسة الخصوصية", "Privacy Policy")}
             </a>
             <span aria-hidden="true" className="text-foreground/30">•</span>
             <a
@@ -296,10 +296,10 @@ export function Footer() {
               data-testid="link-terms-conditions"
               className="hover:text-[var(--gold-light)] transition-colors"
             >
-              الشروط والأحكام
+              {t("الشروط والأحكام", "Terms & Conditions")}
             </a>
           </nav>
-          <p>&copy; 2026 Bashak Developments. جميع الحقوق محفوظة.</p>
+          <p>{t("© 2026 Bashak Developments. جميع الحقوق محفوظة.", "© 2026 Bashak Developments. All rights reserved.")}</p>
         </div>
       </div>
     </footer>

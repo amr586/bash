@@ -16,6 +16,7 @@ import {
 import { ChevronDown, LayoutDashboard, LogOut, Moon, Settings, ShieldCheck, Sun, User as UserIcon } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import { useTheme } from "@/lib/theme"
+import { useLang, type Lang } from "@/lib/i18n"
 import { isStaff } from "@/lib/roles"
 
 function ThemeToggle({ compact = false }: { compact?: boolean }) {
@@ -47,8 +48,6 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
 
 type NavChild = { label: string; href: string }
 type NavItem = { label: string; href: string; children?: NavChild[] }
-
-type Lang = "ar" | "en"
 
 const NAV_BY_LANG: Record<Lang, NavItem[]> = {
   ar: [
@@ -150,15 +149,6 @@ function LangPill({
   const apply = (next: Lang) => {
     if (next === lang) return
     setLang(next)
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("bashak.lang", next)
-      } catch {
-        /* ignore */
-      }
-      document.documentElement.lang = next
-      document.documentElement.dir = next === "ar" ? "rtl" : "ltr"
-    }
   }
   const sizes = compact ? "h-8 text-[11px]" : "h-9 text-xs"
   const padX = compact ? "px-2" : "px-3"
@@ -273,22 +263,10 @@ export function Header() {
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null)
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const [, navigate] = useLocation()
-  const [lang, setLang] = useState<Lang>(() => {
-    if (typeof window === "undefined") return "ar"
-    return (localStorage.getItem("bashak.lang") as Lang) || "ar"
-  })
+  const { lang, setLang } = useLang()
   const navLinks = NAV_BY_LANG[lang]
   const showAddProperty = isStaff(user)
   const t = T[lang]
-  const toggleLang = () => {
-    const next: Lang = lang === "ar" ? "en" : "ar"
-    setLang(next)
-    if (typeof window !== "undefined") {
-      localStorage.setItem("bashak.lang", next)
-      document.documentElement.dir = next === "ar" ? "rtl" : "ltr"
-      document.documentElement.lang = next
-    }
-  }
 
   useEffect(() => {
     const handleScroll = () => {

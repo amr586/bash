@@ -4,6 +4,7 @@ import { ClipboardList } from "lucide-react"
 import { HeroSlideshow } from "./hero-slideshow"
 import { RegisterNowDialog } from "./register-now-dialog"
 import { apiFetch, type Property } from "@/lib/api"
+import { useLang } from "@/lib/i18n"
 import heroBg from "../assets/hero-bg.png"
 import project1 from "../assets/project-1.png"
 import project2 from "../assets/project-2.png"
@@ -31,6 +32,7 @@ const fallbackImages = [
 ]
 
 export function HeroSection() {
+  const { lang, t } = useLang()
   const [propertyImages, setPropertyImages] = useState<string[]>([])
 
   useEffect(() => {
@@ -59,7 +61,6 @@ export function HeroSection() {
 
   return (
     <section className="py-20 px-4 relative overflow-hidden min-h-screen flex flex-col justify-between">
-      {/* Animated real-estate slideshow background */}
       <HeroSlideshow images={slideshowImages} intervalMs={3000} />
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/70 to-black/95" />
@@ -93,15 +94,21 @@ export function HeroSection() {
       <div className="container mx-auto text-center relative z-10 pb-8">
         <div className="max-w-4xl mx-auto">
           <p
-            dir="rtl"
-            lang="ar"
+            dir={lang === "ar" ? "rtl" : "ltr"}
+            lang={lang}
             className="text-xl md:text-2xl font-medium text-white/95 mb-8 text-balance leading-relaxed max-w-3xl mx-auto"
             style={{ fontFamily: "'Tajawal', sans-serif" }}
           >
-            شركة باشاك للتطوير العقاري — بنبني ونطوّر مشاريعنا بنفسنا في قلب التجمع الخامس بأكتر من 10 سنين خبرة.
+            {t(
+              "شركة باشاك للتطوير العقاري — بنبني ونطوّر مشاريعنا بنفسنا في قلب التجمع الخامس بأكتر من 10 سنين خبرة.",
+              "Bashak Developments — we design, build and deliver our own projects in the heart of New Cairo's 5th Settlement, with over 10 years of experience.",
+            )}
             <br />
             <span style={{ color: "var(--gold-light)" }}>
-              كل وحدة بتشوفها هنا من تصميمنا وتنفيذنا — إحنا المطوّر والمالك.
+              {t(
+                "كل وحدة بتشوفها هنا من تصميمنا وتنفيذنا — إحنا المطوّر والمالك.",
+                "Every unit you see here is designed and built by us — we are both the developer and the owner.",
+              )}
             </span>
           </p>
 
@@ -117,8 +124,8 @@ export function HeroSection() {
                   }}
                   data-testid="button-register-now"
                 >
-                  <ClipboardList className="ml-2 h-4 w-4" />
-                  سجّل الآن
+                  <ClipboardList className={lang === "ar" ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+                  {t("سجّل الآن", "Register Now")}
                 </Button>
               }
             />

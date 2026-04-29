@@ -3,13 +3,14 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Bath, BedDouble, MapPin, Maximize2 } from "lucide-react";
 import {
-  formatPrice,
-  listingTypeLabels,
-  propertyTypeLabels,
   resolveImageUrl,
-  statusLabels,
+  useFormatPrice,
+  useListingTypeLabels,
+  usePropertyTypeLabels,
+  useStatusLabels,
   type Property,
 } from "@/lib/api";
+import { useLang } from "@/lib/i18n";
 
 export function PropertyCard({
   property,
@@ -22,11 +23,17 @@ export function PropertyCard({
   actions?: React.ReactNode;
   href?: string;
 }) {
+  const { lang, t } = useLang();
+  const formatPrice = useFormatPrice();
+  const propertyTypeLabels = usePropertyTypeLabels();
+  const listingTypeLabels = useListingTypeLabels();
+  const statusLabels = useStatusLabels();
   const status = statusLabels[property.status];
   const linkTo = href ?? `/properties/${property.id}`;
+  const cornerPos = lang === "ar" ? "right-2" : "left-2";
   return (
     <Card
-      dir="rtl"
+      dir={lang === "ar" ? "rtl" : "ltr"}
       className="overflow-hidden border-border/40 bg-background/60 backdrop-blur hover:shadow-xl transition-shadow group"
     >
       <div className="relative aspect-[4/3] bg-foreground/5">
@@ -41,10 +48,10 @@ export function PropertyCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-foreground/30 text-sm">
-            بدون صورة
+            {t("بدون صورة", "No image")}
           </div>
         )}
-        <div className="absolute top-2 right-2 flex gap-1.5">
+        <div className={`absolute top-2 ${cornerPos} flex gap-1.5`}>
           <Badge
             className="text-black font-semibold border-0"
             style={{ background: "var(--gold)" }}
@@ -58,7 +65,7 @@ export function PropertyCard({
       </div>
       <Link
         href={linkTo}
-        aria-label={`عرض تفاصيل ${property.title}`}
+        aria-label={t(`عرض تفاصيل ${property.title}`, `View details for ${property.title}`)}
         className="absolute inset-0 z-[1] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
       />
       <div className="p-4 flex flex-col gap-3 relative">
@@ -69,7 +76,7 @@ export function PropertyCard({
           <div className="text-xs text-foreground/60 mt-1 flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             <span className="truncate">
-              {property.location || "بدون منطقة"} ·{" "}
+              {property.location || t("بدون منطقة", "No location")} ·{" "}
               {propertyTypeLabels[property.type] ?? property.type}
             </span>
           </div>
@@ -96,7 +103,7 @@ export function PropertyCard({
           {property.area != null && (
             <span className="flex items-center gap-1">
               <Maximize2 className="h-3.5 w-3.5" />
-              {property.area} م²
+              {t(`${property.area} م²`, `${property.area} m²`)}
             </span>
           )}
         </div>

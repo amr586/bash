@@ -3,6 +3,7 @@
 import type React from "react"
 import { motion } from "framer-motion"
 import { AnimatedGradient } from "@/components/ui/animated-gradient-with-svg"
+import { useLang } from "@/lib/i18n"
 
 interface BentoCardProps {
   title: string
@@ -91,6 +92,7 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, value, subtitle, colors, d
 }
 
 export function AnimatedFeaturesSection() {
+  const { lang, t } = useLang()
   return (
     <section id="features" className="py-20 px-4 bg-background">
       <svg width="0" height="0" className="absolute">
@@ -106,57 +108,72 @@ export function AnimatedFeaturesSection() {
         </defs>
       </svg>
 
-      <div className="container mx-auto" dir="rtl" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+      <div className="container mx-auto" dir={lang === "ar" ? "rtl" : "ltr"} style={{ fontFamily: "'Tajawal', sans-serif" }}>
         <div className="text-center mb-16">
           <h2
             className="text-4xl font-bold mb-4"
             style={{ color: "var(--gold-light)" }}
           >
-            لماذا باشاك؟
+            {t("لماذا باشاك؟", "Why Bashak?")}
           </h2>
           <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
-            أكثر من 10 أعوام من الخبرة في التطوير العقاري — نحوّل رؤاكم إلى واقع ملموس.
+            {t(
+              "أكثر من 10 أعوام من الخبرة في التطوير العقاري — نحوّل رؤاكم إلى واقع ملموس.",
+              "Over 10 years of real estate development experience — turning your vision into reality.",
+            )}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px]">
           <div className="md:col-span-2">
             <BentoCard
-              title="خبرة 10 سنوات"
-              value="ثقة وموثوقية"
-              subtitle="خبرة تمتد لأكثر من 10 أعوام في تقديم حلول عقارية مبتكرة وموثوقة بمعايير عالية"
+              title={t("خبرة 10 سنوات", "10 Years of Experience")}
+              value={t("ثقة وموثوقية", "Trust & Reliability")}
+              subtitle={t(
+                "خبرة تمتد لأكثر من 10 أعوام في تقديم حلول عقارية مبتكرة وموثوقة بمعايير عالية",
+                "More than a decade delivering innovative, dependable real estate solutions to the highest standards.",
+              )}
               colors={["#1a1408", "#2a2418", "#14110a"]}
               delay={0.2}
             />
           </div>
           <BentoCard
-            title="موقع التجمع الخامس"
-            value="قلب القاهرة"
-            subtitle="قرب من الطرق الرئيسية"
+            title={t("موقع التجمع الخامس", "5th Settlement Location")}
+            value={t("قلب القاهرة", "Heart of Cairo")}
+            subtitle={t("قرب من الطرق الرئيسية", "Steps from the main roads")}
             colors={["#1f1808", "#2c2418", "#14110a"]}
             delay={0.4}
           />
           <BentoCard
-            title="استلام سريع"
-            value="سنتين"
-            subtitle="من التعاقد للتسليم"
+            title={t("استلام سريع", "Fast Handover")}
+            value={t("سنتين", "Two Years")}
+            subtitle={t("من التعاقد للتسليم", "From contract to handover")}
             colors={["#1c1608", "#2a2014", "#14110a"]}
             delay={0.6}
           />
           <div className="md:col-span-2">
             <BentoCard
-              title="إطلالات بانوراميا"
-              value="حدائق وشوارع"
-              subtitle="تتمتع المشاريع بتميز خاص بإطلالات بانوراميا على حدائق وشوارع رئيسية وخدمات حيوية"
+              title={t("إطلالات بانوراميا", "Panoramic Views")}
+              value={t("حدائق وشوارع", "Gardens & Boulevards")}
+              subtitle={t(
+                "تتمتع المشاريع بتميز خاص بإطلالات بانوراميا على حدائق وشوارع رئيسية وخدمات حيوية",
+                "Our projects enjoy panoramic views over gardens, main streets and key services.",
+              )}
               colors={["#171208", "#2a2418", "#14110a"]}
               delay={0.8}
             />
           </div>
           <div className="md:col-span-3">
             <BentoCard
-              title="خدمة عملاء احترافية تتابع كل خطوة"
-              value="من التخطيط للتسليم"
-              subtitle="فريقنا المختص يتابع مع كل عميل كل خطوة في مسار التنفيذ بدايةً من التخطيط وحتى التسليم النهائي، هدفنا توفير تجربة سلسة وشفافة تمنح العملاء الثقة والاطمئنان"
+              title={t(
+                "خدمة عملاء احترافية تتابع كل خطوة",
+                "Professional Customer Service Every Step of the Way",
+              )}
+              value={t("من التخطيط للتسليم", "From Planning to Handover")}
+              subtitle={t(
+                "فريقنا المختص يتابع مع كل عميل كل خطوة في مسار التنفيذ بدايةً من التخطيط وحتى التسليم النهائي، هدفنا توفير تجربة سلسة وشفافة تمنح العملاء الثقة والاطمئنان",
+                "Our dedicated team walks every client through each stage — from planning to final handover — for a smooth, transparent experience built on trust.",
+              )}
               colors={["#13100a", "#231e10", "#14110a"]}
               delay={1}
             />

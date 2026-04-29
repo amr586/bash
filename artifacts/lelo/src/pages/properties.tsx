@@ -17,46 +17,57 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import {
   apiFetch,
-  finishingLabels,
-  propertyTypeLabels,
+  useAmenityLabels,
+  useFinishingLabels,
+  usePropertyTypeLabels,
   type Property,
-  type PropertyFinishing,
 } from "@/lib/api";
-
-const TYPE_OPTIONS = [
-  { value: "all", label: "كل الأنواع" },
-  ...Object.entries(propertyTypeLabels).map(([value, label]) => ({ value, label })),
-];
-
-const FINISHING_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "all", label: "كل الأنواع" },
-  ...(Object.keys(finishingLabels) as PropertyFinishing[]).map((k) => ({
-    value: k,
-    label: finishingLabels[k],
-  })),
-];
-
-const ROOM_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "all", label: "أي عدد" },
-  { value: "1", label: "1+" },
-  { value: "2", label: "2+" },
-  { value: "3", label: "3+" },
-  { value: "4", label: "4+" },
-  { value: "5", label: "5+" },
-];
-
-const AMENITIES: Array<{ key: keyof Property; label: string }> = [
-  { key: "furnished", label: "مفروش" },
-  { key: "parking", label: "موقف سيارات" },
-  { key: "elevator", label: "مصعد" },
-  { key: "pool", label: "حمام سباحة" },
-  { key: "garden", label: "حديقة" },
-  { key: "basement", label: "بيزمنت" },
-];
+import { useLang } from "@/lib/i18n";
 
 export default function PropertiesPage() {
+  const { lang, t } = useLang();
   const search = useSearch();
   const initial = useMemo(() => new URLSearchParams(search), [search]);
+  const propertyTypeLabels = usePropertyTypeLabels();
+  const finishingLabels = useFinishingLabels();
+  const amenityLabels = useAmenityLabels();
+
+  const TYPE_OPTIONS = useMemo(
+    () => [
+      { value: "all", label: t("كل الأنواع", "All types") },
+      ...Object.entries(propertyTypeLabels).map(([value, label]) => ({ value, label })),
+    ],
+    [propertyTypeLabels, t],
+  );
+
+  const FINISHING_OPTIONS = useMemo(
+    () => [
+      { value: "all", label: t("كل الأنواع", "All types") },
+      ...Object.entries(finishingLabels).map(([value, label]) => ({ value, label })),
+    ],
+    [finishingLabels, t],
+  );
+
+  const ROOM_OPTIONS = useMemo(
+    () => [
+      { value: "all", label: t("أي عدد", "Any") },
+      { value: "1", label: "1+" },
+      { value: "2", label: "2+" },
+      { value: "3", label: "3+" },
+      { value: "4", label: "4+" },
+      { value: "5", label: "5+" },
+    ],
+    [t],
+  );
+
+  const AMENITIES = useMemo(
+    () =>
+      (["furnished", "parking", "elevator", "pool", "garden", "basement"] as const).map((k) => ({
+        key: k as keyof Property,
+        label: amenityLabels[k] ?? k,
+      })),
+    [amenityLabels],
+  );
 
   const [type, setType] = useState<string>(initial.get("type") || "all");
   const [q, setQ] = useState<string>(initial.get("q") || "");
@@ -77,7 +88,6 @@ export default function PropertiesPage() {
   const [items, setItems] = useState<Property[] | null>(null);
   const [filtersOpen, setFiltersOpen] = useState<boolean>(false);
 
-  // Sync state when URL search params change
   useEffect(() => {
     setType(initial.get("type") || "all");
     setQ(initial.get("q") || "");
@@ -99,18 +109,17 @@ export default function PropertiesPage() {
       .catch(() => setItems([]));
   }, [type]);
 
-  // Auto-extract distinct locations from loaded items
   const locationOptions = useMemo(() => {
-    if (!items) return [{ value: "all", label: "كل المناطق" }];
+    if (!items) return [{ value: "all", label: t("كل المناطق", "All locations") }];
     const set = new Set<string>();
     for (const p of items) if (p.location) set.add(p.location.trim());
     return [
-      { value: "all", label: "كل المناطق" },
+      { value: "all", label: t("كل المناطق", "All locations") },
       ...Array.from(set)
-        .sort((a, b) => a.localeCompare(b, "ar"))
+        .sort((a, b) => a.localeCompare(b, lang === "ar" ? "ar" : "en"))
         .map((l) => ({ value: l, label: l })),
     ];
-  }, [items]);
+  }, [items, lang, t]);
 
   const filtered = useMemo(() => {
     if (!items) return null;
@@ -152,6 +161,7 @@ export default function PropertiesPage() {
     bedroomsMin,
     finishing,
     amenities,
+    AMENITIES,
   ]);
 
   function resetFilters() {
@@ -179,13 +189,18 @@ export default function PropertiesPage() {
     ...AMENITIES.map((a) => Boolean(amenities[a.key as string])),
   ].filter(Boolean).length;
 
+  const isAr = lang === "ar";
+  const sideMargin = isAr ? "ml-1" : "mr-1";
+  const searchIconPos = isAr ? "right-3" : "left-3";
+  const inputPad = isAr ? "pr-9" : "pl-9";
+
   const filterPanel = (
     <Card className="border-border/40 bg-background/60 backdrop-blur sticky top-24">
       <CardContent className="p-5 space-y-5">
         <div className="flex items-center justify-between">
           <h3 className="font-bold inline-flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4" style={{ color: "var(--gold)" }} />
-            فلاتر
+            {t("فلاتر", "Filters")}
           </h3>
           {activeFilterCount > 0 && (
             <button
@@ -195,13 +210,13 @@ export default function PropertiesPage() {
               data-testid="button-reset-filters"
             >
               <X className="h-3 w-3" />
-              مسح ({activeFilterCount})
+              {t("مسح", "Clear")} ({activeFilterCount})
             </button>
           )}
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-xs">نوع الوحدة</Label>
+          <Label className="text-xs">{t("نوع الوحدة", "Property type")}</Label>
           <Select value={type} onValueChange={setType}>
             <SelectTrigger data-testid="filter-type">
               <SelectValue />
@@ -217,7 +232,7 @@ export default function PropertiesPage() {
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-xs">المنطقة</Label>
+          <Label className="text-xs">{t("المنطقة", "Location")}</Label>
           <Select value={locationFilter} onValueChange={setLocationFilter}>
             <SelectTrigger data-testid="filter-location">
               <SelectValue />
@@ -233,7 +248,7 @@ export default function PropertiesPage() {
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-xs">عدد الغرف</Label>
+          <Label className="text-xs">{t("عدد الغرف", "Bedrooms")}</Label>
           <Select value={bedroomsMin} onValueChange={setBedroomsMin}>
             <SelectTrigger data-testid="filter-bedrooms">
               <SelectValue />
@@ -249,7 +264,7 @@ export default function PropertiesPage() {
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-xs">التشطيب</Label>
+          <Label className="text-xs">{t("التشطيب", "Finishing")}</Label>
           <Select value={finishing} onValueChange={setFinishing}>
             <SelectTrigger data-testid="filter-finishing">
               <SelectValue />
@@ -265,16 +280,16 @@ export default function PropertiesPage() {
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-xs">السعر (جنيه)</Label>
+          <Label className="text-xs">{t("السعر (جنيه)", "Price (EGP)")}</Label>
           <div className="grid grid-cols-2 gap-2">
             <Input
               type="number"
               min="0"
               value={priceMin}
               onChange={(e) => setPriceMin(e.target.value)}
-              placeholder="من"
+              placeholder={t("من", "From")}
               dir="ltr"
-              className="text-right text-sm"
+              className={`${isAr ? "text-right" : "text-left"} text-sm`}
               data-testid="filter-price-min"
             />
             <Input
@@ -282,25 +297,25 @@ export default function PropertiesPage() {
               min="0"
               value={priceMax}
               onChange={(e) => setPriceMax(e.target.value)}
-              placeholder="إلى"
+              placeholder={t("إلى", "To")}
               dir="ltr"
-              className="text-right text-sm"
+              className={`${isAr ? "text-right" : "text-left"} text-sm`}
               data-testid="filter-price-max"
             />
           </div>
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-xs">المساحة (م²)</Label>
+          <Label className="text-xs">{t("المساحة (م²)", "Area (m²)")}</Label>
           <div className="grid grid-cols-2 gap-2">
             <Input
               type="number"
               min="0"
               value={areaMin}
               onChange={(e) => setAreaMin(e.target.value)}
-              placeholder="من"
+              placeholder={t("من", "From")}
               dir="ltr"
-              className="text-right text-sm"
+              className={`${isAr ? "text-right" : "text-left"} text-sm`}
               data-testid="filter-area-min"
             />
             <Input
@@ -308,16 +323,16 @@ export default function PropertiesPage() {
               min="0"
               value={areaMax}
               onChange={(e) => setAreaMax(e.target.value)}
-              placeholder="إلى"
+              placeholder={t("إلى", "To")}
               dir="ltr"
-              className="text-right text-sm"
+              className={`${isAr ? "text-right" : "text-left"} text-sm`}
               data-testid="filter-area-max"
             />
           </div>
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-xs">المميزات</Label>
+          <Label className="text-xs">{t("المميزات", "Amenities")}</Label>
           <div className="grid grid-cols-2 gap-2">
             {AMENITIES.map((a) => {
               const k = a.key as string;
@@ -346,7 +361,7 @@ export default function PropertiesPage() {
   return (
     <div className="min-h-screen bg-background">
       <main
-        dir="rtl"
+        dir={isAr ? "rtl" : "ltr"}
         className="pt-24 pb-16"
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
@@ -362,28 +377,28 @@ export default function PropertiesPage() {
               className="text-3xl md:text-4xl font-bold mt-2"
               style={{ color: "var(--gold-light)" }}
             >
-              تصفّح العقارات
+              {t("تصفّح العقارات", "Browse Properties")}
             </h1>
             <p className="text-foreground/70 mt-2 max-w-xl mx-auto">
-              ابحث، قارن وتواصل معنا في أي وقت.
+              {t(
+                "ابحث، قارن وتواصل معنا في أي وقت.",
+                "Search, compare, and reach out to us anytime.",
+              )}
             </p>
           </div>
 
           <div className="grid lg:grid-cols-[280px_1fr] gap-6">
-            {/* Sidebar (desktop) */}
             <aside className="hidden lg:block">{filterPanel}</aside>
 
-            {/* Main column */}
             <div>
-              {/* Search bar + mobile filter toggle */}
               <div className="flex items-center gap-2 mb-5">
                 <div className="relative flex-1">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50" />
+                  <Search className={`absolute ${searchIconPos} top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50`} />
                   <Input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    placeholder="ابحث بالعنوان أو المنطقة..."
-                    className="pr-9"
+                    placeholder={t("ابحث بالعنوان أو المنطقة...", "Search by title or location…")}
+                    className={inputPad}
                     data-testid="input-search-properties"
                   />
                 </div>
@@ -394,12 +409,12 @@ export default function PropertiesPage() {
                   onClick={() => setFiltersOpen((o) => !o)}
                   data-testid="button-toggle-filters"
                 >
-                  <SlidersHorizontal className="ml-1 h-4 w-4" />
-                  فلاتر{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+                  <SlidersHorizontal className={`${sideMargin} h-4 w-4`} />
+                  {t("فلاتر", "Filters")}
+                  {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
                 </Button>
               </div>
 
-              {/* Mobile collapsible filter */}
               {filtersOpen && (
                 <div className="lg:hidden mb-5">{filterPanel}</div>
               )}
@@ -411,7 +426,10 @@ export default function PropertiesPage() {
               ) : filtered.length === 0 ? (
                 <div className="text-center py-24">
                   <p className="text-foreground/70 mb-4">
-                    مفيش عقارات مطابقة للفلاتر دلوقتي.
+                    {t(
+                      "مفيش عقارات مطابقة للفلاتر دلوقتي.",
+                      "No properties match these filters right now.",
+                    )}
                   </p>
                   <div className="flex items-center justify-center gap-2">
                     <Button
@@ -419,17 +437,20 @@ export default function PropertiesPage() {
                       variant="outline"
                       className="rounded-xl"
                     >
-                      مسح الفلاتر
+                      {t("مسح الفلاتر", "Clear filters")}
                     </Button>
                     <Button asChild variant="outline" className="rounded-xl">
-                      <Link href="/">العودة للرئيسية</Link>
+                      <Link href="/">{t("العودة للرئيسية", "Back to Home")}</Link>
                     </Button>
                   </div>
                 </div>
               ) : (
                 <>
                   <p className="text-xs text-foreground/60 mb-3">
-                    {filtered.length} عقار مطابق
+                    {t(
+                      `${filtered.length} عقار مطابق`,
+                      `${filtered.length} matching ${filtered.length === 1 ? "property" : "properties"}`,
+                    )}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                     {filtered.map((p) => (

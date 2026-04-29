@@ -3,6 +3,7 @@
 import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion"
 import { useEffect, useRef } from "react"
 import { Building2, Users, Award, Calendar } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface CounterProps {
   to: number
@@ -31,18 +32,17 @@ function Counter({ to, suffix = "", duration = 2 }: CounterProps) {
   )
 }
 
-const stats = [
-  { icon: Calendar, value: 10, suffix: "+", label: "سنوات من الخبرة" },
-  { icon: Building2, value: 50, suffix: "+", label: "مشروع تم تسليمه" },
-  { icon: Users, value: 850, suffix: "+", label: "عميل سعيد" },
-  { icon: Award, value: 99, suffix: "%", label: "نسبة رضا العملاء" },
-]
-
 export function StatsSection() {
+  const { lang, t } = useLang()
+  const stats = [
+    { icon: Calendar, value: 10, suffix: "+", label: t("سنوات من الخبرة", "Years of Experience") },
+    { icon: Building2, value: 50, suffix: "+", label: t("مشروع تم تسليمه", "Projects Delivered") },
+    { icon: Users, value: 850, suffix: "+", label: t("عميل سعيد", "Happy Clients") },
+    { icon: Award, value: 99, suffix: "%", label: t("نسبة رضا العملاء", "Client Satisfaction") },
+  ]
+
   return (
-    <section
-      className="relative py-20 px-4 overflow-hidden bg-background"
-    >
+    <section className="relative py-20 px-4 overflow-hidden bg-background">
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div
           className="absolute inset-0"
@@ -55,7 +55,7 @@ export function StatsSection() {
 
       <div
         className="container mx-auto relative z-10"
-        dir="rtl"
+        dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
         <motion.div
@@ -66,7 +66,7 @@ export function StatsSection() {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl md:text-4xl font-bold" style={{ color: "var(--gold-light)" }}>
-            أرقام تتحدث عن نجاحنا
+            {t("أرقام تتحدث عن نجاحنا", "Numbers That Speak for Our Success")}
           </h2>
         </motion.div>
 

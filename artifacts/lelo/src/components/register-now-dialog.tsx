@@ -19,31 +19,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, CheckCircle2 } from "lucide-react";
-
-const REASONS = [
-  { value: "buy", label: "شراء عقار" },
-  { value: "general", label: "استفسار" },
-  { value: "partner", label: "طلب شراكة" },
-] as const;
+import { useLang } from "@/lib/i18n";
 
 interface Props {
   trigger: ReactNode;
 }
 
 export function RegisterNowDialog({ trigger }: Props) {
+  const { lang, t } = useLang();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [reason, setReason] = useState<string>("buy_apartment");
+  const [reason, setReason] = useState<string>("buy");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const REASONS = [
+    { value: "buy", label: t("شراء عقار", "Buying a property") },
+    { value: "general", label: t("استفسار", "General enquiry") },
+    { value: "partner", label: t("طلب شراكة", "Partnership request") },
+  ];
+
   const reset = () => {
     setName("");
     setPhone("");
-    setReason("buy_apartment");
+    setReason("buy");
     setNotes("");
     setError(null);
     setSuccess(false);
@@ -53,19 +55,19 @@ export function RegisterNowDialog({ trigger }: Props) {
     e.preventDefault();
     setError(null);
     if (name.trim().length < 2) {
-      setError("اكتب اسمك من فضلك.");
+      setError(t("اكتب اسمك من فضلك.", "Please enter your name."));
       return;
     }
     if (phone.trim().length < 6) {
-      setError("اكتب رقم تليفون صحيح.");
+      setError(t("اكتب رقم تليفون صحيح.", "Please enter a valid phone number."));
       return;
     }
     setSubmitting(true);
     const reasonLabel =
-      REASONS.find((r) => r.value === reason)?.label ?? "تسجيل اهتمام";
+      REASONS.find((r) => r.value === reason)?.label ?? t("تسجيل اهتمام", "Interest registration");
     const message = notes.trim()
       ? `[${reasonLabel}] ${notes.trim()}`
-      : `[${reasonLabel}] تسجيل اهتمام جديد عبر زر "سجّل الآن".`;
+      : `[${reasonLabel}] ${t("تسجيل اهتمام جديد عبر زر \"سجّل الآن\".", "New interest registration via the Register Now button.")}`;
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -80,15 +82,17 @@ export function RegisterNowDialog({ trigger }: Props) {
         const body = (await res.json().catch(() => ({}))) as {
           error?: string;
         };
-        throw new Error(body.error ?? "حصل خطأ، حاول تاني.");
+        throw new Error(body.error ?? t("حصل خطأ، حاول تاني.", "Something went wrong, please try again."));
       }
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حصل خطأ، حاول تاني.");
+      setError(err instanceof Error ? err.message : t("حصل خطأ، حاول تاني.", "Something went wrong, please try again."));
     } finally {
       setSubmitting(false);
     }
   };
+
+  const isAr = lang === "ar";
 
   return (
     <Dialog
@@ -101,24 +105,30 @@ export function RegisterNowDialog({ trigger }: Props) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         className="sm:max-w-md"
-        dir="rtl"
+        dir={isAr ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
-        <DialogHeader className="text-right">
+        <DialogHeader className={isAr ? "text-right" : "text-left"}>
           <DialogTitle className="text-xl" style={{ color: "var(--gold-light)" }}>
-            سجّل اهتمامك الآن
+            {t("سجّل اهتمامك الآن", "Register Your Interest Now")}
           </DialogTitle>
           <DialogDescription className="text-foreground/70">
-            اترك بياناتك وفريق المبيعات هيتواصل معاك في أسرع وقت.
+            {t(
+              "اترك بياناتك وفريق المبيعات هيتواصل معاك في أسرع وقت.",
+              "Leave your details and our sales team will contact you shortly.",
+            )}
           </DialogDescription>
         </DialogHeader>
 
         {success ? (
           <div className="flex flex-col items-center text-center gap-3 py-6">
             <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-            <p className="text-lg font-semibold">تم استلام طلبك!</p>
+            <p className="text-lg font-semibold">{t("تم استلام طلبك!", "Your request has been received!")}</p>
             <p className="text-sm text-foreground/70">
-              فريق باشاك هيتواصل معاك قريبًا. شكرًا لاهتمامك.
+              {t(
+                "فريق باشاك هيتواصل معاك قريبًا. شكرًا لاهتمامك.",
+                "The Bashak team will be in touch soon. Thanks for your interest.",
+              )}
             </p>
             <Button
               type="button"
@@ -126,25 +136,25 @@ export function RegisterNowDialog({ trigger }: Props) {
               className="mt-2 text-black font-semibold"
               style={{ background: "var(--gold)" }}
             >
-              تمام
+              {t("تمام", "OK")}
             </Button>
           </div>
         ) : (
-          <form onSubmit={onSubmit} className="flex flex-col gap-4 text-right">
+          <form onSubmit={onSubmit} className={`flex flex-col gap-4 ${isAr ? "text-right" : "text-left"}`}>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="rn-name">الاسم</Label>
+              <Label htmlFor="rn-name">{t("الاسم", "Name")}</Label>
               <Input
                 id="rn-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="اسمك بالكامل"
+                placeholder={t("اسمك بالكامل", "Your full name")}
                 required
                 data-testid="input-register-name"
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="rn-phone">رقم الموبايل</Label>
+              <Label htmlFor="rn-phone">{t("رقم الموبايل", "Mobile number")}</Label>
               <Input
                 id="rn-phone"
                 type="tel"
@@ -158,7 +168,7 @@ export function RegisterNowDialog({ trigger }: Props) {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="rn-reason">سبب التواصل</Label>
+              <Label htmlFor="rn-reason">{t("سبب التواصل", "Reason for contact")}</Label>
               <Select value={reason} onValueChange={setReason}>
                 <SelectTrigger id="rn-reason" data-testid="select-register-reason">
                   <SelectValue />
@@ -174,12 +184,15 @@ export function RegisterNowDialog({ trigger }: Props) {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="rn-notes">معلومات إضافية</Label>
+              <Label htmlFor="rn-notes">{t("معلومات إضافية", "Additional notes")}</Label>
               <Textarea
                 id="rn-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="مثلاً: ميزانية، عدد الغرف، المنطقة المفضلة..."
+                placeholder={t(
+                  "مثلاً: ميزانية، عدد الغرف، المنطقة المفضلة...",
+                  "E.g. budget, number of bedrooms, preferred area…",
+                )}
                 rows={3}
                 data-testid="input-register-notes"
               />
@@ -202,8 +215,10 @@ export function RegisterNowDialog({ trigger }: Props) {
               style={{ background: "var(--gold)" }}
               data-testid="button-register-submit"
             >
-              {submitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-              {submitting ? "جاري الإرسال..." : "سجّل الآن"}
+              {submitting && <Loader2 className={`${isAr ? "ml-2" : "mr-2"} h-4 w-4 animate-spin`} />}
+              {submitting
+                ? t("جاري الإرسال...", "Sending…")
+                : t("سجّل الآن", "Register Now")}
             </Button>
           </form>
         )}

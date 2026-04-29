@@ -4,8 +4,10 @@ import { Search, ChevronUp, ChevronDown, MapPin } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useSiteSettings } from "@/lib/site-settings";
+import { useLang } from "@/lib/i18n";
 
 export function PropertySearch() {
+  const { lang, t } = useLang();
   const [, setLocation] = useLocation();
   const { settings } = useSiteSettings();
   const quickLocations = settings.locations.slice(0, 8);
@@ -33,9 +35,13 @@ export function PropertySearch() {
     setLocation(`/properties${qs ? `?${qs}` : ""}`);
   };
 
+  const sideMargin = lang === "ar" ? "ml-2" : "mr-2";
+  const searchIconPos = lang === "ar" ? "right-3" : "left-3";
+  const inputPad = lang === "ar" ? "pr-9" : "pl-9";
+
   return (
     <section
-      dir="rtl"
+      dir={lang === "ar" ? "rtl" : "ltr"}
       className="relative z-20 -mt-16 md:-mt-20 mb-16 px-4"
       style={{ fontFamily: "'Tajawal', sans-serif" }}
     >
@@ -45,12 +51,17 @@ export function PropertySearch() {
             className="text-2xl md:text-3xl font-bold"
             style={{ color: "var(--gold-light)" }}
           >
-            ابحث عن منزل أحلامك
+            {t("ابحث عن منزل أحلامك", "Find Your Dream Home")}
             <br className="md:hidden" />
-            <span className="md:mr-2"> في قلب التجمع الخامس</span>
+            <span className={lang === "ar" ? "md:mr-2" : "md:ml-2"}>
+              {t(" في قلب التجمع الخامس", " in the heart of the 5th Settlement")}
+            </span>
           </h2>
           <p className="text-foreground/70 mt-2">
-            مشاريع باشاك للتطوير العقاري — وحدات سكنية وتجارية حصرية في قلب القاهرة الجديدة.
+            {t(
+              "مشاريع باشاك للتطوير العقاري — وحدات سكنية وتجارية حصرية في قلب القاهرة الجديدة.",
+              "Bashak Developments — exclusive residential and commercial units in the heart of New Cairo.",
+            )}
           </p>
         </div>
 
@@ -61,18 +72,17 @@ export function PropertySearch() {
             borderColor: "rgba(212, 175, 55, 0.25)",
           }}
         >
-          {/* Search row */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3">
             <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50 pointer-events-none" />
+              <Search className={`absolute ${searchIconPos} top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50 pointer-events-none`} />
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") goToResults();
                 }}
-                placeholder="ابحث بالموقع أو نوع العقار..."
-                className="pr-9 h-11"
+                placeholder={t("ابحث بالموقع أو نوع العقار...", "Search by location or property type…")}
+                className={`${inputPad} h-11`}
                 data-testid="input-search"
               />
             </div>
@@ -82,8 +92,8 @@ export function PropertySearch() {
               style={{ background: "var(--gold)" }}
               data-testid="button-search"
             >
-              <Search className="ml-2 h-4 w-4" />
-              بحث
+              <Search className={`${sideMargin} h-4 w-4`} />
+              {t("بحث", "Search")}
             </Button>
             <Button
               type="button"
@@ -94,81 +104,79 @@ export function PropertySearch() {
             >
               {showAdvanced ? (
                 <>
-                  <ChevronUp className="ml-2 h-4 w-4" />
-                  إخفاء
+                  <ChevronUp className={`${sideMargin} h-4 w-4`} />
+                  {t("إخفاء", "Hide")}
                 </>
               ) : (
                 <>
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                  المزيد
+                  <ChevronDown className={`${sideMargin} h-4 w-4`} />
+                  {t("المزيد", "More")}
                 </>
               )}
             </Button>
           </div>
 
-          {/* Advanced filters */}
           {showAdvanced && (
-            <div className="mt-5 pt-5 border-t border-white/5">
+            <div className="mt-5 pt-5 border-t border-foreground/5">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="text-xs text-foreground/60 mb-1 block">
-                    السعر الأدنى
+                    {t("السعر الأدنى", "Min price")}
                   </label>
                   <Input
                     type="number"
                     inputMode="numeric"
                     value={priceMin}
                     onChange={(e) => setPriceMin(e.target.value)}
-                    placeholder="من"
+                    placeholder={t("من", "From")}
                     data-testid="input-price-min"
                   />
                 </div>
                 <div>
                   <label className="text-xs text-foreground/60 mb-1 block">
-                    السعر الأقصى
+                    {t("السعر الأقصى", "Max price")}
                   </label>
                   <Input
                     type="number"
                     inputMode="numeric"
                     value={priceMax}
                     onChange={(e) => setPriceMax(e.target.value)}
-                    placeholder="إلى"
+                    placeholder={t("إلى", "To")}
                     data-testid="input-price-max"
                   />
                 </div>
                 <div>
                   <label className="text-xs text-foreground/60 mb-1 block">
-                    المساحة (م²)
+                    {t("المساحة (م²)", "Area (m²)")}
                   </label>
                   <Input
                     type="number"
                     inputMode="numeric"
                     value={areaMin}
                     onChange={(e) => setAreaMin(e.target.value)}
-                    placeholder="من"
+                    placeholder={t("من", "From")}
                     data-testid="input-area-min"
                   />
                 </div>
                 <div>
                   <label className="text-xs text-foreground/60 mb-1 block">
-                    المساحة (م²)
+                    {t("المساحة (م²)", "Area (m²)")}
                   </label>
                   <Input
                     type="number"
                     inputMode="numeric"
                     value={areaMax}
                     onChange={(e) => setAreaMax(e.target.value)}
-                    placeholder="إلى"
+                    placeholder={t("إلى", "To")}
                     data-testid="input-area-max"
                   />
                 </div>
               </div>
 
-              {/* Quick locations */}
               <div className="mt-5">
                 <div className="text-xs text-foreground/60 mb-2 flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" />
-                  مناطق سريعة
+                  {t("مناطق سريعة", "Quick locations")}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {quickLocations.map((loc) => (
@@ -191,7 +199,7 @@ export function PropertySearch() {
                     onClick={() => goToResults()}
                     className="px-3 py-1.5 rounded-full text-sm text-[var(--gold-light)] hover:text-[var(--gold)] transition-all"
                   >
-                    مناطق أخرى ›
+                    {t("مناطق أخرى ›", "Other areas ›")}
                   </button>
                 </div>
               </div>

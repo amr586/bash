@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react"
 import { Link } from "wouter"
 import { motion } from "framer-motion"
-import { ArrowLeft, Bath, BedDouble, Loader2, MapPin, Maximize } from "lucide-react"
+import { ArrowLeft, ArrowRight, Bath, BedDouble, Loader2, MapPin, Maximize } from "lucide-react"
 import {
   apiFetch,
   formatPrice,
-  listingTypeLabels,
-  propertyTypeLabels,
+  useListingTypeLabels,
+  usePropertyTypeLabels,
   type Property,
 } from "@/lib/api"
+import { useLang } from "@/lib/i18n"
 import project1 from "../assets/project-1.png"
 import project2 from "../assets/project-2.png"
 import project3 from "../assets/project-3.png"
@@ -28,6 +29,7 @@ const cardVariants = {
 }
 
 export function ProjectsSection() {
+  const { lang, t } = useLang()
   const [properties, setProperties] = useState<Property[] | null>(null)
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function ProjectsSection() {
     <section id="projects" className="py-20 px-4 bg-background overflow-hidden">
       <div
         className="container mx-auto"
-        dir="rtl"
+        dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
         <div className="text-center mb-16">
@@ -68,7 +70,7 @@ export function ProjectsSection() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            مشاريعنا اللي بنبنيها بنفسنا
+            {t("مشاريعنا اللي بنبنيها بنفسنا", "Projects We Build Ourselves")}
           </motion.h2>
           <motion.p
             className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed"
@@ -77,7 +79,10 @@ export function ProjectsSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-إحنا في باشاك بنطوّر وبنبني مشاريعنا بأنفسنا في قلب التجمع الخامس — كل وحدة من تصميمنا وتنفيذنا وتسليمنا.
+            {t(
+              "إحنا في باشاك بنطوّر وبنبني مشاريعنا بأنفسنا في قلب التجمع الخامس — كل وحدة من تصميمنا وتنفيذنا وتسليمنا.",
+              "At Bashak we develop and build our own projects in the heart of the 5th Settlement — every unit is designed, constructed and delivered by our team.",
+            )}
           </motion.p>
         </div>
 
@@ -109,8 +114,12 @@ export function ProjectsSection() {
                   background: "rgba(212, 175, 55, 0.05)",
                 }}
               >
-                <span>عرض المزيد</span>
-                <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                <span>{t("عرض المزيد", "View More")}</span>
+                {lang === "ar" ? (
+                  <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                ) : (
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                )}
               </Link>
             </motion.div>
           </>
@@ -121,6 +130,9 @@ export function ProjectsSection() {
 }
 
 function FeaturedCard({ property, index }: { property: Property; index: number }) {
+  const { lang, t } = useLang()
+  const propertyTypeLabels = usePropertyTypeLabels()
+  const listingTypeLabels = useListingTypeLabels()
   const fallback = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]
   return (
     <motion.article
@@ -135,7 +147,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
     >
       <Link
         href={`/properties/${property.id}`}
-        aria-label={`عرض تفاصيل ${property.title}`}
+        aria-label={t(`عرض تفاصيل ${property.title}`, `View details for ${property.title}`)}
         className="absolute inset-0 z-[1] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
       />
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -151,7 +163,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        <div className="absolute top-4 right-4">
+        <div className={`absolute top-4 ${lang === "ar" ? "right-4" : "left-4"}`}>
           <span
             className="px-3 py-1 rounded-full text-xs font-semibold text-black"
             style={{ background: "var(--gold)" }}
@@ -186,7 +198,9 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
           >
             <BedDouble className="h-4 w-4" style={{ color: "var(--gold)" }} />
             <span className="text-sm text-foreground/80">
-              {property.bedrooms != null ? `${property.bedrooms} غرف` : "—"}
+              {property.bedrooms != null
+                ? t(`${property.bedrooms} غرف`, `${property.bedrooms} bed`)
+                : "—"}
             </span>
           </div>
           <div
@@ -195,7 +209,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
           >
             <Maximize className="h-4 w-4" style={{ color: "var(--gold)" }} />
             <span className="text-sm text-foreground/80">
-              {property.area != null ? `${property.area} م²` : "—"}
+              {property.area != null ? t(`${property.area} م²`, `${property.area} m²`) : "—"}
             </span>
           </div>
           {property.bathrooms != null && (
@@ -205,7 +219,7 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
             >
               <Bath className="h-4 w-4" style={{ color: "var(--gold)" }} />
               <span className="text-sm text-foreground/80">
-                {property.bathrooms} حمامات
+                {t(`${property.bathrooms} حمامات`, `${property.bathrooms} bath`)}
               </span>
             </div>
           )}
@@ -221,8 +235,12 @@ function FeaturedCard({ property, index }: { property: Property; index: number }
             className="flex items-center gap-1 text-sm font-semibold transition-all group-hover:gap-3"
             style={{ color: "var(--gold)" }}
           >
-            التفاصيل
-            <ArrowLeft className="h-4 w-4" />
+            {t("التفاصيل", "Details")}
+            {lang === "ar" ? (
+              <ArrowLeft className="h-4 w-4" />
+            ) : (
+              <ArrowRight className="h-4 w-4" />
+            )}
           </span>
         </div>
       </div>

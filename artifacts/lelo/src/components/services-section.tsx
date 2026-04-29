@@ -2,46 +2,67 @@
 
 import { motion } from "framer-motion"
 import { Home, Building, TrendingUp, Key, ShieldCheck, Hammer } from "lucide-react"
-
-const services = [
-  {
-    icon: Home,
-    title: "تطوير سكني",
-    description: "وحدات سكنية فاخرة بتصميمات معاصرة وتشطيبات راقية في أفضل مواقع التجمع الخامس",
-  },
-  {
-    icon: Building,
-    title: "كومباوندات متكاملة",
-    description: "مجمعات سكنية متكاملة بحدائق وخدمات وأمن على مدار الساعة لتجربة سكن متميزة",
-  },
-  {
-    icon: TrendingUp,
-    title: "استشارات استثمارية",
-    description: "نصائح متخصصة لاختيار الوحدة العقارية الأنسب كاستثمار يحقق عائدًا مستدامًا",
-  },
-  {
-    icon: Key,
-    title: "تسليم متشطب",
-    description: "وحدات تُسلَّم بتشطيبات حديثة كاملة جاهزة للسكن خلال سنتين من التعاقد",
-  },
-  {
-    icon: ShieldCheck,
-    title: "ضمان الجودة",
-    description: "معايير عالية في التنفيذ ومواد بناء أصلية مع ضمان شامل على كل وحدة",
-  },
-  {
-    icon: Hammer,
-    title: "إدارة المشاريع",
-    description: "متابعة احترافية لكل مشروع من التخطيط حتى التسليم بدقة واهتمام",
-  },
-]
+import { useLang } from "@/lib/i18n"
 
 export function ServicesSection() {
+  const { lang, t } = useLang()
+
+  const services = [
+    {
+      icon: Home,
+      title: t("تطوير سكني", "Residential Development"),
+      description: t(
+        "وحدات سكنية فاخرة بتصميمات معاصرة وتشطيبات راقية في أفضل مواقع التجمع الخامس",
+        "Luxury residential units with contemporary design and premium finishing in prime 5th Settlement locations.",
+      ),
+    },
+    {
+      icon: Building,
+      title: t("كومباوندات متكاملة", "Integrated Compounds"),
+      description: t(
+        "مجمعات سكنية متكاملة بحدائق وخدمات وأمن على مدار الساعة لتجربة سكن متميزة",
+        "Fully integrated compounds with gardens, services and 24/7 security for an exceptional living experience.",
+      ),
+    },
+    {
+      icon: TrendingUp,
+      title: t("استشارات استثمارية", "Investment Advisory"),
+      description: t(
+        "نصائح متخصصة لاختيار الوحدة العقارية الأنسب كاستثمار يحقق عائدًا مستدامًا",
+        "Expert guidance to pick the right unit as an investment with sustainable long-term returns.",
+      ),
+    },
+    {
+      icon: Key,
+      title: t("تسليم متشطب", "Finished Handover"),
+      description: t(
+        "وحدات تُسلَّم بتشطيبات حديثة كاملة جاهزة للسكن خلال سنتين من التعاقد",
+        "Units delivered fully finished and move-in ready within two years of contract signing.",
+      ),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("ضمان الجودة", "Quality Guarantee"),
+      description: t(
+        "معايير عالية في التنفيذ ومواد بناء أصلية مع ضمان شامل على كل وحدة",
+        "High construction standards, genuine materials and a comprehensive warranty on every unit.",
+      ),
+    },
+    {
+      icon: Hammer,
+      title: t("إدارة المشاريع", "Project Management"),
+      description: t(
+        "متابعة احترافية لكل مشروع من التخطيط حتى التسليم بدقة واهتمام",
+        "Professional end-to-end project management — from planning all the way to handover.",
+      ),
+    },
+  ]
+
   return (
     <section id="services" className="py-20 px-4 bg-background overflow-hidden">
       <div
         className="container mx-auto"
-        dir="rtl"
+        dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
         <div className="text-center mb-16">
@@ -66,7 +87,7 @@ export function ServicesSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            خدماتنا العقارية
+            {t("خدماتنا العقارية", "Our Real Estate Services")}
           </motion.h2>
           <motion.p
             className="text-xl text-foreground/80 max-w-2xl mx-auto"
@@ -75,7 +96,10 @@ export function ServicesSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            حلول عقارية متكاملة تغطي كل احتياجاتك من البحث والاستشارة وحتى التسليم
+            {t(
+              "حلول عقارية متكاملة تغطي كل احتياجاتك من البحث والاستشارة وحتى التسليم",
+              "End-to-end real estate solutions covering every step — from search and advisory all the way to handover.",
+            )}
           </motion.p>
         </div>
 

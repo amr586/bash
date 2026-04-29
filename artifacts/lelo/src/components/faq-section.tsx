@@ -3,42 +3,62 @@
 import { motion } from "framer-motion"
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-
-const faqs = [
-  {
-    question: "أين تقع مشاريع شركة باشاك؟",
-    answer:
-      "تتميز مواقع مشاريع شركة باشاك في قلب التجمع الخامس مع قرب فائق من الطرق الرئيسية والخدمات الحيوية. تتمتع المشاريع بتميز خاص بإطلالات بانوراميا على حدائق وشوارع رئيسية.",
-  },
-  {
-    question: "ما نظام السداد المتاح؟",
-    answer:
-      "مقدم يبدأ من 700 ألف جنيه والباقي يُقسَّط على 60 شهرًا، مع استلام خلال سنتين من تاريخ التعاقد.",
-  },
-  {
-    question: "ما الذي يميز خدمة العملاء في باشاك؟",
-    answer:
-      "في شركة باشاك نؤمن أن الاحترافية في خدمة العملاء هي أساس نجاح أي مشروع. فريقنا المختص يتابع مع كل عميل كل خطوة في مسار التنفيذ بدايةً من التخطيط وحتى التسليم النهائي.",
-  },
-  {
-    question: "كم سنة خبرة لدى الشركة؟",
-    answer:
-      "شركة بشاك للتطوير العقاري تمتلك خبرة تمتد لأكثر من 10 أعوام في تقديم حلول عقارية مبتكرة وموثوقة بمعايير عالية من الجودة والمصداقية.",
-  },
-  {
-    question: "كيف يمكنني الحجز أو الاستعلام؟",
-    answer:
-      "للحجز والاستعلام تواصل معنا على الخط الساخن 17327 أو 01151313999، أو عبر واتساب على wa.me/201151313999.",
-  },
-  {
-    question: "أين يقع المقر الرئيسي للشركة؟",
-    answer:
-      "يقع مقرنا في فيلا 99، الحي الأول، شارع 90، التجمع الخامس، القاهرة الجديدة 1، محافظة القاهرة، مصر، 11835.",
-  },
-]
+import { useLang } from "@/lib/i18n"
 
 export function FAQSection() {
+  const { lang, t } = useLang()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  const faqs = [
+    {
+      question: t("أين تقع مشاريع شركة باشاك؟", "Where are Bashak's projects located?"),
+      answer: t(
+        "تتميز مواقع مشاريع شركة باشاك في قلب التجمع الخامس مع قرب فائق من الطرق الرئيسية والخدمات الحيوية. تتمتع المشاريع بتميز خاص بإطلالات بانوراميا على حدائق وشوارع رئيسية.",
+        "Bashak's projects sit in the heart of the 5th Settlement, close to main roads and essential services, with panoramic views over gardens and major boulevards.",
+      ),
+    },
+    {
+      question: t("ما نظام السداد المتاح؟", "What payment plans are available?"),
+      answer: t(
+        "مقدم يبدأ من 700 ألف جنيه والباقي يُقسَّط على 60 شهرًا، مع استلام خلال سنتين من تاريخ التعاقد.",
+        "A down payment starting from EGP 700,000 with the remainder spread over 60 months — handover within two years of contract signing.",
+      ),
+    },
+    {
+      question: t(
+        "ما الذي يميز خدمة العملاء في باشاك؟",
+        "What makes Bashak's customer service special?",
+      ),
+      answer: t(
+        "في شركة باشاك نؤمن أن الاحترافية في خدمة العملاء هي أساس نجاح أي مشروع. فريقنا المختص يتابع مع كل عميل كل خطوة في مسار التنفيذ بدايةً من التخطيط وحتى التسليم النهائي.",
+        "We believe professional customer service is the foundation of every successful project. Our team walks each client through every step — from planning to final handover.",
+      ),
+    },
+    {
+      question: t("كم سنة خبرة لدى الشركة؟", "How many years of experience does Bashak have?"),
+      answer: t(
+        "شركة بشاك للتطوير العقاري تمتلك خبرة تمتد لأكثر من 10 أعوام في تقديم حلول عقارية مبتكرة وموثوقة بمعايير عالية من الجودة والمصداقية.",
+        "Bashak Developments has more than 10 years of experience providing innovative, reliable real estate solutions of the highest quality.",
+      ),
+    },
+    {
+      question: t(
+        "كيف يمكنني الحجز أو الاستعلام؟",
+        "How can I book a unit or get more information?",
+      ),
+      answer: t(
+        "للحجز والاستعلام تواصل معنا على الخط الساخن 17327 أو 01151313999، أو عبر واتساب على wa.me/201151313999.",
+        "To book or enquire, reach our hotline at 17327 or 01151313999, or message us on WhatsApp at wa.me/201151313999.",
+      ),
+    },
+    {
+      question: t("أين يقع المقر الرئيسي للشركة؟", "Where is the company's head office?"),
+      answer: t(
+        "يقع مقرنا في فيلا 99، الحي الأول، شارع 90، التجمع الخامس، القاهرة الجديدة 1، محافظة القاهرة، مصر، 11835.",
+        "Villa 99, First District, 90th Street, 5th Settlement, New Cairo 1, Cairo, Egypt, 11835.",
+      ),
+    },
+  ]
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index)
@@ -48,7 +68,7 @@ export function FAQSection() {
     <section id="faq" className="py-20 px-4 bg-background">
       <div
         className="container mx-auto max-w-4xl"
-        dir="rtl"
+        dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ fontFamily: "'Tajawal', sans-serif" }}
       >
         <div className="text-center mb-16">
@@ -60,7 +80,7 @@ export function FAQSection() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            الأسئلة الشائعة
+            {t("الأسئلة الشائعة", "Frequently Asked Questions")}
           </motion.h2>
           <motion.p
             className="text-xl text-foreground/80 max-w-2xl mx-auto"
@@ -69,7 +89,10 @@ export function FAQSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            كل ما تريد معرفته عن مشاريع شركة باشاك. لم تجد إجابتك؟ تواصل معنا.
+            {t(
+              "كل ما تريد معرفته عن مشاريع شركة باشاك. لم تجد إجابتك؟ تواصل معنا.",
+              "Everything you need to know about Bashak. Can't find what you need? Get in touch.",
+            )}
           </motion.p>
         </div>
 
@@ -85,10 +108,12 @@ export function FAQSection() {
               viewport={{ once: true }}
             >
               <button
-                className="w-full px-6 py-4 text-right flex items-center justify-between hover:bg-foreground/5 transition-colors rounded-lg"
+                className={`w-full px-6 py-4 ${lang === "ar" ? "text-right" : "text-left"} flex items-center justify-between hover:bg-foreground/5 transition-colors rounded-lg`}
                 onClick={() => toggleFAQ(index)}
               >
-                <span className="text-lg font-medium text-foreground pl-4">{faq.question}</span>
+                <span className={`text-lg font-medium text-foreground ${lang === "ar" ? "pl-4" : "pr-4"}`}>
+                  {faq.question}
+                </span>
                 <ChevronDown
                   className={`h-5 w-5 transition-transform flex-shrink-0 ${
                     openIndex === index ? "rotate-180" : ""

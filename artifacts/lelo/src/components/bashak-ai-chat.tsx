@@ -3,24 +3,40 @@ import { Sparkles, Send, X, Loader2, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSiteSettings } from "@/lib/site-settings";
+import { useLang } from "@/lib/i18n";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-const QUICK_PROMPTS = [
-  "مين شركة باشاك؟",
-  "أرقام التواصل؟",
-  "آخر مشاريعكم؟",
-  "إيه العقارات المتاحة؟",
-];
-
 export function BashakAIChat() {
+  const { lang, t } = useLang();
   const { settings } = useSiteSettings();
+
+  const QUICK_PROMPTS = lang === "ar"
+    ? [
+        "مين شركة باشاك؟",
+        "أرقام التواصل؟",
+        "آخر مشاريعكم؟",
+        "إيه العقارات المتاحة؟",
+      ]
+    : [
+        "Who is Bashak?",
+        "What are the contact numbers?",
+        "What are your latest projects?",
+        "What properties are available?",
+      ];
+
   const welcome = useMemo<ChatMessage>(
-    () => ({ role: "assistant", content: settings.aiWelcomeMessage }),
-    [settings.aiWelcomeMessage],
+    () => ({
+      role: "assistant",
+      content:
+        lang === "ar"
+          ? settings.aiWelcomeMessage
+          : "Hi! I'm Bashak's AI assistant. Ask me anything about our company or properties.",
+    }),
+    [settings.aiWelcomeMessage, lang],
   );
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([welcome]);
@@ -58,6 +74,7 @@ export function BashakAIChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: next.filter((m) => m !== welcome).slice(-12),
+          lang,
         }),
       });
       const body = (await res.json().catch(() => ({}))) as {
@@ -65,11 +82,11 @@ export function BashakAIChat() {
         error?: string;
       };
       if (!res.ok || !body.reply) {
-        throw new Error(body.error ?? "حصل خطأ، حاول تاني.");
+        throw new Error(body.error ?? t("حصل خطأ، حاول تاني.", "Something went wrong, please try again."));
       }
       setMessages((m) => [...m, { role: "assistant", content: body.reply! }]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حصل خطأ، حاول تاني.");
+      setError(err instanceof Error ? err.message : t("حصل خطأ، حاول تاني.", "Something went wrong, please try again."));
     } finally {
       setSending(false);
     }
@@ -80,15 +97,17 @@ export function BashakAIChat() {
     void send(input);
   };
 
+  const isAr = lang === "ar";
+  const sidePos = isAr ? "left-6" : "right-6";
+
   return (
     <>
-      {/* Floating launcher */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="افتح المساعد الذكي لباشاك"
+        aria-label={t("افتح المساعد الذكي لباشاك", "Open Bashak AI assistant")}
         data-testid="button-ai-chat-toggle"
-        className="fixed bottom-6 left-6 z-50 inline-flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-black shadow-2xl hover:scale-105 active:scale-95 transition-transform"
+        className={`fixed bottom-6 ${sidePos} z-50 inline-flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-black shadow-2xl hover:scale-105 active:scale-95 transition-transform`}
         style={{
           background: "linear-gradient(135deg, var(--gold), var(--gold-light))",
           boxShadow: "0 12px 32px rgba(212,175,55,0.45)",
@@ -96,19 +115,18 @@ export function BashakAIChat() {
         }}
       >
         {open ? <X className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
-        {open ? "إغلاق" : "مساعد باشاك"}
+        {open ? t("إغلاق", "Close") : t("مساعد باشاك", "Bashak AI")}
       </button>
 
-      {/* Chat window */}
       {open && (
         <div
-          className="fixed bottom-24 left-6 right-6 sm:right-auto sm:w-[380px] z-50 rounded-2xl overflow-hidden border bg-background/95 backdrop-blur shadow-2xl flex flex-col"
+          className={`fixed bottom-24 ${sidePos} ${isAr ? "right-6" : "left-6"} sm:right-auto sm:left-auto sm:${sidePos} sm:w-[380px] z-50 rounded-2xl overflow-hidden border bg-background/95 backdrop-blur shadow-2xl flex flex-col`}
           style={{
             borderColor: "var(--gold-dark)",
             maxHeight: "min(70vh, 600px)",
             fontFamily: "'Tajawal', sans-serif",
           }}
-          dir="rtl"
+          dir={isAr ? "rtl" : "ltr"}
           data-testid="ai-chat-window"
         >
           <div
@@ -126,10 +144,13 @@ export function BashakAIChat() {
             </div>
             <div className="flex-1">
               <p className="font-semibold text-sm" style={{ color: "var(--gold-light)" }}>
-                مساعد باشاك الذكي
+                {t("مساعد باشاك الذكي", "Bashak AI Assistant")}
               </p>
               <p className="text-[11px] text-foreground/60">
-                يجاوب على أسئلتك عن الشركة والعقارات
+                {t(
+                  "يجاوب على أسئلتك عن الشركة والعقارات",
+                  "Answers your questions about the company and properties",
+                )}
               </p>
             </div>
           </div>
@@ -166,7 +187,7 @@ export function BashakAIChat() {
                   style={{ background: "var(--gold)" }}
                 >
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  بكتب...
+                  {t("بكتب...", "Typing…")}
                 </div>
               </div>
             )}
@@ -201,7 +222,7 @@ export function BashakAIChat() {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="اكتب سؤالك..."
+              placeholder={t("اكتب سؤالك...", "Type your question…")}
               disabled={sending}
               data-testid="input-ai-chat"
               className="flex-1"
@@ -213,7 +234,7 @@ export function BashakAIChat() {
               className="text-black shrink-0"
               style={{ background: "var(--gold)" }}
               data-testid="button-ai-chat-send"
-              aria-label="إرسال"
+              aria-label={t("إرسال", "Send")}
             >
               <Send className="h-4 w-4" />
             </Button>

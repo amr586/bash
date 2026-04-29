@@ -8,8 +8,10 @@ import { Loader2, Send } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/api";
+import { useLang } from "@/lib/i18n";
 
 export function ContactSection() {
+  const { lang, t } = useLang();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [name, setName] = useState("");
@@ -32,8 +34,8 @@ export function ContactSection() {
     e.preventDefault();
     if (name.trim().length < 2 || message.trim().length < 2) {
       toast({
-        title: "بيانات ناقصة",
-        description: "اكتب اسمك ورسالتك.",
+        title: t("بيانات ناقصة", "Missing details"),
+        description: t("اكتب اسمك ورسالتك.", "Please add your name and your message."),
         variant: "destructive",
       });
       return;
@@ -51,14 +53,14 @@ export function ContactSection() {
         }),
       });
       toast({
-        title: "وصلتنا رسالتك",
-        description: "هنرد عليك في أقرب وقت.",
+        title: t("وصلتنا رسالتك", "We've got your message"),
+        description: t("هنرد عليك في أقرب وقت.", "We'll get back to you shortly."),
       });
       setMessage("");
     } catch (err) {
       toast({
-        title: "خطأ",
-        description: err instanceof Error ? err.message : "تعذّر الإرسال.",
+        title: t("خطأ", "Error"),
+        description: err instanceof Error ? err.message : t("تعذّر الإرسال.", "Couldn't send your message."),
         variant: "destructive",
       });
     } finally {
@@ -70,7 +72,7 @@ export function ContactSection() {
     <section
       id="contact"
       className="relative py-20 px-4 bg-background"
-      dir="rtl"
+      dir={lang === "ar" ? "rtl" : "ltr"}
     >
       <div className="container mx-auto max-w-3xl">
         <div className="text-center mb-8">
@@ -78,10 +80,13 @@ export function ContactSection() {
             className="text-3xl md:text-4xl font-bold"
             style={{ color: "var(--gold-light)" }}
           >
-            تواصل معنا
+            {t("تواصل معنا", "Contact Us")}
           </h2>
           <p className="text-foreground/70 mt-3">
-            ابعتلنا رسالتك وفريقنا هيرجعلك بأقرب وقت.
+            {t(
+              "ابعتلنا رسالتك وفريقنا هيرجعلك بأقرب وقت.",
+              "Send us a message and our team will reply soon.",
+            )}
           </p>
         </div>
         <Card className="border-border/40 bg-background/60 backdrop-blur">
@@ -89,7 +94,7 @@ export function ContactSection() {
             <form onSubmit={onSubmit} className="grid gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="c-name">الاسم *</Label>
+                  <Label htmlFor="c-name">{t("الاسم *", "Name *")}</Label>
                   <Input
                     id="c-name"
                     value={name}
@@ -99,31 +104,31 @@ export function ContactSection() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="c-phone">رقم الهاتف</Label>
+                  <Label htmlFor="c-phone">{t("رقم الهاتف", "Phone Number")}</Label>
                   <Input
                     id="c-phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     dir="ltr"
-                    className="text-right"
+                    className={lang === "ar" ? "text-right" : ""}
                     maxLength={30}
                   />
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="c-email">الإيميل</Label>
+                <Label htmlFor="c-email">{t("الإيميل", "Email")}</Label>
                 <Input
                   id="c-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   dir="ltr"
-                  className="text-right"
+                  className={lang === "ar" ? "text-right" : ""}
                   maxLength={255}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="c-reason">سبب الاستفسار *</Label>
+                <Label htmlFor="c-reason">{t("سبب الاستفسار *", "Reason *")}</Label>
                 <select
                   id="c-reason"
                   value={reason}
@@ -131,13 +136,13 @@ export function ContactSection() {
                   className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                   data-testid="select-contact-reason"
                 >
-                  <option value="buy">شراء عقار</option>
-                  <option value="general">استفسار</option>
-                  <option value="partner">طلب شراكة</option>
+                  <option value="buy">{t("شراء عقار", "Buying a property")}</option>
+                  <option value="general">{t("استفسار", "General enquiry")}</option>
+                  <option value="partner">{t("طلب شراكة", "Partnership request")}</option>
                 </select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="c-msg">رسالتك *</Label>
+                <Label htmlFor="c-msg">{t("رسالتك *", "Your message *")}</Label>
                 <Textarea
                   id="c-msg"
                   value={message}
@@ -145,7 +150,7 @@ export function ContactSection() {
                   rows={5}
                   maxLength={5000}
                   required
-                  placeholder="ابعتلنا استفسارك أو طلبك..."
+                  placeholder={t("ابعتلنا استفسارك أو طلبك...", "Tell us your enquiry or request…")}
                 />
               </div>
               <div className="flex justify-end">
@@ -156,11 +161,11 @@ export function ContactSection() {
                   style={{ background: "var(--gold)" }}
                 >
                   {sending ? (
-                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    <Loader2 className={`${lang === "ar" ? "ml-2" : "mr-2"} h-4 w-4 animate-spin`} />
                   ) : (
-                    <Send className="ml-2 h-4 w-4" />
+                    <Send className={`${lang === "ar" ? "ml-2" : "mr-2"} h-4 w-4`} />
                   )}
-                  إرسال
+                  {t("إرسال", "Send")}
                 </Button>
               </div>
             </form>

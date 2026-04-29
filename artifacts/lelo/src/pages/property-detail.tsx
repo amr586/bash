@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  ArrowLeft,
   ArrowRight,
   Bath,
   BedDouble,
@@ -30,20 +31,16 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   apiFetch,
-  formatPrice,
-  listingTypeLabels,
-  propertyTypeLabels,
   resolveImageUrl,
+  useFormatPrice,
+  useListingTypeLabels,
+  usePropertyTypeLabels,
   type Property,
 } from "@/lib/api";
-
-const REASON_OPTIONS: { value: string; label: string }[] = [
-  { value: "buy", label: "شراء عقار" },
-  { value: "general", label: "استفسار" },
-  { value: "partner", label: "طلب شراكة" },
-];
+import { useLang } from "@/lib/i18n";
 
 export default function PropertyDetailPage() {
+  const { lang, t } = useLang();
   const [, params] = useRoute<{ id: string }>("/properties/:id");
   const [, navigate] = useLocation();
   const id = params?.id;
@@ -62,21 +59,23 @@ export default function PropertyDetailPage() {
       })
       .catch((e) => {
         setProperty(null);
-        setError(e instanceof Error ? e.message : "تعذّر تحميل العقار.");
+        setError(e instanceof Error ? e.message : t("تعذّر تحميل العقار.", "Couldn't load this property."));
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
+
+  const isAr = lang === "ar";
 
   return (
     <div className="min-h-screen bg-background">
-      <main dir="rtl" className="pt-20 pb-16">
+      <main dir={isAr ? "rtl" : "ltr"} className="pt-20 pb-16">
         <div className="container mx-auto px-4">
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-foreground mb-6"
           >
-            <ArrowRight className="h-4 w-4" />
-            رجوع
+            {isAr ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+            {t("رجوع", "Back")}
           </button>
 
           {loading ? (
@@ -85,12 +84,17 @@ export default function PropertyDetailPage() {
             </div>
           ) : error || !property ? (
             <div className="max-w-xl mx-auto text-center py-24">
-              <h1 className="text-2xl font-bold mb-3">العقار غير متاح</h1>
+              <h1 className="text-2xl font-bold mb-3">
+                {t("العقار غير متاح", "Property unavailable")}
+              </h1>
               <p className="text-foreground/70 mb-6">
-                {error ?? "العقار اللي بتدور عليه مش موجود أو لسه تحت المراجعة."}
+                {error ?? t(
+                  "العقار اللي بتدور عليه مش موجود أو لسه تحت المراجعة.",
+                  "The property you're looking for doesn't exist or is still under review.",
+                )}
               </p>
               <Button asChild className="rounded-xl">
-                <Link href="/">العودة للرئيسية</Link>
+                <Link href="/">{t("العودة للرئيسية", "Back to Home")}</Link>
               </Button>
             </div>
           ) : (
@@ -104,6 +108,12 @@ export default function PropertyDetailPage() {
 }
 
 function PropertyDetail({ property }: { property: Property }) {
+  const { lang, t } = useLang();
+  const formatPrice = useFormatPrice();
+  const listingTypeLabels = useListingTypeLabels();
+  const propertyTypeLabels = usePropertyTypeLabels();
+  const isAr = lang === "ar";
+
   const gallery: string[] = (() => {
     const list = [...(property.imageUrls ?? [])];
     if (
@@ -129,10 +139,10 @@ function PropertyDetail({ property }: { property: Property }) {
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-foreground/30">
-              بدون صورة
+              {t("بدون صورة", "No image")}
             </div>
           )}
-          <div className="absolute top-4 right-4 flex gap-2">
+          <div className={`absolute top-4 ${isAr ? "right-4" : "left-4"} flex gap-2`}>
             <Badge
               className="text-black font-semibold border-0"
               style={{ background: "var(--gold)" }}
@@ -157,7 +167,7 @@ function PropertyDetail({ property }: { property: Property }) {
                     ? "ring-2 ring-[var(--gold)] border-transparent"
                     : "border-border/40 opacity-80 hover:opacity-100"
                 }`}
-                aria-label={`الصورة ${idx + 1}`}
+                aria-label={t(`الصورة ${idx + 1}`, `Image ${idx + 1}`)}
                 data-testid={`thumb-image-${idx}`}
               >
                 <img
@@ -175,7 +185,7 @@ function PropertyDetail({ property }: { property: Property }) {
             <CardContent className="p-6 space-y-3">
               <h2 className="font-semibold text-foreground flex items-center gap-2">
                 <Maximize2 className="h-4 w-4" style={{ color: "var(--gold)" }} />
-                المخطط (2D)
+                {t("المخطط (2D)", "Floor plan (2D)")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {property.floorPlanUrls.map((url, idx) => (
@@ -189,7 +199,7 @@ function PropertyDetail({ property }: { property: Property }) {
                   >
                     <img
                       src={resolveImageUrl(url)}
-                      alt={`مخطط ${idx + 1}`}
+                      alt={t(`مخطط ${idx + 1}`, `Plan ${idx + 1}`)}
                       className="absolute inset-0 w-full h-full object-contain group-hover:scale-[1.02] transition-transform"
                     />
                   </a>
@@ -223,26 +233,30 @@ function PropertyDetail({ property }: { property: Property }) {
             <div className="grid grid-cols-3 gap-3">
               <DetailStat
                 icon={<BedDouble className="h-4 w-4" />}
-                label="غرف"
+                label={t("غرف", "Bedrooms")}
                 value={property.bedrooms != null ? String(property.bedrooms) : "—"}
               />
               <DetailStat
                 icon={<Bath className="h-4 w-4" />}
-                label="حمامات"
+                label={t("حمامات", "Bathrooms")}
                 value={
                   property.bathrooms != null ? String(property.bathrooms) : "—"
                 }
               />
               <DetailStat
                 icon={<Maximize2 className="h-4 w-4" />}
-                label="المساحة"
-                value={property.area != null ? `${property.area} م²` : "—"}
+                label={t("المساحة", "Area")}
+                value={
+                  property.area != null
+                    ? t(`${property.area} م²`, `${property.area} m²`)
+                    : "—"
+                }
               />
             </div>
 
             {property.description && (
               <div>
-                <h2 className="font-semibold mb-2">وصف العقار</h2>
+                <h2 className="font-semibold mb-2">{t("وصف العقار", "About this property")}</h2>
                 <p className="text-foreground/80 whitespace-pre-wrap leading-relaxed">
                   {property.description}
                 </p>
@@ -259,9 +273,9 @@ function PropertyDetail({ property }: { property: Property }) {
                   data-testid="link-maps"
                 >
                   <a href={property.mapsLink} target="_blank" rel="noreferrer">
-                    <MapPin className="ml-2 h-4 w-4" />
-                    افتح الموقع على جوجل ماب
-                    <ExternalLink className="mr-2 h-3.5 w-3.5 opacity-60" />
+                    <MapPin className={`${isAr ? "ml-2" : "mr-2"} h-4 w-4`} />
+                    {t("افتح الموقع على جوجل ماب", "Open location on Google Maps")}
+                    <ExternalLink className={`${isAr ? "mr-2" : "ml-2"} h-3.5 w-3.5 opacity-60`} />
                   </a>
                 </Button>
               </div>
@@ -275,8 +289,8 @@ function PropertyDetail({ property }: { property: Property }) {
                   style={{ background: "var(--gold)" }}
                 >
                   <a href={`tel:${property.contactPhone}`}>
-                    <Phone className="ml-2 h-4 w-4" />
-                    اتصال مباشر
+                    <Phone className={`${isAr ? "ml-2" : "mr-2"} h-4 w-4`} />
+                    {t("اتصال مباشر", "Call now")}
                   </a>
                 </Button>
                 <Button
@@ -290,8 +304,8 @@ function PropertyDetail({ property }: { property: Property }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <MessageCircle className="ml-2 h-4 w-4" />
-                    واتساب
+                    <MessageCircle className={`${isAr ? "ml-2" : "mr-2"} h-4 w-4`} />
+                    {t("واتساب", "WhatsApp")}
                   </a>
                 </Button>
               </div>
@@ -334,14 +348,21 @@ function DetailStat({
 }
 
 function ContactPropertyForm({ property }: { property: Property }) {
+  const { lang, t } = useLang();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [reason, setReason] = useState("viewing");
+  const [reason, setReason] = useState("buy");
   const [extra, setExtra] = useState("");
   const [sending, setSending] = useState(false);
+
+  const REASON_OPTIONS = [
+    { value: "buy", label: t("شراء عقار", "Buying a property") },
+    { value: "general", label: t("استفسار", "General enquiry") },
+    { value: "partner", label: t("طلب شراكة", "Partnership request") },
+  ];
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -356,14 +377,14 @@ function ContactPropertyForm({ property }: { property: Property }) {
     e.preventDefault();
     if (name.trim().length < 2) {
       toast({
-        title: "بيانات ناقصة",
-        description: "اكتب اسمك على الأقل.",
+        title: t("بيانات ناقصة", "Missing details"),
+        description: t("اكتب اسمك على الأقل.", "Please add your name."),
         variant: "destructive",
       });
       return;
     }
     const reasonLabel =
-      REASON_OPTIONS.find((r) => r.value === reason)?.label ?? "استفسار";
+      REASON_OPTIONS.find((r) => r.value === reason)?.label ?? t("استفسار", "Enquiry");
     const composedMessage = extra.trim()
       ? `[${reasonLabel}] ${extra.trim()}`
       : `[${reasonLabel}]`;
@@ -381,14 +402,18 @@ function ContactPropertyForm({ property }: { property: Property }) {
         }),
       });
       toast({
-        title: "تم إرسال طلبك",
-        description: "هنرجعلك على بياناتك في أقرب وقت.",
+        title: t("تم إرسال طلبك", "Your request has been sent"),
+        description: t(
+          "هنرجعلك على بياناتك في أقرب وقت.",
+          "We'll get back to you as soon as possible.",
+        ),
       });
       setExtra("");
     } catch (err) {
       toast({
-        title: "خطأ",
-        description: err instanceof Error ? err.message : "تعذّر الإرسال.",
+        title: t("خطأ", "Error"),
+        description:
+          err instanceof Error ? err.message : t("تعذّر الإرسال.", "Couldn't send your request."),
         variant: "destructive",
       });
     } finally {
@@ -396,19 +421,24 @@ function ContactPropertyForm({ property }: { property: Property }) {
     }
   }
 
+  const isAr = lang === "ar";
+
   return (
     <Card
       className="border-border/40 bg-background/60 backdrop-blur sticky top-24"
-      dir="rtl"
+      dir={isAr ? "rtl" : "ltr"}
     >
       <CardContent className="p-6">
-        <h2 className="text-lg font-semibold mb-1">تواصل معنا</h2>
+        <h2 className="text-lg font-semibold mb-1">{t("تواصل معنا", "Contact Us")}</h2>
         <p className="text-xs text-foreground/60 mb-5">
-          ابعتلنا بياناتك وهنرجعلك بخصوص "{property.title}".
+          {t(
+            <>ابعتلنا بياناتك وهنرجعلك بخصوص "{property.title}".</>,
+            <>Send us your details and we'll get back to you about "{property.title}".</>,
+          )}
         </p>
         <form onSubmit={onSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="cd-name">الاسم *</Label>
+            <Label htmlFor="cd-name">{t("الاسم *", "Name *")}</Label>
             <Input
               id="cd-name"
               value={name}
@@ -418,32 +448,32 @@ function ContactPropertyForm({ property }: { property: Property }) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="cd-phone">رقم الهاتف</Label>
+            <Label htmlFor="cd-phone">{t("رقم الهاتف", "Phone Number")}</Label>
             <Input
               id="cd-phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               dir="ltr"
-              className="text-right"
+              className={isAr ? "text-right" : ""}
               maxLength={30}
-              placeholder="مثال: 01151313999"
+              placeholder={t("مثال: 01151313999", "e.g. 01151313999")}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="cd-email">الإيميل</Label>
+            <Label htmlFor="cd-email">{t("الإيميل", "Email")}</Label>
             <Input
               id="cd-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               dir="ltr"
-              className="text-right"
+              className={isAr ? "text-right" : ""}
               maxLength={255}
               placeholder="you@example.com"
             />
           </div>
           <div className="grid gap-2">
-            <Label>سبب التواصل *</Label>
+            <Label>{t("سبب التواصل *", "Reason for contact *")}</Label>
             <Select value={reason} onValueChange={setReason}>
               <SelectTrigger>
                 <SelectValue />
@@ -458,14 +488,17 @@ function ContactPropertyForm({ property }: { property: Property }) {
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="cd-extra">إضافة أخرى</Label>
+            <Label htmlFor="cd-extra">{t("إضافة أخرى", "Additional notes")}</Label>
             <Textarea
               id="cd-extra"
               value={extra}
               onChange={(e) => setExtra(e.target.value)}
               rows={4}
               maxLength={5000}
-              placeholder="أي تفاصيل إضافية تحب توضحها..."
+              placeholder={t(
+                "أي تفاصيل إضافية تحب توضحها...",
+                "Any extra details you'd like to share…",
+              )}
             />
           </div>
           <Button
@@ -475,11 +508,11 @@ function ContactPropertyForm({ property }: { property: Property }) {
             style={{ background: "var(--gold)" }}
           >
             {sending ? (
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              <Loader2 className={`${isAr ? "ml-2" : "mr-2"} h-4 w-4 animate-spin`} />
             ) : (
-              <Send className="ml-2 h-4 w-4" />
+              <Send className={`${isAr ? "ml-2" : "mr-2"} h-4 w-4`} />
             )}
-            إرسال الطلب
+            {t("إرسال الطلب", "Send Request")}
           </Button>
         </form>
       </CardContent>
