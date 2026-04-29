@@ -159,7 +159,7 @@ export function PropertySearch() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-foreground/60 mb-1 block">
+                  <label className="text-xs mb-1 block text-[#c28a2f99]">
                     {t("المساحة (م²)", "Area (m²)")}
                   </label>
                   <Input
