@@ -120,7 +120,7 @@ export function PropertySearch() {
             <div className="mt-5 pt-5 border-t border-foreground/5">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-xs text-foreground/60 mb-1 block">
+                  <label className="text-xs mb-1 block text-[#96742c99]">
                     {t("السعر الأدنى", "Min price")}
                   </label>
                   <Input
