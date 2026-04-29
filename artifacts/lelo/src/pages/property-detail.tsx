@@ -263,21 +263,48 @@ function PropertyDetail({ property }: { property: Property }) {
               </div>
             )}
 
-            {property.mapsLink && (
-              <div className="pt-2 border-t border-border/30">
-                <Button
-                  asChild
-                  variant="outline"
-                  className="rounded-xl"
-                  style={{ borderColor: "var(--gold)", color: "var(--gold-light)" }}
-                  data-testid="link-maps"
+            {(property.mapsLink || property.location) && (
+              <div className="pt-4 border-t border-border/30 flex flex-col items-center gap-3">
+                <a
+                  href={
+                    property.mapsLink ||
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location ?? property.title)}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="link-property-map-circle"
+                  aria-label={t("افتح موقع العقار على جوجل ماب", "Open property location on Google Maps")}
+                  className="relative block rounded-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-2xl w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72"
+                  style={{
+                    border: "4px solid var(--gold)",
+                    boxShadow:
+                      "0 0 0 2px rgba(198,155,27,0.25), 0 10px 30px -10px rgba(198,155,27,0.45)",
+                  }}
                 >
-                  <a href={property.mapsLink} target="_blank" rel="noreferrer">
-                    <MapPin className={`${isAr ? "ml-2" : "mr-2"} h-4 w-4`} />
-                    {t("افتح الموقع على جوجل ماب", "Open location on Google Maps")}
-                    <ExternalLink className={`${isAr ? "mr-2" : "ml-2"} h-3.5 w-3.5 opacity-60`} />
-                  </a>
-                </Button>
+                  <iframe
+                    title={t("موقع العقار على الخريطة", "Property location on the map")}
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(property.location ?? property.title)}&output=embed`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="absolute inset-0 w-full h-full"
+                    style={{ border: 0, pointerEvents: "none" }}
+                  />
+                </a>
+                <a
+                  href={
+                    property.mapsLink ||
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location ?? property.title)}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="link-maps"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+                  style={{ color: "var(--gold-light)" }}
+                >
+                  <MapPin className="h-4 w-4" />
+                  {t("افتح الموقع على جوجل ماب", "Open location on Google Maps")}
+                  <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+                </a>
               </div>
             )}
 
