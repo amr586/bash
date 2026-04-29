@@ -174,7 +174,7 @@ export function PropertySearch() {
               </div>
 
               <div className="mt-5">
-                <div className="text-xs text-foreground/60 mb-2 flex items-center gap-1">
+                <div className="text-xs mb-2 flex items-center gap-1 text-[#7f5f2199]">
                   <MapPin className="h-3.5 w-3.5" />
                   {t("مناطق سريعة", "Quick locations")}
                 </div>
