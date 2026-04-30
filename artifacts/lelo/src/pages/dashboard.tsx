@@ -48,6 +48,7 @@ const ALL_TABS = [
   "recommended",
   "favorites",
   "contact-us",
+  "my-contact-requests",
   "my-properties",
   "edit-properties",
   "contact-requests",
@@ -80,10 +81,15 @@ export default function DashboardPage() {
             "edit-properties",
             "contact-requests",
             "favorites",
-            "contact-us",
             "notifications",
           ]
-        : ["recommended", "favorites", "contact-us", "notifications"],
+        : [
+            "recommended",
+            "favorites",
+            "contact-us",
+            "my-contact-requests",
+            "notifications",
+          ],
     [staff],
   );
 
@@ -95,6 +101,7 @@ export default function DashboardPage() {
   const [mine, setMine] = useState<Property[] | null>(null);
   const [allProperties, setAllProperties] = useState<Property[] | null>(null);
   const [contacts, setContacts] = useState<ContactRequest[] | null>(null);
+  const [sentContacts, setSentContacts] = useState<ContactRequest[] | null>(null);
   const [notifications, setNotifications] = useState<Notification[] | null>(
     null,
   );
@@ -156,17 +163,24 @@ export default function DashboardPage() {
         .then((d) => setAllProperties(d.properties))
         .catch(() => setAllProperties([]));
     } else if (tab === "contact-requests" && contacts == null) {
-      apiFetch<{ contactRequests: ContactRequest[] }>(
-        "/api/me/contact-requests",
-      )
+      const url = staff
+        ? "/api/admin/contact-requests"
+        : "/api/me/contact-requests";
+      apiFetch<{ contactRequests: ContactRequest[] }>(url)
         .then((d) => setContacts(d.contactRequests))
         .catch(() => setContacts([]));
+    } else if (tab === "my-contact-requests" && sentContacts == null) {
+      apiFetch<{ contactRequests: ContactRequest[] }>(
+        "/api/me/sent-contact-requests",
+      )
+        .then((d) => setSentContacts(d.contactRequests))
+        .catch(() => setSentContacts([]));
     } else if (tab === "notifications" && notifications == null) {
       apiFetch<{ notifications: Notification[] }>("/api/me/notifications")
         .then((d) => setNotifications(d.notifications))
         .catch(() => setNotifications([]));
     }
-  }, [tab, isAuthenticated, recommended, favorites, mine, allProperties, contacts, notifications]);
+  }, [tab, isAuthenticated, staff, recommended, favorites, mine, allProperties, contacts, sentContacts, notifications]);
 
   async function onNotificationClick(n: Notification) {
     if (!n.isRead) {
@@ -256,7 +270,7 @@ export default function DashboardPage() {
         <Tabs value={tab} onValueChange={changeTab} dir={isAr ? "rtl" : "ltr"}>
           <TabsList
             className={`grid grid-cols-2 ${
-              staff ? "md:grid-cols-7" : "md:grid-cols-4"
+              staff ? "md:grid-cols-6" : "md:grid-cols-5"
             } w-full h-auto`}
           >
             <TabsTrigger value="recommended" className="gap-1.5" data-testid="tab-recommended">
@@ -275,15 +289,22 @@ export default function DashboardPage() {
             {staff && (
               <TabsTrigger value="contact-requests" className="gap-1.5" data-testid="tab-contact-requests">
                 <Inbox className="h-4 w-4" />{" "}
-                {t("طلبات على عقاراتي", "Requests on my listings")}
+                {t("طلبات التواصل", "Contact requests")}
               </TabsTrigger>
             )}
             <TabsTrigger value="favorites" className="gap-1.5" data-testid="tab-favorites">
               <Heart className="h-4 w-4" /> {t("المفضلة", "Favorites")}
             </TabsTrigger>
-            <TabsTrigger value="contact-us" className="gap-1.5" data-testid="tab-contact-us">
-              <MessageSquare className="h-4 w-4" /> {t("تواصل معنا", "Contact us")}
-            </TabsTrigger>
+            {!staff && (
+              <TabsTrigger value="contact-us" className="gap-1.5" data-testid="tab-contact-us">
+                <MessageSquare className="h-4 w-4" /> {t("تواصل معنا", "Contact us")}
+              </TabsTrigger>
+            )}
+            {!staff && (
+              <TabsTrigger value="my-contact-requests" className="gap-1.5" data-testid="tab-my-contact-requests">
+                <Inbox className="h-4 w-4" /> {t("طلبات تواصلك", "Your requests")}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="notifications" className="gap-1.5" data-testid="tab-notifications">
               <Bell className="h-4 w-4" /> {t("الإشعارات", "Notifications")}
             </TabsTrigger>
@@ -417,28 +438,56 @@ export default function DashboardPage() {
             <TabsContent value="contact-requests" className="mt-6">
               <SectionWrapper
                 empty={t(
-                  "مفيش طلبات تواصل على عقاراتك حتى الآن.",
-                  "No contact requests on your listings yet.",
+                  "مفيش طلبات تواصل لسه.",
+                  "No contact requests yet.",
                 )}
                 data={contacts}
               >
                 {contacts && contacts.length > 0 && (
+                  <div className="space-y-3">
+                    {contacts.map((c) => (
+                      <StaffContactRequestCard
+                        key={c.id}
+                        contact={c}
+                        isAr={isAr}
+                        t={t}
+                        onReplied={(updated) =>
+                          setContacts((prev) =>
+                            prev
+                              ? prev.map((x) =>
+                                  x.id === c.id ? { ...x, ...updated } : x,
+                                )
+                              : prev,
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
+              </SectionWrapper>
+            </TabsContent>
+          )}
+
+          {!staff && (
+            <TabsContent value="my-contact-requests" className="mt-6">
+              <SectionWrapper
+                empty={t(
+                  "لسه ما بعتش أي طلب تواصل.",
+                  "You haven't sent any contact requests yet.",
+                )}
+                data={sentContacts}
+              >
+                {sentContacts && sentContacts.length > 0 && (
                   <Card className="border-border/40 bg-background/60 backdrop-blur">
                     <CardContent className="p-0">
                       <ul className="divide-y divide-border/30">
-                        {contacts.map((c) => (
-                          <li key={c.id} className="p-4 space-y-1">
+                        {sentContacts.map((c) => (
+                          <li key={c.id} className="p-4 space-y-2">
                             <div className="flex items-center justify-between flex-wrap gap-2">
                               <div className="font-semibold">
-                                {c.name}{" "}
-                                {!c.isRead && (
-                                  <Badge
-                                    className="border-0 text-black font-semibold"
-                                    style={{ background: "var(--gold)" }}
-                                  >
-                                    {t("جديد", "New")}
-                                  </Badge>
-                                )}
+                                {c.reason
+                                  ? c.reason
+                                  : t("طلب تواصل", "Contact request")}
                               </div>
                               <div className="text-xs text-foreground/60">
                                 {formatRelative(c.createdAt)}
@@ -450,29 +499,42 @@ export default function DashboardPage() {
                                 {c.propertyTitle}
                               </div>
                             )}
-                            <div className="text-sm text-foreground/80">
+                            <div className="text-sm text-foreground/80 whitespace-pre-wrap">
                               {c.message}
                             </div>
-                            <div className="flex gap-3 text-xs text-foreground/60">
-                              {c.phone && (
-                                <a
-                                  href={`tel:${c.phone}`}
-                                  dir="ltr"
-                                  className="hover:text-foreground"
+                            {c.replyMessage ? (
+                              <div
+                                className="rounded-md p-3 text-sm whitespace-pre-wrap"
+                                style={{
+                                  background: "var(--gold)/10",
+                                  border: "1px solid var(--gold)",
+                                  backgroundColor: "rgba(212,175,55,0.08)",
+                                }}
+                              >
+                                <div
+                                  className="text-xs font-semibold mb-1"
+                                  style={{ color: "var(--gold-light)" }}
                                 >
-                                  {c.phone}
-                                </a>
-                              )}
-                              {c.email && (
-                                <a
-                                  href={`mailto:${c.email}`}
-                                  dir="ltr"
-                                  className="hover:text-foreground"
-                                >
-                                  {c.email}
-                                </a>
-                              )}
-                            </div>
+                                  {t("رد فريق الدعم", "Support reply")}
+                                  {c.repliedAt && (
+                                    <span className="text-foreground/60 font-normal">
+                                      {" · "}
+                                      {formatRelative(c.repliedAt)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-foreground/90">
+                                  {c.replyMessage}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-xs text-foreground/50">
+                                {t(
+                                  "لسه ما حدش رد. هنبعتلك إشعار لما الدعم يرد.",
+                                  "No reply yet. You'll be notified when support responds.",
+                                )}
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -796,6 +858,171 @@ function ContactUsPanel({
             </Button>
           </div>
         </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StaffContactRequestCard({
+  contact,
+  isAr,
+  t,
+  onReplied,
+}: {
+  contact: ContactRequest;
+  isAr: boolean;
+  t: (ar: string, en: string) => string;
+  onReplied: (updated: Partial<ContactRequest>) => void;
+}) {
+  const [reply, setReply] = useState(contact.replyMessage ?? "");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const alreadyReplied = !!contact.replyMessage;
+
+  async function send() {
+    const trimmed = reply.trim();
+    if (!trimmed) return;
+    setSending(true);
+    setError(null);
+    try {
+      const res = await apiFetch<{ contactRequest: ContactRequest }>(
+        `/api/admin/contact-requests/${contact.id}/reply`,
+        {
+          method: "POST",
+          body: JSON.stringify({ replyMessage: trimmed }),
+        },
+      );
+      onReplied({
+        replyMessage: res.contactRequest.replyMessage,
+        repliedAt: res.contactRequest.repliedAt,
+        isRead: true,
+      });
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : t("حصلت مشكلة، حاول تاني.", "Something went wrong, try again."),
+      );
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <Card className="border-border/40 bg-background/60 backdrop-blur">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="font-semibold flex items-center gap-2 flex-wrap">
+            <span>{contact.name}</span>
+            {!contact.isRead && !alreadyReplied && (
+              <Badge
+                className="border-0 text-black font-semibold"
+                style={{ background: "var(--gold)" }}
+              >
+                {t("جديد", "New")}
+              </Badge>
+            )}
+            {alreadyReplied && (
+              <Badge
+                variant="outline"
+                className="border-foreground/30 text-foreground/70"
+              >
+                {t("تم الرد", "Replied")}
+              </Badge>
+            )}
+          </div>
+          <div className="text-xs text-foreground/60">
+            {formatRelative(contact.createdAt)}
+          </div>
+        </div>
+
+        {contact.reason && (
+          <div className="text-xs text-foreground/70">
+            {t("السبب: ", "Reason: ")}
+            {contact.reason}
+          </div>
+        )}
+        {contact.propertyTitle && (
+          <div className="text-xs text-foreground/70">
+            {t("عن عقار: ", "About: ")}
+            {contact.propertyTitle}
+          </div>
+        )}
+
+        <div className="text-sm text-foreground/85 whitespace-pre-wrap">
+          {contact.message}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {contact.phone && (
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="border-[var(--gold)]/40 hover:bg-[var(--gold)]/10"
+              data-testid={`button-call-${contact.id}`}
+            >
+              <a href={`tel:${contact.phone}`} dir="ltr">
+                {t("اتصال", "Call")} · {contact.phone}
+              </a>
+            </Button>
+          )}
+          {contact.email && (
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="border-[var(--gold)]/40 hover:bg-[var(--gold)]/10"
+              data-testid={`button-email-${contact.id}`}
+            >
+              <a href={`mailto:${contact.email}`} dir="ltr">
+                {t("إيميل", "Email")} · {contact.email}
+              </a>
+            </Button>
+          )}
+        </div>
+
+        <div className="space-y-2 pt-2 border-t border-border/30">
+          <Label htmlFor={`reply-${contact.id}`} className="text-xs">
+            {alreadyReplied
+              ? t("ردك السابق", "Your previous reply")
+              : t("رد مباشر", "Direct reply")}
+          </Label>
+          <Textarea
+            id={`reply-${contact.id}`}
+            rows={3}
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            placeholder={t(
+              "اكتب ردك هنا...",
+              "Type your reply here…",
+            )}
+            data-testid={`input-reply-${contact.id}`}
+            dir={isAr ? "rtl" : "ltr"}
+          />
+          {error && (
+            <div className="text-xs text-red-400">{error}</div>
+          )}
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              onClick={send}
+              disabled={sending || !reply.trim()}
+              className="text-black font-semibold"
+              style={{ background: "var(--gold)" }}
+              data-testid={`button-send-reply-${contact.id}`}
+            >
+              {sending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : alreadyReplied ? (
+                t("تحديث الرد", "Update reply")
+              ) : (
+                t("إرسال الرد", "Send reply")
+              )}
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

@@ -107,6 +107,9 @@ export const contactRequestsTable = pgTable(
     phone: varchar("phone", { length: 30 }),
     reason: varchar("reason", { length: 32 }).notNull().default("general"),
     message: text("message").notNull(),
+    userId: varchar("user_id").references(() => usersTable.id, {
+      onDelete: "set null",
+    }),
     propertyId: varchar("property_id").references(() => propertiesTable.id, {
       onDelete: "set null",
     }),
@@ -115,6 +118,11 @@ export const contactRequestsTable = pgTable(
       { onDelete: "set null" },
     ),
     isRead: boolean("is_read").notNull().default(false),
+    replyMessage: text("reply_message"),
+    repliedAt: timestamp("replied_at", { withTimezone: true }),
+    repliedById: varchar("replied_by_id").references(() => usersTable.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -122,6 +130,7 @@ export const contactRequestsTable = pgTable(
   (table) => [
     index("idx_contact_property").on(table.propertyId),
     index("idx_contact_owner").on(table.propertyOwnerId),
+    index("idx_contact_user").on(table.userId),
     index("idx_contact_created").on(table.createdAt),
   ],
 );
@@ -135,6 +144,7 @@ export const notificationTypeValues = [
   "property_rejected",
   "contact_request_general",
   "contact_request_property",
+  "contact_request_reply",
   "admin_added_property",
 ] as const;
 export type NotificationType = (typeof notificationTypeValues)[number];

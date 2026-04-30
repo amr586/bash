@@ -75,6 +75,17 @@ The import was already structured as a pnpm_workspace Vite app (no Next.js conve
   - New `lib/locations.ts` exports `translateLocation(loc, lang)` with an Arabic→English map of common Cairo/Egypt areas (التجمع الخامس → Fifth Settlement, etc). The DB still stores the canonical Arabic string; only the displayed label switches with `lang`. Used by `LocationField` (dropdown options + placeholder), `PropertyCard` (location row), `PropertySearch` (quick-location chips). Unknown locations fall back to the original string.
   - `LocationField` placeholder, label, custom-area input, and "other area" option now go through `useLang().t(...)`.
   - Pages translated end-to-end via `useLang()`: `pages/login.tsx` (login + signup tabs, all field labels, password rules, OTP screen, error toasts), `pages/profile.tsx` (header buttons, avatar buttons, all form fields + helper text + toast titles/descriptions), `pages/dashboard.tsx` (welcome header, action buttons, all 6 tab labels, every empty-state message, contact-us inline form including reasons select labels). All three pages also flip `dir` and icon margin (ml/mr) based on `lang`.
+- **Phase 2.8 — Contact-request inbox + replies (DONE)**
+  - DB (`lib/db/src/schema/properties.ts`): `contact_requests` gained `userId` (FK → users, set null on delete), `replyMessage`, `repliedAt`, `repliedById`. Added `idx_contact_user`. `notificationTypeValues` got `contact_request_reply`.
+  - `support` is now a recognised staff role on the frontend (`STAFF_ROLES` in `artifacts/lelo/src/lib/roles.ts`); DB enum already had it.
+  - API (`artifacts/api-server/src/routes/contact.ts`):
+    - `POST /api/contact` — captures `userId` when authed and calls `notifyAllStaff` (helper in `lib/notifications.ts`, targets `isAdmin=true` OR role in super_admin/admin/property_manager/data_entry/support). Notification links to `/dashboard?tab=contact-requests`.
+    - `GET /api/me/sent-contact-requests` — user-only, returns the user's own submissions plus any reply.
+    - `GET /api/admin/contact-requests` — staff-only (was admin-only); includes `userId` so we can link back to the sender.
+    - `POST /api/admin/contact-requests/:id/reply` — body `{ replyMessage }`, persists reply + marks read, then notifies the sender (`type: "contact_request_reply"`, link `/dashboard?tab=my-contact-requests`). Returns `{ success, contactRequest: { id, replyMessage, repliedAt, isRead } }`.
+  - Dashboard (`artifacts/lelo/src/pages/dashboard.tsx`):
+    - Staff tabs no longer include `contact-us` (it's purely a user-facing tab). Staff `contact-requests` tab now shows ALL contact requests with a `StaffContactRequestCard` per row: tel:/mailto: action buttons + inline reply textarea → POST reply. "تم الرد" badge once a reply exists.
+    - Non-staff tab order: `recommended / favorites / contact-us / my-contact-requests / notifications`. The new `my-contact-requests` tab fetches `/api/me/sent-contact-requests` and shows each request with its support reply (gold callout) or a "no reply yet" hint.
 - **Phase 3 — Media library (planned)**: YouTube videos curated by admin, public gallery.
 - **Phase 4 — Site polish (planned)**: EN/AR toggle, Google Maps footer, full-screen loader, public property listings + filters + detail page.
 

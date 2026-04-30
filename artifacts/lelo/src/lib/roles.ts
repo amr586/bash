@@ -5,6 +5,7 @@ export const STAFF_ROLES = [
   "admin",
   "property_manager",
   "data_entry",
+  "support",
 ] as const;
 
 export type StaffRole = (typeof STAFF_ROLES)[number];

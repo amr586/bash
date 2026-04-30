@@ -71,11 +71,15 @@ export type ContactRequest = {
   name: string;
   email: string | null;
   phone: string | null;
+  reason?: string | null;
   message: string;
   propertyId: string | null;
   propertyTitle: string | null;
+  userId?: string | null;
   isRead: boolean;
   createdAt: string;
+  replyMessage?: string | null;
+  repliedAt?: string | null;
 };
 
 export type Notification = {
