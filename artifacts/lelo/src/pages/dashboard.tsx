@@ -27,6 +27,7 @@ import {
   Inbox,
   Loader2,
   MessageSquare,
+  Pencil,
   Plus,
   Send,
   User as UserIcon,
@@ -48,6 +49,7 @@ const ALL_TABS = [
   "favorites",
   "contact-us",
   "my-properties",
+  "edit-properties",
   "contact-requests",
   "notifications",
 ] as const;
@@ -75,6 +77,7 @@ export default function DashboardPage() {
         ? [
             "recommended",
             "my-properties",
+            "edit-properties",
             "contact-requests",
             "favorites",
             "contact-us",
@@ -90,6 +93,7 @@ export default function DashboardPage() {
   const [favorites, setFavorites] = useState<Property[] | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [mine, setMine] = useState<Property[] | null>(null);
+  const [allProperties, setAllProperties] = useState<Property[] | null>(null);
   const [contacts, setContacts] = useState<ContactRequest[] | null>(null);
   const [notifications, setNotifications] = useState<Notification[] | null>(
     null,
@@ -147,6 +151,10 @@ export default function DashboardPage() {
       apiFetch<{ properties: Property[] }>("/api/me/properties")
         .then((d) => setMine(d.properties))
         .catch(() => setMine([]));
+    } else if (tab === "edit-properties" && allProperties == null) {
+      apiFetch<{ properties: Property[] }>("/api/admin/properties")
+        .then((d) => setAllProperties(d.properties))
+        .catch(() => setAllProperties([]));
     } else if (tab === "contact-requests" && contacts == null) {
       apiFetch<{ contactRequests: ContactRequest[] }>(
         "/api/me/contact-requests",
@@ -158,7 +166,7 @@ export default function DashboardPage() {
         .then((d) => setNotifications(d.notifications))
         .catch(() => setNotifications([]));
     }
-  }, [tab, isAuthenticated, recommended, favorites, mine, contacts, notifications]);
+  }, [tab, isAuthenticated, recommended, favorites, mine, allProperties, contacts, notifications]);
 
   async function onNotificationClick(n: Notification) {
     if (!n.isRead) {
@@ -248,7 +256,7 @@ export default function DashboardPage() {
         <Tabs value={tab} onValueChange={changeTab} dir={isAr ? "rtl" : "ltr"}>
           <TabsList
             className={`grid grid-cols-2 ${
-              staff ? "md:grid-cols-6" : "md:grid-cols-4"
+              staff ? "md:grid-cols-7" : "md:grid-cols-4"
             } w-full h-auto`}
           >
             <TabsTrigger value="recommended" className="gap-1.5" data-testid="tab-recommended">
@@ -257,6 +265,11 @@ export default function DashboardPage() {
             {staff && (
               <TabsTrigger value="my-properties" className="gap-1.5" data-testid="tab-my-properties">
                 <Plus className="h-4 w-4" /> {t("عقاراتي", "My properties")}
+              </TabsTrigger>
+            )}
+            {staff && (
+              <TabsTrigger value="edit-properties" className="gap-1.5" data-testid="tab-edit-properties">
+                <Pencil className="h-4 w-4" /> {t("تعديل عقار", "Edit property")}
               </TabsTrigger>
             )}
             {staff && (
@@ -331,6 +344,48 @@ export default function DashboardPage() {
               defaultEmail={user.email ?? ""}
             />
           </TabsContent>
+
+          {staff && (
+            <TabsContent value="edit-properties" className="mt-6">
+              <SectionWrapper
+                empty={t(
+                  "مفيش عقارات هنا لسه.",
+                  "No properties yet.",
+                )}
+                data={allProperties}
+              >
+                {allProperties && allProperties.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {allProperties.map((p) => (
+                      <PropertyCard
+                        key={p.id}
+                        property={p}
+                        showStatus
+                        isFavorite={favoriteIds.has(p.id)}
+                        onFavoriteChange={(next) => onFavoriteChange(p.id, next)}
+                        actions={
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/edit-property/${p.id}`)}
+                            className="rounded-lg w-full"
+                            style={{
+                              borderColor: "var(--gold)",
+                              color: "var(--gold-light)",
+                            }}
+                            data-testid={`button-edit-property-${p.id}`}
+                          >
+                            <Pencil className={`${iconMargin} h-3.5 w-3.5`} />
+                            {t("تعديل", "Edit")}
+                          </Button>
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
+              </SectionWrapper>
+            </TabsContent>
+          )}
 
           {staff && (
             <TabsContent value="my-properties" className="mt-6">
