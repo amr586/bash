@@ -64,8 +64,10 @@ The import was already structured as a pnpm_workspace Vite app (no Next.js conve
   - API (`artifacts/api-server/src/routes/favorites.ts`): `GET /api/me/favorites` (full property objects), `GET /api/me/favorites/ids` (just ids — used to render the heart state on listings), `POST /api/favorites/:id`, `DELETE /api/favorites/:id`. All require auth.
   - `PropertyCard` shows a heart toggle in the top corner (opposite of the listing badge). Anonymous taps redirect to `/login`. Cards accept `isFavorite` + `onFavoriteChange` for parent-controlled state, otherwise track locally.
   - Dashboard tabs are now role-aware:
-    - All users: `recommended`, `favorites`, `contact-us`, `notifications`.
-    - Staff (super_admin / admin / property_manager / data_entry / legacy isAdmin): the above + `my-properties` and `contact-requests`.
+    - Regular / demo users: `recommended`, `favorites`, `contact-us`, `my-contact-requests`, `notifications`.
+    - Property managers / data entry: `recommended`, `my-properties`, `edit-properties`, `favorites`, `notifications`.
+    - Support: `recommended`, `contact-requests`, `favorites`, `notifications`.
+    - Admin / super_admin: all tabs.
   - `contact-us` tab embeds an inline form (name/phone/email/reason/message) that POSTs to `/api/contact`. Pre-fills name/phone/email from the logged-in user.
   - Bug fix: dashboard previously used `isStaff(user)` without importing it — now imported from `@/lib/roles`.
   - Test accounts seeded by `pnpm --filter db run seed` (script: `lib/db/scripts/seed-test-users.mjs`). Re-run is idempotent (`ON CONFLICT (email) DO UPDATE`). Also chained from `scripts/post-merge.sh` so merges keep accounts in sync.

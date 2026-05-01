@@ -41,7 +41,7 @@ import {
   type Notification,
   type Property,
 } from "@/lib/api";
-import { isStaff } from "@/lib/roles";
+import { isStaff, canManageProperties, canHandleSupport } from "@/lib/roles";
 import { useLang } from "@/lib/i18n";
 
 const ALL_TABS = [
@@ -72,26 +72,25 @@ export default function DashboardPage() {
   const iconMargin = isAr ? "ml-2" : "mr-2";
 
   const staff = isStaff(user);
-  const allowedTabs: readonly TabKey[] = useMemo(
-    () =>
-      staff
-        ? [
-            "recommended",
-            "my-properties",
-            "edit-properties",
-            "contact-requests",
-            "favorites",
-            "notifications",
-          ]
-        : [
-            "recommended",
-            "favorites",
-            "contact-us",
-            "my-contact-requests",
-            "notifications",
-          ],
-    [staff],
-  );
+  const canProps = canManageProperties(user);
+  const canSupport = canHandleSupport(user);
+
+  const allowedTabs: readonly TabKey[] = useMemo(() => {
+    if (!staff) {
+      return [
+        "recommended",
+        "favorites",
+        "contact-us",
+        "my-contact-requests",
+        "notifications",
+      ];
+    }
+    const tabs: TabKey[] = ["recommended"];
+    if (canProps) tabs.push("my-properties", "edit-properties");
+    if (canSupport) tabs.push("contact-requests");
+    tabs.push("favorites", "notifications");
+    return tabs;
+  }, [staff, canProps, canSupport]);
 
   const [tab, setTab] = useState<TabKey>(() => readTabFromHash(allowedTabs));
 
