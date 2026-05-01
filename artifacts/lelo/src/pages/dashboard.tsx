@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import {
   Bell,
+  BookOpen,
   CheckCircle2,
   Heart,
   Inbox,
@@ -32,6 +33,7 @@ import {
   Send,
   User as UserIcon,
 } from "lucide-react";
+import { BlogsPanel } from "@/components/blogs-panel";
 import { PropertyCard } from "@/components/property-card";
 import {
   apiFetch,
@@ -53,6 +55,7 @@ const ALL_TABS = [
   "edit-properties",
   "contact-requests",
   "notifications",
+  "manage-blogs",
 ] as const;
 type TabKey = (typeof ALL_TABS)[number];
 
@@ -75,6 +78,8 @@ export default function DashboardPage() {
   const canProps = canManageProperties(user);
   const canSupport = canHandleSupport(user);
 
+  const isAdmin = user?.isAdmin === true;
+
   const allowedTabs: readonly TabKey[] = useMemo(() => {
     if (!staff) {
       return [
@@ -89,8 +94,9 @@ export default function DashboardPage() {
     if (canProps) tabs.push("my-properties", "edit-properties");
     if (canSupport) tabs.push("contact-requests");
     tabs.push("favorites", "notifications");
+    if (isAdmin) tabs.push("manage-blogs");
     return tabs;
-  }, [staff, canProps, canSupport]);
+  }, [staff, canProps, canSupport, isAdmin]);
 
   const [tab, setTab] = useState<TabKey>(() => readTabFromHash(allowedTabs));
 
@@ -307,6 +313,11 @@ export default function DashboardPage() {
             <TabsTrigger value="notifications" className="gap-1.5" data-testid="tab-notifications">
               <Bell className="h-4 w-4" /> {t("الإشعارات", "Notifications")}
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="manage-blogs" className="gap-1.5" data-testid="tab-manage-blogs">
+                <BookOpen className="h-4 w-4" /> {t("المقالات", "Blog Posts")}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="recommended" className="mt-6">
@@ -600,6 +611,12 @@ export default function DashboardPage() {
               )}
             </SectionWrapper>
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="manage-blogs" className="mt-6">
+              <BlogsPanel />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
