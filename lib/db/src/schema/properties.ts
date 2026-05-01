@@ -11,6 +11,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { usersTable } from "./auth";
 
+export const propertyEraValues = ["current", "past"] as const;
+export type PropertyEra = (typeof propertyEraValues)[number];
+
 export const propertyStatusValues = ["pending", "approved", "rejected"] as const;
 export type PropertyStatus = (typeof propertyStatusValues)[number];
 
@@ -68,6 +71,7 @@ export const propertiesTable = pgTable(
     floorPlanUrls: text("floor_plan_urls").array().notNull().default(sql`ARRAY[]::text[]`),
     mapsLink: varchar("maps_link", { length: 1000 }),
     contactPhone: varchar("contact_phone", { length: 30 }),
+    era: varchar("era", { length: 16 }).notNull().default("current"),
     status: varchar("status", { length: 16 }).notNull().default("pending"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

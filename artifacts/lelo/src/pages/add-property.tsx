@@ -47,6 +47,7 @@ export default function AddPropertyPage() {
   const [type, setType] = useState("apartment");
   const listingType = "sale";
   const [featured, setFeatured] = useState(false);
+  const [era, setEra] = useState<"current" | "past">("current");
   const [description, setDescription] = useState("");
 
   // price + location
@@ -192,6 +193,7 @@ export default function AddPropertyPage() {
           floorPlanUrls,
           mapsLink: mapsLink.trim() || null,
           contactPhone: contactPhone.trim(),
+          era,
         }),
       });
       toast({
@@ -287,6 +289,25 @@ export default function AddPropertyPage() {
                     {featured
                       ? "هيظهر في قسم العقارات بالصفحة الرئيسية وكمان في صفحة العقارات."
                       : "سيظهر في صفحة العقارات العادية فقط."}
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label className="font-semibold">نوع المشروع</Label>
+                  <Select
+                    value={era}
+                    onValueChange={(v) => setEra(v as "current" | "past")}
+                  >
+                    <SelectTrigger data-testid="select-era">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="current">مشروع حالي</SelectItem>
+                      <SelectItem value="past">مشروع سابق</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-foreground/60">
+                    هل هذا العقار من المشاريع الحالية أم السابقة؟
                   </p>
                 </div>
 

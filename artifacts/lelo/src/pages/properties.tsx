@@ -69,6 +69,7 @@ export default function PropertiesPage() {
     [amenityLabels],
   );
 
+  const [era, setEra] = useState<"all" | "current" | "past">("all");
   const [type, setType] = useState<string>(initial.get("type") || "all");
   const [q, setQ] = useState<string>(initial.get("q") || "");
   const [locationFilter, setLocationFilter] = useState<string>(
@@ -101,13 +102,14 @@ export default function PropertiesPage() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (type !== "all") params.set("type", type);
+    if (era !== "all") params.set("era", era);
     setItems(null);
     apiFetch<{ properties: Property[] }>(
       `/api/properties${params.toString() ? `?${params.toString()}` : ""}`,
     )
       .then((d) => setItems(d.properties))
       .catch(() => setItems([]));
-  }, [type]);
+  }, [type, era]);
 
   const locationOptions = useMemo(() => {
     if (!items) return [{ value: "all", label: t("كل المناطق", "All locations") }];
@@ -385,6 +387,33 @@ export default function PropertiesPage() {
                 "Search, compare, and reach out to us anytime.",
               )}
             </p>
+
+            <div className="flex justify-center gap-2 mt-6">
+              {(
+                [
+                  { value: "all", arLabel: "الكل", enLabel: "All" },
+                  { value: "current", arLabel: "حالية", enLabel: "Current" },
+                  { value: "past", arLabel: "سابقة", enLabel: "Past" },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setEra(opt.value)}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold border transition-all ${
+                    era === opt.value
+                      ? "text-background border-transparent"
+                      : "border-border text-foreground/70 hover:border-[var(--gold)] hover:text-[var(--gold)]"
+                  }`}
+                  style={
+                    era === opt.value
+                      ? { background: "var(--gold)", borderColor: "var(--gold)" }
+                      : {}
+                  }
+                >
+                  {t(opt.arLabel, opt.enLabel)}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-[280px_1fr] gap-6">

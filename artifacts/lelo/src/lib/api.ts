@@ -29,6 +29,7 @@ export type Property = {
   floorPlanUrls: string[];
   mapsLink: string | null;
   contactPhone: string | null;
+  era: "current" | "past";
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;

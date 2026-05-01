@@ -98,6 +98,11 @@ export function PropertyCard({
           >
             {listingTypeLabels[property.listingType] ?? property.listingType}
           </Badge>
+          {property.era === "past" && (
+            <Badge className="bg-slate-600 text-white border-0 font-semibold">
+              {t("سابق", "Past")}
+            </Badge>
+          )}
           {showStatus && status && (
             <Badge className={`${status.color} border-0`}>{status.label}</Badge>
           )}

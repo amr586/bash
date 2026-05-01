@@ -61,6 +61,7 @@ export default function EditPropertyPage() {
   const [type, setType] = useState("apartment");
   const listingType = "sale";
   const [featured, setFeatured] = useState(false);
+  const [era, setEra] = useState<"current" | "past">("current");
   const [price, setPrice] = useState("");
   const [area, setArea] = useState("");
   const [location, setLocation] = useState("");
@@ -113,6 +114,7 @@ export default function EditPropertyPage() {
         setDescription(p.description ?? "");
         setType(p.type);
         setFeatured(p.featured ?? false);
+        setEra((p.era as "current" | "past") ?? "current");
         setPrice(p.price > 0 ? String(p.price) : "");
         setArea(p.area != null ? String(p.area) : "");
         setLocation(p.location ?? "");
@@ -235,6 +237,7 @@ export default function EditPropertyPage() {
           floorPlanUrls,
           mapsLink: mapsLink.trim() || null,
           contactPhone: contactPhone.trim() || null,
+          era,
           status,
         }),
       });
@@ -368,6 +371,25 @@ export default function EditPropertyPage() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label className="font-semibold">نوع المشروع</Label>
+                  <Select
+                    value={era}
+                    onValueChange={(v) => setEra(v as "current" | "past")}
+                  >
+                    <SelectTrigger data-testid="select-era">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="current">مشروع حالي</SelectItem>
+                      <SelectItem value="past">مشروع سابق</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-foreground/60">
+                    هل هذا العقار من المشاريع الحالية أم السابقة؟
+                  </p>
                 </div>
 
                 <div className="grid gap-2">

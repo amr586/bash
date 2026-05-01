@@ -7,6 +7,7 @@ import {
   propertyTypeValues,
   propertyListingValues,
   propertyStatusValues,
+  propertyEraValues,
 } from "@workspace/db";
 import { and, desc, eq, ne, sql } from "drizzle-orm";
 import { createNotification } from "../lib/notifications";
@@ -61,6 +62,7 @@ const propertyInputSchema = z.object({
   floorPlanUrls: z.array(z.string().trim().min(1).max(1000)).max(20).optional(),
   mapsLink: z.string().trim().max(1000).nullable().optional(),
   contactPhone: z.string().trim().max(30).nullable().optional(),
+  era: z.enum(propertyEraValues).optional().default("current"),
 });
 
 function serializeProperty(p: typeof propertiesTable.$inferSelect) {
@@ -93,6 +95,7 @@ function serializeProperty(p: typeof propertiesTable.$inferSelect) {
     floorPlanUrls: p.floorPlanUrls ?? [],
     mapsLink: p.mapsLink,
     contactPhone: p.contactPhone,
+    era: p.era ?? "current",
     status: p.status,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
@@ -153,6 +156,7 @@ router.post("/properties", async (req: Request, res: Response) => {
         (parsed.data.contactPhone && parsed.data.contactPhone.trim()) ||
         req.user.phone ||
         null,
+      era: parsed.data.era ?? "current",
       status: "approved",
     })
     .returning();
@@ -202,9 +206,15 @@ router.get("/properties", async (req: Request, res: Response) => {
           req.query.listingType as (typeof propertyListingValues)[number],
         )
       : undefined;
+  const eraFilter =
+    typeof req.query.era === "string" &&
+    (propertyEraValues as readonly string[]).includes(req.query.era)
+      ? eq(propertiesTable.era, req.query.era as (typeof propertyEraValues)[number])
+      : undefined;
   const conds = [eq(propertiesTable.status, "approved")];
   if (typeFilter) conds.push(typeFilter);
   if (listingFilter) conds.push(listingFilter);
+  if (eraFilter) conds.push(eraFilter);
   const rows = await db
     .select()
     .from(propertiesTable)
@@ -335,6 +345,7 @@ const adminUpdateSchema = z.object({
   floorPlanUrls: z.array(z.string().trim().min(1).max(1000)).max(20).optional(),
   mapsLink: z.string().trim().max(1000).nullable().optional(),
   contactPhone: z.string().trim().max(30).nullable().optional(),
+  era: z.enum(propertyEraValues).optional(),
 });
 
 router.patch("/admin/properties/:id", async (req: Request, res: Response) => {
@@ -393,6 +404,7 @@ router.patch("/admin/properties/:id", async (req: Request, res: Response) => {
   if (parsed.data.mapsLink !== undefined) updates.mapsLink = parsed.data.mapsLink;
   if (parsed.data.contactPhone !== undefined)
     updates.contactPhone = parsed.data.contactPhone;
+  if (parsed.data.era !== undefined) updates.era = parsed.data.era;
 
   const [updated] = await db
     .update(propertiesTable)
