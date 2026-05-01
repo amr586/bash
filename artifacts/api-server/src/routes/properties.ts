@@ -232,6 +232,30 @@ router.get("/properties/:id", async (req: Request, res: Response) => {
   res.json({ property: serializeProperty(row) });
 });
 
+router.get("/properties/:id/similar", async (req: Request, res: Response) => {
+  const [row] = await db
+    .select()
+    .from(propertiesTable)
+    .where(eq(propertiesTable.id, req.params.id));
+  if (!row || row.status !== "approved") {
+    res.json({ properties: [] });
+    return;
+  }
+  const rows = await db
+    .select()
+    .from(propertiesTable)
+    .where(
+      and(
+        eq(propertiesTable.status, "approved"),
+        eq(propertiesTable.type, row.type),
+        ne(propertiesTable.id, row.id),
+      ),
+    )
+    .orderBy(sql`random()`)
+    .limit(4);
+  res.json({ properties: rows.map(serializeProperty) });
+});
+
 router.get("/me/properties", async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) {
     res.status(401).json({ error: "Unauthorized" });

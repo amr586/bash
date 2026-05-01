@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Bath,
   BedDouble,
+  Building2,
   ExternalLink,
   Loader2,
   MapPin,
@@ -38,6 +39,7 @@ import {
   type Property,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { PropertyCard } from "@/components/property-card";
 
 export default function PropertyDetailPage() {
   const { lang, t } = useLang();
@@ -46,16 +48,21 @@ export default function PropertyDetailPage() {
   const id = params?.id;
 
   const [property, setProperty] = useState<Property | null>(null);
+  const [similar, setSimilar] = useState<Property[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    setSimilar([]);
     apiFetch<{ property: Property }>(`/api/properties/${id}`)
       .then((d) => {
         setProperty(d.property);
         setError(null);
+        apiFetch<{ properties: Property[] }>(`/api/properties/${id}/similar`)
+          .then((s) => setSimilar(s.properties))
+          .catch(() => {/* ignore — similar section just stays empty */});
       })
       .catch((e) => {
         setProperty(null);
@@ -98,7 +105,21 @@ export default function PropertyDetailPage() {
               </Button>
             </div>
           ) : (
-            <PropertyDetail property={property} />
+            <>
+              <PropertyDetail property={property} />
+              {similar.length > 0 && (
+                <div className="mt-14">
+                  <h2 className="text-xl font-bold mb-6" style={{ color: "var(--gold-light)" }}>
+                    {t("عقارات مشابهة", "Similar Properties")}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {similar.map((p) => (
+                      <PropertyCard key={p.id} property={p} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
@@ -230,7 +251,7 @@ function PropertyDetail({ property }: { property: Property }) {
               {formatPrice(property.price)}
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className={`grid gap-3 ${property.floor != null ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
               <DetailStat
                 icon={<BedDouble className="h-4 w-4" />}
                 label={t("غرف", "Bedrooms")}
@@ -252,6 +273,19 @@ function PropertyDetail({ property }: { property: Property }) {
                     : "—"
                 }
               />
+              {property.floor != null && (
+                <DetailStat
+                  icon={<Building2 className="h-4 w-4" />}
+                  label={t("الدور", "Floor")}
+                  value={
+                    property.floor === 0
+                      ? t("أرضي", "Ground")
+                      : property.floor < 0
+                        ? t(`بدروم ${Math.abs(property.floor)}`, `Basement ${Math.abs(property.floor)}`)
+                        : t(`${property.floor}`, `${property.floor}`)
+                  }
+                />
+              )}
             </div>
 
             {property.description && (

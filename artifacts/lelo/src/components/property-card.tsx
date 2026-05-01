@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Bath, BedDouble, Heart, MapPin, Maximize2 } from "lucide-react";
+import { Bath, BedDouble, Building2, Heart, MapPin, Maximize2 } from "lucide-react";
 import {
   addFavorite,
   removeFavorite,
@@ -168,6 +168,16 @@ export function PropertyCard({
             <span className="flex items-center gap-1">
               <Maximize2 className="h-3.5 w-3.5" />
               {t(`${property.area} م²`, `${property.area} m²`)}
+            </span>
+          )}
+          {property.floor != null && (
+            <span className="flex items-center gap-1">
+              <Building2 className="h-3.5 w-3.5" />
+              {property.floor === 0
+                ? t("أرضي", "GF")
+                : property.floor < 0
+                  ? t(`ب${Math.abs(property.floor)}`, `B${Math.abs(property.floor)}`)
+                  : t(`د${property.floor}`, `F${property.floor}`)}
             </span>
           )}
         </div>
