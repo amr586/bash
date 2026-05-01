@@ -9,6 +9,7 @@ import notificationsRouter from "./notifications";
 import bashakAiRouter from "./bashak-ai";
 import storageRouter from "./storage";
 import siteSettingsRouter from "./site-settings";
+import jobsRouter from "./jobs";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(notificationsRouter);
 router.use(bashakAiRouter);
 router.use(storageRouter);
 router.use(siteSettingsRouter);
+router.use(jobsRouter);
 
 export default router;

@@ -137,8 +137,12 @@ export function Footer() {
   const quickLinks = [
     { label: t("الرئيسية", "Home"), href: "/" },
     { label: t("جميع العقارات", "All Properties"), href: "/properties" },
-    { label: t("مشاريعنا", "Projects"), href: "/projects" },
+    { label: t("آخر المشاريع", "Last Projects"), href: "/projects" },
     { label: t("عننا", "About Us"), href: "/about" },
+    { label: t("الخدمات", "Services"), href: "/services" },
+    { label: t("الوظائف", "Jobs"), href: "/jobs" },
+    { label: t("الإعلام", "Media"), href: "/media" },
+    { label: t("المدوّنة", "Blog"), href: "/blogs" },
     { label: t("تواصل معنا", "Contact Us"), href: "/contact" },
   ]
 

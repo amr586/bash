@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
-import { LayoutDashboard, LogOut, Moon, Settings, ShieldCheck, Sun, User as UserIcon } from "lucide-react"
+import { ChevronDown, LayoutDashboard, LogOut, Moon, Settings, ShieldCheck, Sun, User as UserIcon } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import { useTheme } from "@/lib/theme"
 import { useLang, type Lang } from "@/lib/i18n"
@@ -51,17 +51,47 @@ type NavItem = { label: string; href: string; children?: NavChild[] }
 
 const NAV_BY_LANG: Record<Lang, NavItem[]> = {
   ar: [
-    { label: "الرئيسية", href: "/" },
+    {
+      label: "الرئيسية",
+      href: "/",
+      children: [
+        { label: "عننا", href: "/about" },
+        { label: "الإعلام", href: "/media" },
+        { label: "المدوّنة", href: "/blogs" },
+        { label: "آخر المشاريع", href: "/projects" },
+      ],
+    },
     { label: "العقارات", href: "/properties" },
-    { label: "مشاريعنا", href: "/projects" },
-    { label: "عننا", href: "/about" },
+    {
+      label: "الخدمات",
+      href: "/services",
+      children: [
+        { label: "خدماتنا", href: "/services" },
+        { label: "الوظائف", href: "/jobs" },
+      ],
+    },
     { label: "تواصل معنا", href: "/contact" },
   ],
   en: [
-    { label: "Home", href: "/" },
+    {
+      label: "Home",
+      href: "/",
+      children: [
+        { label: "About", href: "/about" },
+        { label: "Media", href: "/media" },
+        { label: "Blogs", href: "/blogs" },
+        { label: "Last Projects", href: "/projects" },
+      ],
+    },
     { label: "Properties", href: "/properties" },
-    { label: "Projects", href: "/projects" },
-    { label: "About", href: "/about" },
+    {
+      label: "Services",
+      href: "/services",
+      children: [
+        { label: "Our Services", href: "/services" },
+        { label: "Jobs", href: "/jobs" },
+      ],
+    },
     { label: "Contact", href: "/contact" },
   ],
 }
@@ -80,23 +110,44 @@ function initials(u: AuthUser): string {
 function NavLinkItem({ link }: { link: NavItem }) {
   const [location] = useLocation()
   const isActive = link.href === "/" ? location === "/" : location.startsWith(link.href)
+  const baseClass = `relative text-sm transition-all duration-300 group px-2 xl:px-3 py-1 rounded-lg hover:bg-foreground/5 whitespace-nowrap ${
+    isActive ? "text-[var(--gold-light)] font-semibold" : "text-foreground/80 hover:text-foreground"
+  }`
+
+  if (!link.children || link.children.length === 0) {
+    return (
+      <Link href={link.href} className={baseClass}>
+        {link.label}
+        <span className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 transition-all duration-200 ${isActive ? "w-4 bg-[var(--gold)]" : "w-0 bg-primary group-hover:w-4"}`} />
+      </Link>
+    )
+  }
 
   return (
-    <Link
-      href={link.href}
-      className={`relative text-sm transition-all duration-300 group px-2 xl:px-3 py-1 rounded-lg hover:bg-foreground/5 whitespace-nowrap ${
-        isActive
-          ? "text-[var(--gold-light)] font-semibold"
-          : "text-foreground/80 hover:text-foreground"
-      }`}
-    >
-      {link.label}
-      <span
-        className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 transition-all duration-200 ${
-          isActive ? "w-4 bg-[var(--gold)]" : "w-0 bg-primary group-hover:w-4"
-        }`}
-      />
-    </Link>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button type="button" className={`${baseClass} inline-flex items-center gap-1 focus:outline-none`}>
+          {link.label}
+          <ChevronDown className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+          <span className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 transition-all duration-200 ${isActive ? "w-4 bg-[var(--gold)]" : "w-0 bg-primary group-hover:w-4"}`} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-[11rem]">
+        <DropdownMenuItem asChild>
+          <Link href={link.href} className="cursor-pointer font-medium" style={{ color: "var(--gold-light)" }}>
+            {link.label}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {link.children.map((child) => (
+          <DropdownMenuItem key={child.href} asChild>
+            <Link href={child.href} className="cursor-pointer">
+              {child.label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -366,14 +417,29 @@ export function Header() {
         >
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setIsMobileOpen(false)}
-                className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
-              >
-                {link.label}
-              </Link>
+              <div key={link.label}>
+                <Link
+                  href={link.href}
+                  onClick={() => setIsMobileOpen(false)}
+                  className="block font-medium text-foreground/90 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
+                >
+                  {link.label}
+                </Link>
+                {link.children && link.children.length > 0 && (
+                  <div className="ms-4 flex flex-col border-s border-border/40 ps-3 mb-1">
+                    {link.children.map((child) => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={() => setIsMobileOpen(false)}
+                        className="text-sm text-foreground/70 hover:text-foreground hover:bg-foreground/5 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
           <div className="mt-3 flex flex-col gap-2">

@@ -12,6 +12,10 @@ import HomePage from "@/pages/home";
 import AboutPage from "@/pages/about";
 import ProjectsPage from "@/pages/projects";
 import ContactPage from "@/pages/contact";
+import MediaPage from "@/pages/media";
+import ServicesPage from "@/pages/services";
+import BlogsPage from "@/pages/blogs";
+import JobsPage from "@/pages/jobs";
 import LoginPage from "@/pages/login";
 import ProfilePage from "@/pages/profile";
 import AdminPage from "@/pages/admin-users";
@@ -32,6 +36,10 @@ function Router() {
         <Route path="/about" component={AboutPage} />
         <Route path="/projects" component={ProjectsPage} />
         <Route path="/contact" component={ContactPage} />
+        <Route path="/media" component={MediaPage} />
+        <Route path="/services" component={ServicesPage} />
+        <Route path="/blogs" component={BlogsPage} />
+        <Route path="/jobs" component={JobsPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/create-account" component={LoginPage} />
         <Route path="/profile" component={ProfilePage} />
