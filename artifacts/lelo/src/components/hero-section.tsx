@@ -64,12 +64,12 @@ export function HeroSection() {
     <section className="py-16 sm:py-20 px-4 relative overflow-hidden min-h-screen flex flex-col justify-between">
       <HeroSlideshow images={slideshowImages} intervalMs={3000} />
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/70 to-black/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/30 to-black/75" />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.85) 100%)",
+              "radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.45) 100%)",
           }}
         />
       </div>
