@@ -1641,12 +1641,33 @@ const emptyBlog = (): Omit<BlogPost, "id"> => ({
   isPublished: false,
 });
 
+async function uploadBlogImage(file: File): Promise<string> {
+  const metaRes = await fetch("/api/storage/uploads/request-url", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type || "application/octet-stream" }),
+  });
+  if (!metaRes.ok) {
+    const err = (await metaRes.json().catch(() => ({}))) as { error?: string };
+    throw new Error(err.error ?? "تعذّر بدء الرفع");
+  }
+  const { uploadURL, objectPath } = (await metaRes.json()) as { uploadURL: string; objectPath: string };
+  const putRes = await fetch(uploadURL, { method: "PUT", body: file, headers: { "Content-Type": file.type || "application/octet-stream" } });
+  if (!putRes.ok) throw new Error("فشل رفع الصورة");
+  return objectPath;
+}
+
 function BlogsPanel() {
   const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [editId, setEditId] = useState<string | "new" | null>(null);
   const [form, setForm] = useState(emptyBlog());
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [blockUploading, setBlockUploading] = useState<{ lang: "ar" | "en"; idx: number } | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const blockInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
   const { toast } = useToast();
 
   async function load() {
@@ -1726,6 +1747,32 @@ function BlogsPanel() {
     setForm({ ...form, [key]: arr.length ? arr : [{ text: "" }] });
   }
 
+  async function handleCoverUpload(file: File) {
+    setCoverUploading(true);
+    try {
+      const path = await uploadBlogImage(file);
+      setForm((f) => ({ ...f, coverImageUrl: path }));
+      toast({ title: "✅ تم رفع صورة الغلاف" });
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "فشل الرفع", variant: "destructive" });
+    } finally {
+      setCoverUploading(false);
+    }
+  }
+
+  async function handleBlockImageUpload(lang: "ar" | "en", idx: number, file: File) {
+    setBlockUploading({ lang, idx });
+    try {
+      const path = await uploadBlogImage(file);
+      updateBodyBlock(lang, idx, "image", path);
+      toast({ title: "✅ تم رفع صورة الفقرة" });
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "فشل الرفع", variant: "destructive" });
+    } finally {
+      setBlockUploading(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -1751,7 +1798,44 @@ function BlogsPanel() {
               <div className="grid gap-2"><Label>العنوان — English</Label><Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} /></div>
               <div className="grid gap-2"><Label>المقتطف — عربي</Label><Textarea rows={2} value={form.excerptAr} onChange={(e) => setForm({ ...form, excerptAr: e.target.value })} /></div>
               <div className="grid gap-2"><Label>المقتطف — English</Label><Textarea rows={2} dir="ltr" value={form.excerptEn} onChange={(e) => setForm({ ...form, excerptEn: e.target.value })} /></div>
-              <div className="grid gap-2 md:col-span-2"><Label>رابط صورة الغلاف</Label><Input dir="ltr" placeholder="https://..." value={form.coverImageUrl} onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })} /></div>
+              <div className="grid gap-2 md:col-span-2">
+                <Label>صورة الغلاف</Label>
+                <div className="flex items-start gap-3 flex-wrap">
+                  {form.coverImageUrl && (
+                    <img
+                      src={resolveImageUrl(form.coverImageUrl)}
+                      alt="غلاف"
+                      className="h-24 w-36 object-cover rounded-lg border border-border/40 shrink-0"
+                    />
+                  )}
+                  <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg gap-1.5 w-fit"
+                      disabled={coverUploading}
+                      onClick={() => coverInputRef.current?.click()}
+                    >
+                      {coverUploading ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> جاري الرفع...</> : <><Upload className="h-3.5 w-3.5" /> رفع صورة</>}
+                    </Button>
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleCoverUpload(f); e.target.value = ""; }}
+                    />
+                    <Input
+                      dir="ltr"
+                      placeholder="أو الصق رابط https://..."
+                      value={form.coverImageUrl}
+                      onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })}
+                      className="text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -1769,7 +1853,61 @@ function BlogsPanel() {
                         </div>
                         <Input placeholder="عنوان فرعي (اختياري)" dir={lng === "ar" ? "rtl" : "ltr"} value={block.heading ?? ""} onChange={(e) => updateBodyBlock(lng, idx, "heading", e.target.value)} />
                         <Textarea placeholder="النص" rows={3} dir={lng === "ar" ? "rtl" : "ltr"} value={block.text} onChange={(e) => updateBodyBlock(lng, idx, "text", e.target.value)} />
-                        <Input placeholder="رابط صورة (اختياري)" dir="ltr" value={block.image ?? ""} onChange={(e) => updateBodyBlock(lng, idx, "image", e.target.value)} />
+                        <div className="space-y-1.5">
+                          {block.image && (
+                            <div className="relative w-fit">
+                              <img
+                                src={resolveImageUrl(block.image)}
+                                alt=""
+                                className="h-20 w-32 object-cover rounded-lg border border-border/40"
+                              />
+                              <button
+                                type="button"
+                                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-white flex items-center justify-center text-xs"
+                                onClick={() => updateBodyBlock(lng, idx, "image", "")}
+                              >×</button>
+                            </div>
+                          )}
+                          <div className="flex gap-2 items-center flex-wrap">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="rounded-lg gap-1 h-7 text-xs"
+                              disabled={blockUploading?.lang === lng && blockUploading?.idx === idx}
+                              onClick={() => {
+                                const key = `${lng}-${idx}`;
+                                blockInputRefs.current.get(key)?.click();
+                              }}
+                            >
+                              {blockUploading?.lang === lng && blockUploading?.idx === idx
+                                ? <><Loader2 className="h-3 w-3 animate-spin" /> رفع...</>
+                                : <><Upload className="h-3 w-3" /> رفع صورة</>}
+                            </Button>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              ref={(el) => {
+                                const key = `${lng}-${idx}`;
+                                if (el) blockInputRefs.current.set(key, el);
+                                else blockInputRefs.current.delete(key);
+                              }}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) void handleBlockImageUpload(lng, idx, f);
+                                e.target.value = "";
+                              }}
+                            />
+                            <Input
+                              placeholder="أو رابط صورة https://..."
+                              dir="ltr"
+                              value={block.image ?? ""}
+                              onChange={(e) => updateBodyBlock(lng, idx, "image", e.target.value)}
+                              className="text-xs h-7 flex-1 min-w-[150px]"
+                            />
+                          </div>
+                        </div>
                       </div>
                     ))}
                     <Button type="button" size="sm" variant="outline" onClick={() => addBlock(lng)} className="rounded-lg w-full gap-1"><Plus className="h-3 w-3" /> إضافة فقرة</Button>
