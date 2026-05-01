@@ -15,6 +15,7 @@ import ContactPage from "@/pages/contact";
 import MediaPage from "@/pages/media";
 import ServicesPage from "@/pages/services";
 import BlogsPage from "@/pages/blogs";
+import BlogDetailPage from "@/pages/blog-detail";
 import JobsPage from "@/pages/jobs";
 import LoginPage from "@/pages/login";
 import ProfilePage from "@/pages/profile";
@@ -39,6 +40,7 @@ function Router() {
         <Route path="/media" component={MediaPage} />
         <Route path="/services" component={ServicesPage} />
         <Route path="/blogs" component={BlogsPage} />
+        <Route path="/blogs/:slug" component={BlogDetailPage} />
         <Route path="/jobs" component={JobsPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/create-account" component={LoginPage} />

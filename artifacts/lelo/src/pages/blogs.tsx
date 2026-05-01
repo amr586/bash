@@ -1,34 +1,76 @@
+import { Link } from "wouter";
 import { Footer } from "@/components/footer";
 import { BashakAIChat } from "@/components/bashak-ai-chat";
 import { ContactWidget } from "@/components/contact-widget";
 import { useLang } from "@/lib/i18n";
-import { BookOpen } from "lucide-react";
+import { BLOG_POSTS } from "@/lib/blogs-data";
+import { Calendar } from "lucide-react";
 
 export default function BlogsPage() {
-  const { t } = useLang();
+  const { lang, t } = useLang();
+  const isAr = lang === "ar";
+
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-20">
-        <section className="py-20 px-4">
-          <div className="container mx-auto text-center max-w-xl">
-            <div
-              className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6"
-              style={{ background: "rgba(212,175,55,0.1)", border: "2px solid var(--gold)" }}
-            >
-              <BookOpen className="h-9 w-9" style={{ color: "var(--gold)" }} />
+      <main className="pt-20 pb-16" dir={isAr ? "rtl" : "ltr"}>
+        <section className="py-12 px-4">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h1
+                className="text-3xl md:text-4xl font-bold mb-3"
+                style={{ color: "var(--gold-light)", fontFamily: "'Tajawal', sans-serif" }}
+              >
+                {t("المدوّنة", "Blog")}
+              </h1>
+              <p className="text-foreground/60 text-base max-w-xl mx-auto">
+                {t(
+                  "مقالات ونصايح عقارية من خبرة باشاك في السوق المصري",
+                  "Real estate articles and tips from Bashak's experience in the Egyptian market",
+                )}
+              </p>
             </div>
-            <h1
-              className="text-3xl md:text-4xl font-bold mb-4"
-              style={{ color: "var(--gold-light)" }}
-            >
-              {t("المدوّنة", "Blog")}
-            </h1>
-            <p className="text-foreground/60 text-lg leading-relaxed">
-              {t(
-                "قريباً — هنشارك معاك مقالات ونصايح عقارية من خبرتنا في السوق المصري.",
-                "Coming soon — we'll be sharing articles and real-estate tips from our experience in the Egyptian market.",
-              )}
-            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {BLOG_POSTS.map((post) => (
+                <Link key={post.slug} href={`/blogs/${post.slug}`} className="group block">
+                  <article className="rounded-2xl overflow-hidden border border-border/40 bg-background/60 backdrop-blur hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-foreground/5">
+                      <img
+                        src={post.coverImage}
+                        alt={isAr ? post.titleAr : post.titleEn}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+
+                    <div className="p-5 flex flex-col flex-1 gap-3">
+                      <div className="flex items-center gap-1.5 text-xs text-foreground/50">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {isAr ? post.dateAr : post.dateEn}
+                      </div>
+
+                      <h2
+                        className="font-bold text-lg leading-snug group-hover:text-[var(--gold-light)] transition-colors line-clamp-2"
+                        style={{ fontFamily: "'Tajawal', sans-serif" }}
+                      >
+                        {isAr ? post.titleAr : post.titleEn}
+                      </h2>
+
+                      <p className="text-sm text-foreground/65 leading-relaxed line-clamp-3 flex-1">
+                        {isAr ? post.excerptAr : post.excerptEn}
+                      </p>
+
+                      <span
+                        className="inline-flex items-center gap-1 text-sm font-semibold mt-1"
+                        style={{ color: "var(--gold-light)" }}
+                      >
+                        {t("اقرأ المزيد ←", "Read more →")}
+                      </span>
+                    </div>
+                  </article>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       </main>
