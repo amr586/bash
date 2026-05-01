@@ -9,6 +9,9 @@ import { WelcomeGreeting } from "@/components/welcome-greeting";
 import { Header } from "@/components/header";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
+import AboutPage from "@/pages/about";
+import ProjectsPage from "@/pages/projects";
+import ContactPage from "@/pages/contact";
 import LoginPage from "@/pages/login";
 import ProfilePage from "@/pages/profile";
 import AdminPage from "@/pages/admin-users";
@@ -26,6 +29,9 @@ function Router() {
       <Header />
       <Switch>
         <Route path="/" component={HomePage} />
+        <Route path="/about" component={AboutPage} />
+        <Route path="/projects" component={ProjectsPage} />
+        <Route path="/contact" component={ContactPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/create-account" component={LoginPage} />
         <Route path="/profile" component={ProfilePage} />

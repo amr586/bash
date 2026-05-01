@@ -137,7 +137,9 @@ export function Footer() {
   const quickLinks = [
     { label: t("الرئيسية", "Home"), href: "/" },
     { label: t("جميع العقارات", "All Properties"), href: "/properties" },
-    { label: t("تواصل معنا", "Contact Us"), href: "/#contact" },
+    { label: t("مشاريعنا", "Projects"), href: "/projects" },
+    { label: t("عننا", "About Us"), href: "/about" },
+    { label: t("تواصل معنا", "Contact Us"), href: "/contact" },
   ]
 
   const propertyTypes = [

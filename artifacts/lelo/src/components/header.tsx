@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
-import { ChevronDown, LayoutDashboard, LogOut, Moon, Settings, ShieldCheck, Sun, User as UserIcon } from "lucide-react"
+import { LayoutDashboard, LogOut, Moon, Settings, ShieldCheck, Sun, User as UserIcon } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import { useTheme } from "@/lib/theme"
 import { useLang, type Lang } from "@/lib/i18n"
@@ -51,40 +51,18 @@ type NavItem = { label: string; href: string; children?: NavChild[] }
 
 const NAV_BY_LANG: Record<Lang, NavItem[]> = {
   ar: [
-    {
-      label: "الرئيسية",
-      href: "/",
-      children: [
-        { label: "عننا", href: "/#about" },
-        { label: "الإعلام", href: "/#media" },
-      ],
-    },
-    {
-      label: "العقارات",
-      href: "/properties",
-      children: [
-        { label: "كل العقارات", href: "/properties" },
-        { label: "آخر القوائم", href: "/#past-projects" },
-      ],
-    },
+    { label: "الرئيسية", href: "/" },
+    { label: "العقارات", href: "/properties" },
+    { label: "مشاريعنا", href: "/projects" },
+    { label: "عننا", href: "/about" },
+    { label: "تواصل معنا", href: "/contact" },
   ],
   en: [
-    {
-      label: "Home",
-      href: "/",
-      children: [
-        { label: "About", href: "/#about" },
-        { label: "Media", href: "/#media" },
-      ],
-    },
-    {
-      label: "Properties",
-      href: "/properties",
-      children: [
-        { label: "All Properties", href: "/properties" },
-        { label: "View Last List", href: "/#past-projects" },
-      ],
-    },
+    { label: "Home", href: "/" },
+    { label: "Properties", href: "/properties" },
+    { label: "Projects", href: "/projects" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ],
 }
 
@@ -100,40 +78,25 @@ function initials(u: AuthUser): string {
 }
 
 function NavLinkItem({ link }: { link: NavItem }) {
-  if (!link.children || link.children.length === 0) {
-    return (
-      <a
-        href={link.href}
-        className="relative text-sm text-foreground/80 hover:text-foreground transition-all duration-300 group px-2 xl:px-3 py-1 rounded-lg hover:bg-foreground/5 whitespace-nowrap"
-      >
-        {link.label}
-        <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-4"></span>
-      </a>
-    )
-  }
+  const [location] = useLocation()
+  const isActive = link.href === "/" ? location === "/" : location.startsWith(link.href)
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="relative inline-flex items-center gap-1 text-sm text-foreground/80 hover:text-foreground transition-all duration-300 group px-2 xl:px-3 py-1 rounded-lg hover:bg-foreground/5 whitespace-nowrap focus:outline-none"
-        >
-          {link.label}
-          <ChevronDown className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
-          <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-4"></span>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[10rem]">
-        {link.children.map((child) => (
-          <DropdownMenuItem key={child.label} asChild>
-            <a href={child.href} className="cursor-pointer">
-              {child.label}
-            </a>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Link
+      href={link.href}
+      className={`relative text-sm transition-all duration-300 group px-2 xl:px-3 py-1 rounded-lg hover:bg-foreground/5 whitespace-nowrap ${
+        isActive
+          ? "text-[var(--gold-light)] font-semibold"
+          : "text-foreground/80 hover:text-foreground"
+      }`}
+    >
+      {link.label}
+      <span
+        className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 transition-all duration-200 ${
+          isActive ? "w-4 bg-[var(--gold)]" : "w-0 bg-primary group-hover:w-4"
+        }`}
+      />
+    </Link>
   )
 }
 
@@ -260,7 +223,6 @@ export function Header() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null)
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const [, navigate] = useLocation()
   const { lang, setLang } = useLang()
@@ -403,66 +365,16 @@ export function Header() {
           `}
         >
           <nav className="flex flex-col gap-1">
-            {navLinks.map((link) => {
-              if (!link.children || link.children.length === 0) {
-                return (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setIsMobileOpen(false)}
-                    className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                )
-              }
-              const open = openMobileGroup === link.label
-              return (
-                <div key={link.label} className="flex flex-col">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOpenMobileGroup(open ? null : link.label)
-                    }
-                    className="flex items-center justify-between text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
-                  >
-                    <span>{link.label}</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        open ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {open && (
-                    <div className="ml-4 mt-1 flex flex-col border-l border-border/40 pl-3">
-                      <a
-                        href={link.href}
-                        onClick={() => {
-                          setIsMobileOpen(false)
-                          setOpenMobileGroup(null)
-                        }}
-                        className="text-sm text-foreground/70 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                      {link.children.map((child) => (
-                        <a
-                          key={child.label}
-                          href={child.href}
-                          onClick={() => {
-                            setIsMobileOpen(false)
-                            setOpenMobileGroup(null)
-                          }}
-                          className="text-sm text-foreground/70 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
-                        >
-                          {child.label}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={() => setIsMobileOpen(false)}
+                className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 px-3 py-2 rounded-lg transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
           <div className="mt-3 flex flex-col gap-2">
             {isAuthenticated && user ? (
