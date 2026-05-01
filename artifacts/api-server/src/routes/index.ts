@@ -10,6 +10,7 @@ import bashakAiRouter from "./bashak-ai";
 import storageRouter from "./storage";
 import siteSettingsRouter from "./site-settings";
 import jobsRouter from "./jobs";
+import contentRouter from "./content";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(bashakAiRouter);
 router.use(storageRouter);
 router.use(siteSettingsRouter);
 router.use(jobsRouter);
+router.use(contentRouter);
 
 export default router;

@@ -73,6 +73,34 @@ export const siteSettingsSchema = z.object({
       "ميفيدا",
       "تاج سيتي",
     ]),
+  aboutWhoWeAreAr: z
+    .string()
+    .trim()
+    .max(4000)
+    .default(
+      "شركة باشاك للتطوير العقاري — أكتر من 10 سنوات خبرة في تطوير وبناء المشاريع السكنية والاستثمارية في قلب التجمع الخامس بالقاهرة الجديدة. كل مشاريعنا اللي بتشوفها على الموقع بنبنيها بأنفسنا — من التصميم للتنفيذ للتسليم — مش بنعرض عقارات حد تاني، إحنا المطوّر والمالك.",
+    ),
+  aboutWhoWeAreEn: z
+    .string()
+    .trim()
+    .max(4000)
+    .default(
+      "Bashak Developments — over 10 years of experience developing residential and investment projects in the heart of the 5th Settlement, New Cairo. Every project on this site is built by us — from design to construction to handover. We don't list other people's properties; we are the developer and the owner.",
+    ),
+  aboutValuesAr: z
+    .string()
+    .trim()
+    .max(4000)
+    .default(
+      "• الشفافية الكاملة في كل تعاملاتنا.\n• جودة بناء وتشطيب على أعلى مستوى.\n• فريق خدمة عملاء متاح طول الوقت.\n• خبرة طويلة في السوق المصري.",
+    ),
+  aboutValuesEn: z
+    .string()
+    .trim()
+    .max(4000)
+    .default(
+      "• Complete transparency in everything we do.\n• Top-tier construction and finishing quality.\n• A customer service team available around the clock.\n• Long-standing expertise in the Egyptian market.",
+    ),
   aiCompanyFacts: z
     .string()
     .trim()

@@ -63,7 +63,7 @@ import {
   type Property,
 } from "@/lib/api";
 
-const TABS = ["users", "properties", "contacts", "settings"] as const;
+const TABS = ["users", "properties", "contacts", "about", "jobs", "blogs", "settings"] as const;
 type Tab = (typeof TABS)[number];
 
 function readTab(): Tab {
@@ -123,7 +123,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs value={tab} onValueChange={changeTab} dir="rtl">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-fit">
+          <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
             <TabsTrigger value="users" className="gap-1.5">
               <Users className="h-4 w-4" /> المستخدمين
             </TabsTrigger>
@@ -132,6 +132,15 @@ export default function AdminPage() {
             </TabsTrigger>
             <TabsTrigger value="contacts" className="gap-1.5">
               <Inbox className="h-4 w-4" /> طلبات التواصل
+            </TabsTrigger>
+            <TabsTrigger value="about" className="gap-1.5">
+              عننا
+            </TabsTrigger>
+            <TabsTrigger value="jobs" className="gap-1.5">
+              الوظائف
+            </TabsTrigger>
+            <TabsTrigger value="blogs" className="gap-1.5">
+              المقالات
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-1.5">
               <SettingsIcon className="h-4 w-4" /> إعدادات الموقع
@@ -146,6 +155,15 @@ export default function AdminPage() {
           </TabsContent>
           <TabsContent value="contacts" className="mt-6">
             <ContactsPanel />
+          </TabsContent>
+          <TabsContent value="about" className="mt-6">
+            <AboutPanel />
+          </TabsContent>
+          <TabsContent value="jobs" className="mt-6">
+            <JobsPanel />
+          </TabsContent>
+          <TabsContent value="blogs" className="mt-6">
+            <BlogsPanel />
           </TabsContent>
           <TabsContent value="settings" className="mt-6">
             <SettingsPanel />
@@ -1375,6 +1393,442 @@ function LocationsEditor({
       <p className="text-xs text-foreground/50">
         لا تنسى الضغط على "حفظ" في الأسفل لتطبيق التعديلات.
       </p>
+    </div>
+  );
+}
+
+// ─── ABOUT PANEL ──────────────────────────────────────────────────────────────
+
+function AboutPanel() {
+  const { settings, refresh } = useSiteSettings();
+  const [draft, setDraft] = useState<SiteSettings>(settings);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => { setDraft(settings); }, [settings]);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await apiFetch("/api/admin/site-settings", {
+        method: "PUT",
+        body: JSON.stringify({
+          aboutWhoWeAreAr: draft.aboutWhoWeAreAr,
+          aboutWhoWeAreEn: draft.aboutWhoWeAreEn,
+          aboutValuesAr: draft.aboutValuesAr,
+          aboutValuesEn: draft.aboutValuesEn,
+        }),
+      });
+      await refresh();
+      toast({ title: "✅ تم حفظ محتوى عننا" });
+    } catch {
+      toast({ title: "خطأ في الحفظ", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <h2 className="text-lg font-bold" style={{ color: "var(--gold)" }}>تعديل محتوى قسم عننا</h2>
+
+      <div className="grid gap-4">
+        <div className="grid gap-2">
+          <Label>من نحن — عربي</Label>
+          <Textarea rows={5} value={draft.aboutWhoWeAreAr ?? ""} onChange={(e) => setDraft({ ...draft, aboutWhoWeAreAr: e.target.value })} />
+        </div>
+        <div className="grid gap-2">
+          <Label>من نحن — English</Label>
+          <Textarea rows={5} dir="ltr" value={draft.aboutWhoWeAreEn ?? ""} onChange={(e) => setDraft({ ...draft, aboutWhoWeAreEn: e.target.value })} />
+        </div>
+        <div className="grid gap-2">
+          <Label>قيمنا — عربي</Label>
+          <Textarea rows={5} value={draft.aboutValuesAr ?? ""} onChange={(e) => setDraft({ ...draft, aboutValuesAr: e.target.value })} />
+        </div>
+        <div className="grid gap-2">
+          <Label>قيمنا — English</Label>
+          <Textarea rows={5} dir="ltr" value={draft.aboutValuesEn ?? ""} onChange={(e) => setDraft({ ...draft, aboutValuesEn: e.target.value })} />
+        </div>
+      </div>
+
+      <Button onClick={save} disabled={saving} className="rounded-xl text-black" style={{ background: "var(--gold)" }}>
+        {saving ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" /> جاري الحفظ...</> : <><Save className="ml-2 h-4 w-4" /> حفظ</>}
+      </Button>
+    </div>
+  );
+}
+
+// ─── JOBS PANEL ───────────────────────────────────────────────────────────────
+
+interface JobListing {
+  id: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  requirementsAr: string;
+  requirementsEn: string;
+  location: string;
+  isActive: boolean;
+}
+
+const emptyJob = (): Omit<JobListing, "id"> => ({
+  titleAr: "",
+  titleEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
+  requirementsAr: "",
+  requirementsEn: "",
+  location: "التجمع الخامس، القاهرة الجديدة",
+  isActive: true,
+});
+
+function JobsPanel() {
+  const [jobs, setJobs] = useState<JobListing[] | null>(null);
+  const [editId, setEditId] = useState<string | "new" | null>(null);
+  const [form, setForm] = useState(emptyJob());
+  const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  async function load() {
+    try {
+      const d = (await apiFetch("/api/admin/job-listings")) as { jobs: JobListing[] };
+      setJobs(d.jobs);
+    } catch { setJobs([]); }
+  }
+
+  useEffect(() => { void load(); }, []);
+
+  function startNew() {
+    setForm(emptyJob());
+    setEditId("new");
+  }
+
+  function startEdit(j: JobListing) {
+    setForm({ titleAr: j.titleAr, titleEn: j.titleEn, descriptionAr: j.descriptionAr, descriptionEn: j.descriptionEn, requirementsAr: j.requirementsAr ?? "", requirementsEn: j.requirementsEn ?? "", location: j.location ?? "", isActive: j.isActive });
+    setEditId(j.id);
+  }
+
+  async function save() {
+    if (!form.titleAr.trim()) { toast({ title: "العنوان بالعربي مطلوب", variant: "destructive" }); return; }
+    setSaving(true);
+    try {
+      if (editId === "new") {
+        await apiFetch("/api/admin/job-listings", { method: "POST", body: JSON.stringify(form) });
+      } else {
+        await apiFetch(`/api/admin/job-listings/${editId}`, { method: "PUT", body: JSON.stringify(form) });
+      }
+      toast({ title: "✅ تم الحفظ" });
+      setEditId(null);
+      void load();
+    } catch {
+      toast({ title: "خطأ في الحفظ", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleteId) return;
+    try {
+      await apiFetch(`/api/admin/job-listings/${deleteId}`, { method: "DELETE" });
+      toast({ title: "✅ تم الحذف" });
+      setDeleteId(null);
+      void load();
+    } catch {
+      toast({ title: "خطأ في الحذف", variant: "destructive" });
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold" style={{ color: "var(--gold)" }}>إدارة الوظائف المتاحة</h2>
+        <Button onClick={startNew} className="rounded-xl text-black gap-1.5" style={{ background: "var(--gold)" }}><Plus className="h-4 w-4" /> وظيفة جديدة</Button>
+      </div>
+
+      {editId && (
+        <Card className="border-border/40 bg-card/50">
+          <CardContent className="p-5 space-y-4">
+            <h3 className="font-bold">{editId === "new" ? "➕ إضافة وظيفة" : "✏️ تعديل وظيفة"}</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid gap-2"><Label>العنوان — عربي *</Label><Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>العنوان — English</Label><Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>الوصف — عربي</Label><Textarea rows={3} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>الوصف — English</Label><Textarea rows={3} dir="ltr" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>المتطلبات — عربي</Label><Textarea rows={3} value={form.requirementsAr} onChange={(e) => setForm({ ...form, requirementsAr: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>المتطلبات — English</Label><Textarea rows={3} dir="ltr" value={form.requirementsEn} onChange={(e) => setForm({ ...form, requirementsEn: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>الموقع</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} id="job-active" />
+              <Label htmlFor="job-active">الوظيفة نشطة (تظهر للزوار)</Label>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button onClick={save} disabled={saving} className="rounded-xl text-black" style={{ background: "var(--gold)" }}>
+                {saving ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" /> جاري...</> : <><Save className="ml-2 h-4 w-4" /> حفظ</>}
+              </Button>
+              <Button variant="outline" onClick={() => setEditId(null)} className="rounded-xl">إلغاء</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {jobs === null ? (
+        <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--gold)" }} /></div>
+      ) : jobs.length === 0 ? (
+        <p className="text-center text-foreground/50 py-10">مفيش وظائف مضافة لحد دلوقتي.</p>
+      ) : (
+        <div className="grid gap-3">
+          {jobs.map((j) => (
+            <Card key={j.id} className="border-border/40 bg-card/40">
+              <CardContent className="p-4 flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold">{j.titleAr}</p>
+                  {j.titleEn && <p className="text-sm text-foreground/50 dir-ltr">{j.titleEn}</p>}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${j.isActive ? "bg-green-500/20 text-green-500" : "bg-foreground/10 text-foreground/50"}`}>{j.isActive ? "نشطة" : "متوقفة"}</span>
+                    {j.location && <span className="text-xs text-foreground/40">{j.location}</span>}
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => startEdit(j)} className="h-8 w-8 p-0"><Pencil className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => setDeleteId(j.id)} className="h-8 w-8 p-0 text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader><AlertDialogTitle>تأكيد الحذف</AlertDialogTitle><AlertDialogDescription>هل أنت متأكد من حذف هذه الوظيفة؟</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>إلغاء</AlertDialogCancel><AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+// ─── BLOGS PANEL ──────────────────────────────────────────────────────────────
+
+interface BlogPost {
+  id: string;
+  slug: string;
+  titleAr: string;
+  titleEn: string;
+  excerptAr: string;
+  excerptEn: string;
+  coverImageUrl: string;
+  bodyAr: { heading?: string; text: string; image?: string }[];
+  bodyEn: { heading?: string; text: string; image?: string }[];
+  dateLabel: string;
+  isPublished: boolean;
+}
+
+const emptyBlog = (): Omit<BlogPost, "id"> => ({
+  slug: "",
+  titleAr: "",
+  titleEn: "",
+  excerptAr: "",
+  excerptEn: "",
+  coverImageUrl: "",
+  bodyAr: [{ text: "" }],
+  bodyEn: [{ text: "" }],
+  dateLabel: new Date().toLocaleDateString("ar-EG", { year: "numeric", month: "long" }),
+  isPublished: false,
+});
+
+function BlogsPanel() {
+  const [posts, setPosts] = useState<BlogPost[] | null>(null);
+  const [editId, setEditId] = useState<string | "new" | null>(null);
+  const [form, setForm] = useState(emptyBlog());
+  const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  async function load() {
+    try {
+      const d = (await apiFetch("/api/admin/blog-posts")) as { posts: BlogPost[] };
+      setPosts(d.posts);
+    } catch { setPosts([]); }
+  }
+
+  useEffect(() => { void load(); }, []);
+
+  function startNew() {
+    setForm(emptyBlog());
+    setEditId("new");
+  }
+
+  function startEdit(p: BlogPost) {
+    setForm({
+      slug: p.slug, titleAr: p.titleAr, titleEn: p.titleEn,
+      excerptAr: p.excerptAr, excerptEn: p.excerptEn,
+      coverImageUrl: p.coverImageUrl ?? "",
+      bodyAr: p.bodyAr?.length ? p.bodyAr : [{ text: "" }],
+      bodyEn: p.bodyEn?.length ? p.bodyEn : [{ text: "" }],
+      dateLabel: p.dateLabel ?? "",
+      isPublished: p.isPublished,
+    });
+    setEditId(p.id);
+  }
+
+  async function save() {
+    if (!form.titleAr.trim()) { toast({ title: "العنوان بالعربي مطلوب", variant: "destructive" }); return; }
+    if (!form.slug.trim()) { toast({ title: "الـ slug مطلوب (أحرف إنجليزية وشرطات فقط)", variant: "destructive" }); return; }
+    setSaving(true);
+    try {
+      if (editId === "new") {
+        await apiFetch("/api/admin/blog-posts", { method: "POST", body: JSON.stringify(form) });
+      } else {
+        await apiFetch(`/api/admin/blog-posts/${editId}`, { method: "PUT", body: JSON.stringify(form) });
+      }
+      toast({ title: "✅ تم الحفظ" });
+      setEditId(null);
+      void load();
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "خطأ في الحفظ", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleteId) return;
+    try {
+      await apiFetch(`/api/admin/blog-posts/${deleteId}`, { method: "DELETE" });
+      toast({ title: "✅ تم الحذف" });
+      setDeleteId(null);
+      void load();
+    } catch {
+      toast({ title: "خطأ في الحذف", variant: "destructive" });
+    }
+  }
+
+  function updateBodyBlock(lang: "ar" | "en", idx: number, field: "heading" | "text" | "image", val: string) {
+    const key = lang === "ar" ? "bodyAr" : "bodyEn";
+    const arr = [...form[key]];
+    arr[idx] = { ...arr[idx], [field]: val };
+    setForm({ ...form, [key]: arr });
+  }
+
+  function addBlock(lang: "ar" | "en") {
+    const key = lang === "ar" ? "bodyAr" : "bodyEn";
+    setForm({ ...form, [key]: [...form[key], { text: "" }] });
+  }
+
+  function removeBlock(lang: "ar" | "en", idx: number) {
+    const key = lang === "ar" ? "bodyAr" : "bodyEn";
+    const arr = form[key].filter((_, i) => i !== idx);
+    setForm({ ...form, [key]: arr.length ? arr : [{ text: "" }] });
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold" style={{ color: "var(--gold)" }}>إدارة المقالات</h2>
+        <Button onClick={startNew} className="rounded-xl text-black gap-1.5" style={{ background: "var(--gold)" }}><Plus className="h-4 w-4" /> مقال جديد</Button>
+      </div>
+
+      {editId && (
+        <Card className="border-border/40 bg-card/50">
+          <CardContent className="p-5 space-y-5">
+            <h3 className="font-bold">{editId === "new" ? "➕ مقال جديد" : "✏️ تعديل مقال"}</h3>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>slug (للرابط، إنجليزي وشرطات فقط) *</Label>
+                <Input dir="ltr" placeholder="my-article-slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })} />
+              </div>
+              <div className="grid gap-2">
+                <Label>تاريخ النشر (نص حر)</Label>
+                <Input placeholder="مايو ٢٠٢٥" value={form.dateLabel} onChange={(e) => setForm({ ...form, dateLabel: e.target.value })} />
+              </div>
+              <div className="grid gap-2"><Label>العنوان — عربي *</Label><Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>العنوان — English</Label><Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>المقتطف — عربي</Label><Textarea rows={2} value={form.excerptAr} onChange={(e) => setForm({ ...form, excerptAr: e.target.value })} /></div>
+              <div className="grid gap-2"><Label>المقتطف — English</Label><Textarea rows={2} dir="ltr" value={form.excerptEn} onChange={(e) => setForm({ ...form, excerptEn: e.target.value })} /></div>
+              <div className="grid gap-2 md:col-span-2"><Label>رابط صورة الغلاف</Label><Input dir="ltr" placeholder="https://..." value={form.coverImageUrl} onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })} /></div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {(["ar", "en"] as const).map((lng) => {
+                const key = lng === "ar" ? "bodyAr" : "bodyEn";
+                const blocks = form[key];
+                return (
+                  <div key={lng} className="space-y-3">
+                    <p className="text-sm font-semibold text-foreground/70">{lng === "ar" ? "محتوى المقال — عربي" : "محتوى المقال — English"}</p>
+                    {blocks.map((block, idx) => (
+                      <div key={idx} className="border border-border/40 rounded-xl p-3 space-y-2 bg-background/40">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-foreground/40">فقرة {idx + 1}</span>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => removeBlock(lng, idx)} className="h-6 w-6 p-0 text-destructive"><X className="h-3 w-3" /></Button>
+                        </div>
+                        <Input placeholder="عنوان فرعي (اختياري)" dir={lng === "ar" ? "rtl" : "ltr"} value={block.heading ?? ""} onChange={(e) => updateBodyBlock(lng, idx, "heading", e.target.value)} />
+                        <Textarea placeholder="النص" rows={3} dir={lng === "ar" ? "rtl" : "ltr"} value={block.text} onChange={(e) => updateBodyBlock(lng, idx, "text", e.target.value)} />
+                        <Input placeholder="رابط صورة (اختياري)" dir="ltr" value={block.image ?? ""} onChange={(e) => updateBodyBlock(lng, idx, "image", e.target.value)} />
+                      </div>
+                    ))}
+                    <Button type="button" size="sm" variant="outline" onClick={() => addBlock(lng)} className="rounded-lg w-full gap-1"><Plus className="h-3 w-3" /> إضافة فقرة</Button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Switch checked={form.isPublished} onCheckedChange={(v) => setForm({ ...form, isPublished: v })} id="blog-published" />
+              <Label htmlFor="blog-published">نشر المقال (سيظهر للزوار)</Label>
+            </div>
+
+            <div className="flex gap-2 flex-wrap">
+              <Button onClick={save} disabled={saving} className="rounded-xl text-black" style={{ background: "var(--gold)" }}>
+                {saving ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" /> جاري...</> : <><Save className="ml-2 h-4 w-4" /> حفظ</>}
+              </Button>
+              <Button variant="outline" onClick={() => setEditId(null)} className="rounded-xl">إلغاء</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {posts === null ? (
+        <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--gold)" }} /></div>
+      ) : posts.length === 0 ? (
+        <p className="text-center text-foreground/50 py-10">مفيش مقالات مضافة لحد دلوقتي.</p>
+      ) : (
+        <div className="grid gap-3">
+          {posts.map((p) => (
+            <Card key={p.id} className="border-border/40 bg-card/40">
+              <CardContent className="p-4 flex items-start gap-3">
+                {p.coverImageUrl && (
+                  <img src={p.coverImageUrl} alt={p.titleAr} className="w-16 h-12 rounded-lg object-cover shrink-0 border border-border/30" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate">{p.titleAr}</p>
+                  <p className="text-xs text-foreground/40 font-mono">{p.slug}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.isPublished ? "bg-green-500/20 text-green-500" : "bg-foreground/10 text-foreground/50"}`}>{p.isPublished ? "منشور" : "مسودة"}</span>
+                    {p.dateLabel && <span className="text-xs text-foreground/40">{p.dateLabel}</span>}
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => startEdit(p)} className="h-8 w-8 p-0"><Pencil className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => setDeleteId(p.id)} className="h-8 w-8 p-0 text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader><AlertDialogTitle>تأكيد حذف المقال</AlertDialogTitle><AlertDialogDescription>هل أنت متأكد؟ لا يمكن التراجع عن هذا الحذف.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>إلغاء</AlertDialogCancel><AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

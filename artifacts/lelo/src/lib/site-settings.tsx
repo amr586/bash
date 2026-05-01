@@ -23,6 +23,10 @@ export interface SiteSettings {
   aiWelcomeMessage: string;
   aiCompanyFacts: string;
   locations: string[];
+  aboutWhoWeAreAr: string;
+  aboutWhoWeAreEn: string;
+  aboutValuesAr: string;
+  aboutValuesEn: string;
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -41,6 +45,14 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   aiWelcomeMessage:
     "أهلاً بيك في باشاك! 👋 اسألني عن الشركة، أرقام التواصل، آخر مشاريعنا، أو العقارات المتاحة دلوقتي.",
   aiCompanyFacts: "",
+  aboutWhoWeAreAr:
+    "شركة باشاك للتطوير العقاري — أكتر من 10 سنوات خبرة في تطوير وبناء المشاريع السكنية والاستثمارية في قلب التجمع الخامس بالقاهرة الجديدة. كل مشاريعنا بنبنيها بأنفسنا — من التصميم للتنفيذ للتسليم — إحنا المطوّر والمالك.",
+  aboutWhoWeAreEn:
+    "Bashak Developments — over 10 years of experience developing residential and investment projects in the heart of the 5th Settlement, New Cairo. Every project is built by us — from design to construction to handover. We are the developer and the owner.",
+  aboutValuesAr:
+    "• الشفافية الكاملة في كل تعاملاتنا.\n• جودة بناء وتشطيب على أعلى مستوى.\n• فريق خدمة عملاء متاح طول الوقت.\n• خبرة طويلة في السوق المصري.",
+  aboutValuesEn:
+    "• Complete transparency in everything we do.\n• Top-tier construction and finishing quality.\n• A customer service team available around the clock.\n• Long-standing expertise in the Egyptian market.",
   locations: [
     "التجمع الخامس",
     "شارع 90 الشمالي",
