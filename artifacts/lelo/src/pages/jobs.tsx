@@ -82,11 +82,20 @@ export default function JobsPage() {
         await uploadToPresignedUrl(cvFile, uploadURL);
         cvUrl = objectPath;
       } catch {
-        toast({ title: t("فشل رفع السي في", "CV upload failed"), variant: "destructive" });
+        toast({
+          title: t(
+            "ملاحظة: تعذّر رفع السيرة الذاتية",
+            "Note: CV could not be uploaded",
+          ),
+          description: t(
+            "هيتم إرسال طلبك بدون السيرة الذاتية. يمكنك إرسالها لاحقاً على الإيميل.",
+            "Your application will be sent without the CV. You can email it separately.",
+          ),
+        });
+        cvUrl = null;
+      } finally {
         setUploading(false);
-        return;
       }
-      setUploading(false);
     }
 
     setSubmitting(true);
