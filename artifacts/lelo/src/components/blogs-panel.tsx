@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2, Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiFetch, resolveImageUrl } from "@/lib/api";
+import { apiFetch, resolveImageUrl, uploadFile } from "@/lib/api";
 
 interface BlogPost {
   id: string;
@@ -46,22 +46,6 @@ const emptyBlog = (): Omit<BlogPost, "id"> => ({
   isPublished: false,
 });
 
-async function uploadBlogImage(file: File): Promise<string> {
-  const metaRes = await fetch("/api/storage/uploads/request-url", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type || "application/octet-stream" }),
-  });
-  if (!metaRes.ok) {
-    const err = (await metaRes.json().catch(() => ({}))) as { error?: string };
-    throw new Error(err.error ?? "تعذّر بدء الرفع");
-  }
-  const { uploadURL, objectPath } = (await metaRes.json()) as { uploadURL: string; objectPath: string };
-  const putRes = await fetch(uploadURL, { method: "PUT", body: file, headers: { "Content-Type": file.type || "application/octet-stream" } });
-  if (!putRes.ok) throw new Error("فشل رفع الصورة");
-  return objectPath;
-}
 
 export function BlogsPanel() {
   const [posts, setPosts] = useState<BlogPost[] | null>(null);
@@ -155,7 +139,7 @@ export function BlogsPanel() {
   async function handleCoverUpload(file: File) {
     setCoverUploading(true);
     try {
-      const path = await uploadBlogImage(file);
+      const path = await uploadFile(file);
       setForm((f) => ({ ...f, coverImageUrl: path }));
       toast({ title: "✅ تم رفع صورة الغلاف" });
     } catch (e) {
@@ -168,7 +152,7 @@ export function BlogsPanel() {
   async function handleBlockImageUpload(lang: "ar" | "en", idx: number, file: File) {
     setBlockUploading({ lang, idx });
     try {
-      const path = await uploadBlogImage(file);
+      const path = await uploadFile(file);
       updateBodyBlock(lang, idx, "image", path);
       toast({ title: "✅ تم رفع صورة الفقرة" });
     } catch (e) {

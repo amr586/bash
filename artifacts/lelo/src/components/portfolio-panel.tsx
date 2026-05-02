@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2, MapPin, Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiFetch, resolveImageUrl } from "@/lib/api";
+import { apiFetch, resolveImageUrl, uploadFile } from "@/lib/api";
 
 interface PortfolioItem {
   id: string;
@@ -50,22 +50,6 @@ const emptyItem = (): Omit<PortfolioItem, "id"> => ({
   sortOrder: "0",
 });
 
-async function uploadImage(file: File): Promise<string> {
-  const metaRes = await fetch("/api/storage/uploads/request-url", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type || "application/octet-stream" }),
-  });
-  if (!metaRes.ok) {
-    const err = (await metaRes.json().catch(() => ({}))) as { error?: string };
-    throw new Error(err.error ?? "تعذّر بدء الرفع");
-  }
-  const { uploadURL, objectPath } = (await metaRes.json()) as { uploadURL: string; objectPath: string };
-  const putRes = await fetch(uploadURL, { method: "PUT", body: file, headers: { "Content-Type": file.type || "application/octet-stream" } });
-  if (!putRes.ok) throw new Error("فشل رفع الصورة");
-  return objectPath;
-}
 
 function toEmbedUrl(url: string): string {
   if (!url.trim()) return "";
@@ -162,7 +146,7 @@ export function PortfolioPanel() {
   async function handleCoverUpload(file: File) {
     setCoverUploading(true);
     try {
-      const path = await uploadImage(file);
+      const path = await uploadFile(file);
       setForm((f) => ({ ...f, coverImageUrl: path }));
       toast({ title: "✅ تم رفع صورة الغلاف" });
     } catch (e) {
@@ -177,7 +161,7 @@ export function PortfolioPanel() {
     let uploaded = 0;
     for (const file of Array.from(files)) {
       try {
-        const path = await uploadImage(file);
+        const path = await uploadFile(file);
         setForm((f) => ({ ...f, images: [...f.images, path] }));
         uploaded++;
       } catch (e) {

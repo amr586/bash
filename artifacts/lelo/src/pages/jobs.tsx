@@ -3,7 +3,7 @@ import { Footer } from "@/components/footer";
 import { BashakAIChat } from "@/components/bashak-ai-chat";
 import { ContactWidget } from "@/components/contact-widget";
 import { useLang } from "@/lib/i18n";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, uploadFile } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,20 +23,6 @@ interface JobListing {
   location: string;
 }
 
-async function requestUploadUrl(file: File): Promise<{ uploadURL: string; objectPath: string }> {
-  const res = await fetch("/api/storage/uploads/request-url", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type || "application/octet-stream" }),
-  });
-  if (!res.ok) throw new Error("فشل رفع الملف.");
-  return res.json();
-}
-
-async function uploadToPresignedUrl(file: File, url: string): Promise<void> {
-  const res = await fetch(url, { method: "PUT", body: file, headers: { "Content-Type": file.type || "application/octet-stream" } });
-  if (!res.ok) throw new Error("فشل رفع الملف.");
-}
 
 export default function JobsPage() {
   const { lang, t } = useLang();
@@ -78,9 +64,7 @@ export default function JobsPage() {
     if (cvFile) {
       setUploading(true);
       try {
-        const { uploadURL, objectPath } = await requestUploadUrl(cvFile);
-        await uploadToPresignedUrl(cvFile, uploadURL);
-        cvUrl = objectPath;
+        cvUrl = await uploadFile(cvFile);
       } catch {
         toast({
           title: t(

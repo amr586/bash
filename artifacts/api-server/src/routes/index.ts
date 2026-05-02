@@ -11,6 +11,7 @@ import storageRouter from "./storage";
 import siteSettingsRouter from "./site-settings";
 import jobsRouter from "./jobs";
 import contentRouter from "./content";
+import uploadsRouter from "./uploads";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(storageRouter);
 router.use(siteSettingsRouter);
 router.use(jobsRouter);
 router.use(contentRouter);
+router.use(uploadsRouter);
 
 export default router;

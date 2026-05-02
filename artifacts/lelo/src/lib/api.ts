@@ -204,6 +204,26 @@ export function resolveImageUrl(url: string | null | undefined): string {
   return url;
 }
 
+/**
+ * Upload a file directly to the API server.
+ * Returns the objectPath (e.g. /api/uploads/serve/<uuid>.ext)
+ */
+export async function uploadFile(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch("/api/uploads/file", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? "فشل رفع الملف");
+  }
+  const data = (await res.json()) as { objectPath: string };
+  return data.objectPath;
+}
+
 export function formatPrice(n: number, lang: "ar" | "en" = "ar"): string {
   if (!n || n <= 0) return lang === "ar" ? "السعر عند الطلب" : "Price on request";
   if (lang === "en") {
