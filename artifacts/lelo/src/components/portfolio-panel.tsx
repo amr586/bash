@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
+import { Loader2, MapPin, Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch, resolveImageUrl } from "@/lib/api";
 
@@ -30,6 +30,7 @@ interface PortfolioItem {
   location: string;
   category: string;
   yearLabel: string;
+  googleMapsUrl: string;
   isPublished: boolean;
   sortOrder: string;
 }
@@ -44,6 +45,7 @@ const emptyItem = (): Omit<PortfolioItem, "id"> => ({
   location: "",
   category: "",
   yearLabel: new Date().getFullYear().toString(),
+  googleMapsUrl: "",
   isPublished: true,
   sortOrder: "0",
 });
@@ -65,6 +67,19 @@ async function uploadImage(file: File): Promise<string> {
   return objectPath;
 }
 
+function toEmbedUrl(url: string): string {
+  if (!url.trim()) return "";
+  if (url.includes("maps/embed")) return url;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("google.com")) {
+      u.searchParams.set("output", "embed");
+      return u.toString();
+    }
+  } catch {}
+  return url;
+}
+
 export function PortfolioPanel() {
   const [items, setItems] = useState<PortfolioItem[] | null>(null);
   const [editId, setEditId] = useState<string | "new" | null>(null);
@@ -75,6 +90,7 @@ export function PortfolioPanel() {
   const [galleryUploading, setGalleryUploading] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const multiGalleryRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   async function load() {
@@ -102,6 +118,7 @@ export function PortfolioPanel() {
       location: item.location ?? "",
       category: item.category ?? "",
       yearLabel: item.yearLabel ?? "",
+      googleMapsUrl: item.googleMapsUrl ?? "",
       isPublished: item.isPublished,
       sortOrder: item.sortOrder ?? "0",
     });
@@ -155,25 +172,30 @@ export function PortfolioPanel() {
     }
   }
 
-  async function handleGalleryUpload(file: File) {
+  async function handleGalleryUpload(files: FileList) {
     setGalleryUploading(true);
-    try {
-      const path = await uploadImage(file);
-      setForm((f) => ({ ...f, images: [...f.images, path] }));
-      toast({ title: "✅ تم رفع الصورة" });
-    } catch (e) {
-      toast({ title: e instanceof Error ? e.message : "فشل الرفع", variant: "destructive" });
-    } finally {
-      setGalleryUploading(false);
+    let uploaded = 0;
+    for (const file of Array.from(files)) {
+      try {
+        const path = await uploadImage(file);
+        setForm((f) => ({ ...f, images: [...f.images, path] }));
+        uploaded++;
+      } catch (e) {
+        toast({ title: e instanceof Error ? e.message : "فشل رفع صورة", variant: "destructive" });
+      }
     }
+    if (uploaded > 0) toast({ title: `✅ تم رفع ${uploaded} صورة` });
+    setGalleryUploading(false);
   }
 
   function removeGalleryImage(idx: number) {
     setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
   }
 
+  const embedUrl = toEmbedUrl(form.googleMapsUrl);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold" style={{ color: "var(--gold)" }}>إدارة سابقة الأعمال</h2>
         <Button onClick={startNew} className="rounded-xl text-black gap-1.5" style={{ background: "var(--gold)" }}>
@@ -183,88 +205,167 @@ export function PortfolioPanel() {
 
       {editId && (
         <Card className="border-border/40 bg-card/50">
-          <CardContent className="p-5 space-y-5">
-            <h3 className="font-bold">{editId === "new" ? "➕ مشروع جديد" : "✏️ تعديل مشروع"}</h3>
+          <CardContent className="p-5 space-y-6">
+            <h3 className="font-bold text-base">{editId === "new" ? "➕ مشروع جديد" : "✏️ تعديل مشروع"}</h3>
 
+            {/* ── الأسماء ── */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>اسم المشروع — عربي *</Label>
-                <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
+                <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} placeholder="مشروع باشاك ريزيدنس" />
               </div>
               <div className="grid gap-2">
-                <Label>اسم المشروع — English</Label>
-                <Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} />
+                <Label>Project Name — English</Label>
+                <Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder="Bashak Residence" />
               </div>
+            </div>
+
+            {/* ── الوصف ── */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>الوصف — عربي</Label>
+                <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} placeholder="وصف المشروع بالتفصيل..." />
+              </div>
+              <div className="grid gap-2">
+                <Label>Description — English</Label>
+                <Textarea rows={4} dir="ltr" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder="Detailed project description..." />
+              </div>
+            </div>
+
+            {/* ── بيانات إضافية ── */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="grid gap-2">
                 <Label>الموقع</Label>
-                <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="القاهرة الجديدة، مصر" />
+                <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="القاهرة الجديدة" />
               </div>
               <div className="grid gap-2">
                 <Label>التصنيف</Label>
-                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="سكني / تجاري / إداري" />
+                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="سكني / تجاري" />
               </div>
               <div className="grid gap-2">
                 <Label>السنة</Label>
                 <Input value={form.yearLabel} onChange={(e) => setForm({ ...form, yearLabel: e.target.value })} placeholder="2024" />
               </div>
               <div className="grid gap-2">
-                <Label>ترتيب العرض (رقم، الأقل أولاً)</Label>
+                <Label>الترتيب</Label>
                 <Input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: e.target.value })} />
               </div>
-              <div className="grid gap-2">
-                <Label>الوصف — عربي</Label>
-                <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} />
-              </div>
-              <div className="grid gap-2">
-                <Label>الوصف — English</Label>
-                <Textarea rows={4} dir="ltr" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} />
-              </div>
+            </div>
 
-              <div className="grid gap-2 md:col-span-2">
-                <Label>صورة الغلاف</Label>
-                <div className="flex items-start gap-3 flex-wrap">
-                  {form.coverImageUrl && (
-                    <img src={resolveImageUrl(form.coverImageUrl)} alt="غلاف" className="h-24 w-36 object-cover rounded-lg border border-border/40 shrink-0" />
-                  )}
-                  <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
-                    <Button type="button" variant="outline" size="sm" className="rounded-lg gap-1.5 w-fit" disabled={coverUploading} onClick={() => coverInputRef.current?.click()}>
-                      {coverUploading ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> جاري الرفع...</> : <><Upload className="h-3.5 w-3.5" /> رفع صورة</>}
-                    </Button>
-                    <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleCoverUpload(f); e.target.value = ""; }} />
-                    <Input dir="ltr" placeholder="أو الصق رابط https://..." value={form.coverImageUrl} onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })} className="text-xs" />
+            {/* ── رابط جوجل ماب ── */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" style={{ color: "var(--gold)" }} />
+                رابط جوجل ماب
+              </Label>
+              <Input
+                dir="ltr"
+                placeholder="https://maps.google.com/maps?q=..."
+                value={form.googleMapsUrl}
+                onChange={(e) => setForm({ ...form, googleMapsUrl: e.target.value })}
+              />
+              <p className="text-xs text-foreground/50">
+                افتح جوجل ماب → اضغط "مشاركة" → انسخ الرابط والصقه هنا
+              </p>
+              {embedUrl && (
+                <div className="flex justify-center py-2">
+                  <div
+                    className="relative overflow-hidden"
+                    style={{
+                      width: 200,
+                      height: 200,
+                      borderRadius: "50%",
+                      border: "4px solid var(--gold)",
+                      boxShadow: "0 0 0 2px var(--gold-dark), 0 0 20px rgba(212,175,55,0.3)",
+                    }}
+                  >
+                    <iframe
+                      src={embedUrl}
+                      title="موقع المشروع"
+                      className="w-full h-full border-0 pointer-events-none"
+                      style={{ width: "100%", height: "100%", transform: "scale(1.1)", transformOrigin: "center" }}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
                   </div>
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div className="grid gap-2 md:col-span-2">
-                <Label>معرض الصور</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
+            {/* ── صورة الغلاف ── */}
+            <div className="space-y-2">
+              <Label>صورة الغلاف</Label>
+              <div className="flex items-start gap-3 flex-wrap">
+                {form.coverImageUrl && (
+                  <div className="relative shrink-0">
+                    <img src={resolveImageUrl(form.coverImageUrl)} alt="غلاف" className="h-24 w-36 object-cover rounded-lg border border-border/40" />
+                    <button type="button" className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-white flex items-center justify-center" onClick={() => setForm({ ...form, coverImageUrl: "" })}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+                  <Button type="button" variant="outline" size="sm" className="rounded-lg gap-1.5 w-fit" disabled={coverUploading} onClick={() => coverInputRef.current?.click()}>
+                    {coverUploading ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> جاري الرفع...</> : <><Upload className="h-3.5 w-3.5" /> رفع من الجهاز</>}
+                  </Button>
+                  <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleCoverUpload(f); e.target.value = ""; }} />
+                  <Input dir="ltr" placeholder="أو الصق رابط https://..." value={form.coverImageUrl} onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })} className="text-xs" />
+                </div>
+              </div>
+            </div>
+
+            {/* ── معرض الصور ── */}
+            <div className="space-y-3">
+              <Label>معرض الصور</Label>
+              {form.images.length > 0 && (
+                <div className="flex flex-wrap gap-2">
                   {form.images.map((img, idx) => (
-                    <div key={idx} className="relative">
-                      <img src={resolveImageUrl(img)} alt="" className="h-20 w-28 object-cover rounded-lg border border-border/40" />
-                      <button type="button" className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-white flex items-center justify-center text-xs" onClick={() => removeGalleryImage(idx)}>
+                    <div key={idx} className="relative group">
+                      <img src={resolveImageUrl(img)} alt="" className="h-24 w-32 object-cover rounded-xl border border-border/40 transition-opacity group-hover:opacity-80" />
+                      <button
+                        type="button"
+                        className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeGalleryImage(idx)}
+                      >
                         <X className="h-3 w-3" />
                       </button>
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-2 items-center flex-wrap">
-                  <Button type="button" variant="outline" size="sm" className="rounded-lg gap-1.5 w-fit" disabled={galleryUploading} onClick={() => galleryInputRef.current?.click()}>
-                    {galleryUploading ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> جاري الرفع...</> : <><Upload className="h-3.5 w-3.5" /> إضافة صورة</>}
-                  </Button>
-                  <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleGalleryUpload(f); e.target.value = ""; }} />
-                </div>
+              )}
+              <div className="flex gap-2 items-center flex-wrap">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg gap-1.5"
+                  disabled={galleryUploading}
+                  onClick={() => multiGalleryRef.current?.click()}
+                >
+                  {galleryUploading
+                    ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> جاري الرفع...</>
+                    : <><Upload className="h-3.5 w-3.5" /> رفع صور من الجهاز (متعددة)</>}
+                </Button>
+                <input
+                  ref={multiGalleryRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => { if (e.target.files?.length) void handleGalleryUpload(e.target.files); e.target.value = ""; }}
+                />
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* ── النشر والحفظ ── */}
+            <div className="flex items-center gap-2 pt-1">
               <Switch checked={form.isPublished} onCheckedChange={(v) => setForm({ ...form, isPublished: v })} id="portfolio-published" />
               <Label htmlFor="portfolio-published">نشر المشروع (سيظهر للزوار)</Label>
             </div>
 
-            <div className="flex gap-2 flex-wrap">
-              <Button onClick={save} disabled={saving} className="rounded-xl text-black" style={{ background: "var(--gold)" }}>
-                {saving ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" /> جاري...</> : <><Save className="ml-2 h-4 w-4" /> حفظ</>}
+            <div className="flex gap-2 flex-wrap pt-1 border-t border-border/30">
+              <Button onClick={save} disabled={saving} className="rounded-xl text-black gap-1.5" style={{ background: "var(--gold)" }}>
+                {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> جاري الحفظ...</> : <><Save className="h-4 w-4" /> حفظ المشروع</>}
               </Button>
               <Button variant="outline" onClick={() => setEditId(null)} className="rounded-xl">إلغاء</Button>
             </div>
@@ -275,29 +376,37 @@ export function PortfolioPanel() {
       {items === null ? (
         <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--gold)" }} /></div>
       ) : items.length === 0 ? (
-        <p className="text-center text-foreground/50 py-10">مفيش مشاريع مضافة لحد دلوقتي.</p>
+        <div className="text-center py-12 text-foreground/50 border border-dashed border-border/40 rounded-2xl">
+          <p className="text-lg mb-2">مفيش مشاريع مضافة لحد دلوقتي</p>
+          <p className="text-sm">اضغط "مشروع جديد" لإضافة أول مشروع</p>
+        </div>
       ) : (
         <div className="grid gap-3">
           {items.map((item) => (
-            <Card key={item.id} className="border-border/40 bg-card/40">
+            <Card key={item.id} className="border-border/40 bg-card/40 hover:border-[var(--gold)]/30 transition-colors">
               <CardContent className="p-4 flex items-start gap-3">
-                {item.coverImageUrl && (
-                  <img src={resolveImageUrl(item.coverImageUrl)} alt={item.titleAr} className="w-16 h-12 rounded-lg object-cover shrink-0 border border-border/30" />
+                {item.coverImageUrl ? (
+                  <img src={resolveImageUrl(item.coverImageUrl)} alt={item.titleAr} className="w-16 h-14 rounded-lg object-cover shrink-0 border border-border/30" />
+                ) : (
+                  <div className="w-16 h-14 rounded-lg shrink-0 border border-border/30 bg-foreground/5 flex items-center justify-center text-foreground/20 text-xl">🏗️</div>
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{item.titleAr}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {item.titleEn && <p className="text-xs text-foreground/40 truncate" dir="ltr">{item.titleEn}</p>}
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.isPublished ? "bg-green-500/20 text-green-500" : "bg-foreground/10 text-foreground/50"}`}>
                       {item.isPublished ? "منشور" : "مخفي"}
                     </span>
-                    {item.category && <span className="text-xs text-foreground/40">{item.category}</span>}
+                    {item.category && <span className="text-xs px-2 py-0.5 rounded-full bg-foreground/8 text-foreground/50">{item.category}</span>}
                     {item.yearLabel && <span className="text-xs text-foreground/40">{item.yearLabel}</span>}
-                    {item.location && <span className="text-xs text-foreground/40">{item.location}</span>}
+                    {item.location && <span className="text-xs text-foreground/40 flex items-center gap-0.5"><MapPin className="h-3 w-3" />{item.location}</span>}
+                    {item.googleMapsUrl && <span className="text-xs text-[var(--gold-light)] flex items-center gap-0.5"><MapPin className="h-3 w-3" />خريطة</span>}
+                    {item.images?.length > 0 && <span className="text-xs text-foreground/40">{item.images.length} صورة</span>}
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => startEdit(item)} className="h-8 w-8 p-0"><Pencil className="h-4 w-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => setDeleteId(item.id)} className="h-8 w-8 p-0 text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                <div className="flex gap-1 shrink-0">
+                  <Button size="sm" variant="ghost" onClick={() => startEdit(item)} className="h-8 w-8 p-0" title="تعديل"><Pencil className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => setDeleteId(item.id)} className="h-8 w-8 p-0 text-destructive hover:text-destructive" title="حذف"><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </CardContent>
             </Card>

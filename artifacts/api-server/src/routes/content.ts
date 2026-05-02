@@ -83,6 +83,7 @@ const portfolioSchema = z.object({
   location: z.string().trim().max(255).default(""),
   category: z.string().trim().max(100).default(""),
   yearLabel: z.string().trim().max(50).default(""),
+  googleMapsUrl: z.string().trim().max(1000).default(""),
   isPublished: z.boolean().default(true),
   sortOrder: z.string().trim().max(20).default("0"),
 });

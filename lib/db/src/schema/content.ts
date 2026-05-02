@@ -44,6 +44,7 @@ export const portfolioItemsTable = pgTable(
     location: varchar("location", { length: 255 }).default(""),
     category: varchar("category", { length: 100 }).default(""),
     yearLabel: varchar("year_label", { length: 50 }).default(""),
+    googleMapsUrl: varchar("google_maps_url", { length: 1000 }).default(""),
     isPublished: boolean("is_published").notNull().default(true),
     sortOrder: text("sort_order").default("0"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
