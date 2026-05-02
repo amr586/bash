@@ -6,6 +6,8 @@ import { SiteSettingsProvider } from "@/lib/site-settings";
 import { ThemeProvider } from "@/lib/theme";
 import { LangProvider } from "@/lib/i18n";
 import { WelcomeGreeting } from "@/components/welcome-greeting";
+import { SplashScreen } from "@/components/splash-screen";
+import { useState } from "react";
 import { Header } from "@/components/header";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
@@ -57,23 +59,41 @@ function Router() {
   );
 }
 
+const SPLASH_KEY = "bashak_splash_shown";
+
 function App() {
+  const [splashDone, setSplashDone] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(SPLASH_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  function handleSplashDone() {
+    try { sessionStorage.setItem(SPLASH_KEY, "1"); } catch {}
+    setSplashDone(true);
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <LangProvider>
-        <SiteSettingsProvider>
-          <TooltipProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-            <Toaster />
-            <WelcomeGreeting />
-          </TooltipProvider>
-        </SiteSettingsProvider>
-        </LangProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <>
+      {!splashDone && <SplashScreen onDone={handleSplashDone} />}
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <LangProvider>
+            <SiteSettingsProvider>
+              <TooltipProvider>
+                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                  <Router />
+                </WouterRouter>
+                <Toaster />
+                <WelcomeGreeting />
+              </TooltipProvider>
+            </SiteSettingsProvider>
+          </LangProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </>
   );
 }
 
