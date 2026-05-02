@@ -74,32 +74,59 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="flex-1 flex items-start justify-center pt-16 sm:pt-20 relative z-10 px-4">
+      <div className="flex-1 flex items-start justify-center pt-16 sm:pt-20 relative z-10 px-4 overflow-hidden">
         <h1
-          className="text-center font-bold leading-[1.05] tracking-[0.06em] sm:tracking-[0.08em] uppercase text-balance"
+          className="text-center font-bold leading-[1.05] uppercase relative"
           style={{
-            color: "var(--gold)",
+            color: "#d4af37",
             fontFamily: "'Tajawal', sans-serif",
-            textShadow: "0 2px 18px rgba(0,0,0,0.55)",
+            textShadow: `
+              0 0 10px rgba(212,175,55,0.7),
+              0 0 20px rgba(212,175,55,0.6),
+              0 0 40px rgba(212,175,55,0.5)
+            `,
           }}
         >
+          {/* Bashak */}
           <motion.span
-            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            initial={{ opacity: 0, y: -60, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="block text-[2.5rem] leading-none sm:text-6xl md:text-7xl lg:text-8xl"
+            transition={{ duration: 0.8 }}
+            className="block text-[2.5rem] sm:text-6xl md:text-7xl lg:text-8xl relative"
           >
             Bashak
           </motion.span>
 
+          {/* Developments */}
           <motion.span
-            initial={{ opacity: 0, y: 50, letterSpacing: "0.5em" }}
+            initial={{ opacity: 0, y: 60, letterSpacing: "0.5em" }}
             animate={{ opacity: 1, y: 0, letterSpacing: "0.18em" }}
-            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-            className="block text-xl sm:text-4xl md:text-5xl lg:text-6xl mt-1 sm:mt-2 tracking-[0.14em] sm:tracking-[0.18em]"
+            transition={{ duration: 1, delay: 0.3 }}
+            className="block text-xl sm:text-4xl md:text-5xl lg:text-6xl mt-2"
           >
             Developments
           </motion.span>
+
+          {/* Shine Effect */}
+          <motion.span
+            initial={{ x: "-100%" }}
+            animate={{ x: "100%" }}
+            transition={{
+              repeat: Infinity,
+              duration: 2.5,
+              ease: "linear",
+            }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "200%",
+              height: "100%",
+              background:
+                "linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent)",
+              pointerEvents: "none",
+            }}
+          />
         </h1>
       </div>
 
