@@ -27,6 +27,7 @@ import AddPropertyPage from "@/pages/add-property";
 import EditPropertyPage from "@/pages/edit-property";
 import PropertiesPage from "@/pages/properties";
 import PropertyDetailPage from "@/pages/property-detail";
+import PortfolioPage from "@/pages/portfolio";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ function Router() {
         <Route path="/properties" component={PropertiesPage} />
         <Route path="/properties/:id" component={PropertyDetailPage} />
         <Route path="/admin" component={AdminPage} />
+        <Route path="/portfolio" component={PortfolioPage} />
         <Route component={NotFound} />
       </Switch>
     </>

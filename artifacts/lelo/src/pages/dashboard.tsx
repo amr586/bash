@@ -23,7 +23,9 @@ import {
 import {
   Bell,
   BookOpen,
+  Briefcase,
   CheckCircle2,
+  GalleryHorizontalEnd,
   Heart,
   Inbox,
   Loader2,
@@ -34,6 +36,8 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { BlogsPanel } from "@/components/blogs-panel";
+import { JobsPanel } from "@/components/jobs-panel";
+import { PortfolioPanel } from "@/components/portfolio-panel";
 import { PropertyCard } from "@/components/property-card";
 import {
   apiFetch,
@@ -56,6 +60,8 @@ const ALL_TABS = [
   "contact-requests",
   "notifications",
   "manage-blogs",
+  "manage-jobs",
+  "manage-portfolio",
 ] as const;
 type TabKey = (typeof ALL_TABS)[number];
 
@@ -94,7 +100,7 @@ export default function DashboardPage() {
     if (canProps) tabs.push("my-properties", "edit-properties");
     if (canSupport) tabs.push("contact-requests");
     tabs.push("favorites", "notifications");
-    if (isAdmin) tabs.push("manage-blogs");
+    if (isAdmin) tabs.push("manage-blogs", "manage-jobs", "manage-portfolio");
     return tabs;
   }, [staff, canProps, canSupport, isAdmin]);
 
@@ -275,7 +281,7 @@ export default function DashboardPage() {
         <Tabs value={tab} onValueChange={changeTab} dir={isAr ? "rtl" : "ltr"}>
           <TabsList
             className={`grid grid-cols-2 ${
-              staff ? "md:grid-cols-6" : "md:grid-cols-5"
+              isAdmin ? "md:grid-cols-9" : staff ? "md:grid-cols-6" : "md:grid-cols-5"
             } w-full h-auto`}
           >
             <TabsTrigger value="recommended" className="gap-1.5" data-testid="tab-recommended">
@@ -316,6 +322,16 @@ export default function DashboardPage() {
             {isAdmin && (
               <TabsTrigger value="manage-blogs" className="gap-1.5" data-testid="tab-manage-blogs">
                 <BookOpen className="h-4 w-4" /> {t("المقالات", "Blog Posts")}
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="manage-jobs" className="gap-1.5" data-testid="tab-manage-jobs">
+                <Briefcase className="h-4 w-4" /> {t("الوظائف", "Jobs")}
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="manage-portfolio" className="gap-1.5" data-testid="tab-manage-portfolio">
+                <GalleryHorizontalEnd className="h-4 w-4" /> {t("سابقة الأعمال", "Portfolio")}
               </TabsTrigger>
             )}
           </TabsList>
@@ -615,6 +631,16 @@ export default function DashboardPage() {
           {isAdmin && (
             <TabsContent value="manage-blogs" className="mt-6">
               <BlogsPanel />
+            </TabsContent>
+          )}
+          {isAdmin && (
+            <TabsContent value="manage-jobs" className="mt-6">
+              <JobsPanel />
+            </TabsContent>
+          )}
+          {isAdmin && (
+            <TabsContent value="manage-portfolio" className="mt-6">
+              <PortfolioPanel />
             </TabsContent>
           )}
         </Tabs>

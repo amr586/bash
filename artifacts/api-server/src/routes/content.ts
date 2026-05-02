@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
-import { db, jobListingsTable, blogPostsTable } from "@workspace/db";
+import { db, jobListingsTable, blogPostsTable, portfolioItemsTable } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 
 const router: IRouter = Router();
@@ -68,6 +68,69 @@ router.put("/admin/job-listings/:id", async (req: Request, res: Response) => {
 router.delete("/admin/job-listings/:id", async (req: Request, res: Response) => {
   if (!isAdmin(req)) { res.status(403).json({ error: "Forbidden" }); return; }
   await db.delete(jobListingsTable).where(eq(jobListingsTable.id, req.params.id));
+  res.json({ success: true });
+});
+
+// ─── PORTFOLIO ITEMS ──────────────────────────────────────────────
+
+const portfolioSchema = z.object({
+  titleAr: z.string().trim().min(1).max(255),
+  titleEn: z.string().trim().max(255).default(""),
+  descriptionAr: z.string().trim().max(5000).default(""),
+  descriptionEn: z.string().trim().max(5000).default(""),
+  coverImageUrl: z.string().trim().max(1000).default(""),
+  images: z.array(z.string().max(1000)).default([]),
+  location: z.string().trim().max(255).default(""),
+  category: z.string().trim().max(100).default(""),
+  yearLabel: z.string().trim().max(50).default(""),
+  isPublished: z.boolean().default(true),
+  sortOrder: z.string().trim().max(20).default("0"),
+});
+
+// Public — published items
+router.get("/portfolio", async (_req: Request, res: Response) => {
+  const rows = await db
+    .select()
+    .from(portfolioItemsTable)
+    .where(eq(portfolioItemsTable.isPublished, true))
+    .orderBy(portfolioItemsTable.sortOrder, desc(portfolioItemsTable.createdAt));
+  res.json({ items: rows });
+});
+
+// Admin — all items
+router.get("/admin/portfolio", async (req: Request, res: Response) => {
+  if (!isAdmin(req)) { res.status(403).json({ error: "Forbidden" }); return; }
+  const rows = await db.select().from(portfolioItemsTable).orderBy(portfolioItemsTable.sortOrder, desc(portfolioItemsTable.createdAt));
+  res.json({ items: rows });
+});
+
+// Admin — create
+router.post("/admin/portfolio", async (req: Request, res: Response) => {
+  if (!isAdmin(req)) { res.status(403).json({ error: "Forbidden" }); return; }
+  const parsed = portfolioSchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: "Invalid data", issues: parsed.error.issues }); return; }
+  const [row] = await db.insert(portfolioItemsTable).values(parsed.data as typeof portfolioItemsTable.$inferInsert).returning();
+  res.status(201).json({ item: row });
+});
+
+// Admin — update
+router.put("/admin/portfolio/:id", async (req: Request, res: Response) => {
+  if (!isAdmin(req)) { res.status(403).json({ error: "Forbidden" }); return; }
+  const parsed = portfolioSchema.partial().safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: "Invalid data", issues: parsed.error.issues }); return; }
+  const [row] = await db
+    .update(portfolioItemsTable)
+    .set({ ...parsed.data, updatedAt: new Date() } as Partial<typeof portfolioItemsTable.$inferInsert>)
+    .where(eq(portfolioItemsTable.id, req.params.id))
+    .returning();
+  if (!row) { res.status(404).json({ error: "Not found" }); return; }
+  res.json({ item: row });
+});
+
+// Admin — delete
+router.delete("/admin/portfolio/:id", async (req: Request, res: Response) => {
+  if (!isAdmin(req)) { res.status(403).json({ error: "Forbidden" }); return; }
+  await db.delete(portfolioItemsTable).where(eq(portfolioItemsTable.id, req.params.id));
   res.json({ success: true });
 });
 
