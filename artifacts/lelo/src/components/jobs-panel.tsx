@@ -131,10 +131,6 @@ export function JobsPanel() {
                 <Label>المسمى الوظيفي — عربي *</Label>
                 <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
               </div>
-              <div className="grid gap-2">
-                <Label>المسمى الوظيفي — English</Label>
-                <Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} />
-              </div>
               <div className="grid gap-2 md:col-span-2">
                 <Label>الموقع</Label>
                 <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
