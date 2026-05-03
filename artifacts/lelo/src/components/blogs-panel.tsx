@@ -201,44 +201,52 @@ export function BlogsPanel() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-foreground/70">محتوى المقال — عربي</p>
-              {form.bodyAr.map((block, idx) => (
-                <div key={idx} className="border border-border/40 rounded-xl p-3 space-y-2 bg-background/40">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-foreground/40">فقرة {idx + 1}</span>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => removeBlock("ar", idx)} className="h-6 w-6 p-0 text-destructive"><X className="h-3 w-3" /></Button>
-                  </div>
-                  <Input placeholder="عنوان فرعي (اختياري)" dir="rtl" value={block.heading ?? ""} onChange={(e) => updateBodyBlock("ar", idx, "heading", e.target.value)} />
-                  <Textarea placeholder="النص" rows={3} dir="rtl" value={block.text} onChange={(e) => updateBodyBlock("ar", idx, "text", e.target.value)} />
-                  <div className="space-y-1.5">
-                    {block.image && (
-                      <div className="relative w-fit">
-                        <img src={resolveImageUrl(block.image)} alt="" className="h-20 w-32 object-cover rounded-lg border border-border/40" />
-                        <button type="button" className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-white flex items-center justify-center text-xs" onClick={() => updateBodyBlock("ar", idx, "image", "")}>×</button>
+            <div className="grid md:grid-cols-2 gap-6">
+              {(["ar", "en"] as const).map((lng) => {
+                const key = lng === "ar" ? "bodyAr" : "bodyEn";
+                const blocks = form[key];
+                return (
+                  <div key={lng} className="space-y-3">
+                    <p className="text-sm font-semibold text-foreground/70">{lng === "ar" ? "محتوى المقال — عربي" : "محتوى المقال — English"}</p>
+                    {blocks.map((block, idx) => (
+                      <div key={idx} className="border border-border/40 rounded-xl p-3 space-y-2 bg-background/40">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-foreground/40">فقرة {idx + 1}</span>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => removeBlock(lng, idx)} className="h-6 w-6 p-0 text-destructive"><X className="h-3 w-3" /></Button>
+                        </div>
+                        <Input placeholder="عنوان فرعي (اختياري)" dir={lng === "ar" ? "rtl" : "ltr"} value={block.heading ?? ""} onChange={(e) => updateBodyBlock(lng, idx, "heading", e.target.value)} />
+                        <Textarea placeholder="النص" rows={3} dir={lng === "ar" ? "rtl" : "ltr"} value={block.text} onChange={(e) => updateBodyBlock(lng, idx, "text", e.target.value)} />
+                        <div className="space-y-1.5">
+                          {block.image && (
+                            <div className="relative w-fit">
+                              <img src={resolveImageUrl(block.image)} alt="" className="h-20 w-32 object-cover rounded-lg border border-border/40" />
+                              <button type="button" className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-white flex items-center justify-center text-xs" onClick={() => updateBodyBlock(lng, idx, "image", "")}>×</button>
+                            </div>
+                          )}
+                          <div className="flex gap-2 items-center flex-wrap">
+                            <Button
+                              type="button" variant="outline" size="sm" className="rounded-lg gap-1 h-7 text-xs"
+                              disabled={blockUploading?.lang === lng && blockUploading?.idx === idx}
+                              onClick={() => { const key = `${lng}-${idx}`; blockInputRefs.current.get(key)?.click(); }}
+                            >
+                              {blockUploading?.lang === lng && blockUploading?.idx === idx
+                                ? <><Loader2 className="h-3 w-3 animate-spin" /> رفع...</>
+                                : <><Upload className="h-3 w-3" /> رفع صورة</>}
+                            </Button>
+                            <input
+                              type="file" accept="image/*" className="hidden"
+                              ref={(el) => { const key = `${lng}-${idx}`; if (el) blockInputRefs.current.set(key, el); else blockInputRefs.current.delete(key); }}
+                              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleBlockImageUpload(lng, idx, f); e.target.value = ""; }}
+                            />
+                            <Input placeholder="أو رابط صورة https://..." dir="ltr" value={block.image ?? ""} onChange={(e) => updateBodyBlock(lng, idx, "image", e.target.value)} className="text-xs h-7 flex-1 min-w-[150px]" />
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    <div className="flex gap-2 items-center flex-wrap">
-                      <Button
-                        type="button" variant="outline" size="sm" className="rounded-lg gap-1 h-7 text-xs"
-                        disabled={blockUploading?.lang === "ar" && blockUploading?.idx === idx}
-                        onClick={() => { const key = `ar-${idx}`; blockInputRefs.current.get(key)?.click(); }}
-                      >
-                        {blockUploading?.lang === "ar" && blockUploading?.idx === idx
-                          ? <><Loader2 className="h-3 w-3 animate-spin" /> رفع...</>
-                          : <><Upload className="h-3 w-3" /> رفع صورة</>}
-                      </Button>
-                      <input
-                        type="file" accept="image/*" className="hidden"
-                        ref={(el) => { const key = `ar-${idx}`; if (el) blockInputRefs.current.set(key, el); else blockInputRefs.current.delete(key); }}
-                        onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleBlockImageUpload("ar", idx, f); e.target.value = ""; }}
-                      />
-                      <Input placeholder="أو رابط صورة https://..." dir="ltr" value={block.image ?? ""} onChange={(e) => updateBodyBlock("ar", idx, "image", e.target.value)} className="text-xs h-7 flex-1 min-w-[150px]" />
-                    </div>
+                    ))}
+                    <Button type="button" size="sm" variant="outline" onClick={() => addBlock(lng)} className="rounded-lg w-full gap-1"><Plus className="h-3 w-3" /> إضافة فقرة</Button>
                   </div>
-                </div>
-              ))}
-              <Button type="button" size="sm" variant="outline" onClick={() => addBlock("ar")} className="rounded-lg w-full gap-1"><Plus className="h-3 w-3" /> إضافة فقرة</Button>
+                );
+              })}
             </div>
 
             <div className="flex items-center gap-2">
