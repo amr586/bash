@@ -198,12 +198,6 @@ export function PortfolioPanel() {
               <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} placeholder="مشروع باشاك ريزيدنس" />
             </div>
 
-            {/* ── الوصف ── */}
-            <div className="grid gap-2">
-              <Label>الوصف</Label>
-              <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} placeholder="وصف المشروع بالتفصيل..." />
-            </div>
-
             {/* ── بيانات إضافية ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="grid gap-2">
