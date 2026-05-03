@@ -168,7 +168,6 @@ export function BlogsPanel() {
         <h2 className="text-lg font-bold" style={{ color: "var(--gold)" }}>إدارة المقالات</h2>
         <Button onClick={startNew} className="rounded-xl text-black gap-1.5" style={{ background: "var(--gold)" }}><Plus className="h-4 w-4" /> مقال جديد</Button>
       </div>
-
       {editId && (
         <Card className="border-border/40 bg-card/50">
           <CardContent className="p-5 space-y-5">
@@ -202,7 +201,7 @@ export function BlogsPanel() {
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-foreground/70">محتوى المقال — عربي</p>
+              <p className="text-sm font-semibold text-foreground/70">محتوى المقال </p>
               {form.bodyAr.map((block, idx) => (
                 <div key={idx} className="border border-border/40 rounded-xl p-3 space-y-2 bg-background/40">
                   <div className="flex items-center justify-between">
@@ -255,7 +254,6 @@ export function BlogsPanel() {
           </CardContent>
         </Card>
       )}
-
       {posts === null ? (
         <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--gold)" }} /></div>
       ) : posts.length === 0 ? (
@@ -285,7 +283,6 @@ export function BlogsPanel() {
           ))}
         </div>
       )}
-
       <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>تأكيد حذف المقال</AlertDialogTitle><AlertDialogDescription>هل أنت متأكد؟ لا يمكن التراجع عن هذا الحذف.</AlertDialogDescription></AlertDialogHeader>
