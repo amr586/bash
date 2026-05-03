@@ -120,7 +120,6 @@ export function JobsPanel() {
           <Plus className="h-4 w-4" /> وظيفة جديدة
         </Button>
       </div>
-
       {editId && (
         <Card className="border-border/40 bg-card/50">
           <CardContent className="p-5 space-y-5">
@@ -128,12 +127,8 @@ export function JobsPanel() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>المسمى الوظيفي — عربي *</Label>
+                <Label>المسمى الوظيفي — *</Label>
                 <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
-              </div>
-              <div className="grid gap-2 md:col-span-2">
-                <Label>الموقع</Label>
-                <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
               </div>
               <div className="grid gap-2">
                 <Label>الوصف — عربي</Label>
@@ -167,7 +162,6 @@ export function JobsPanel() {
           </CardContent>
         </Card>
       )}
-
       {jobs === null ? (
         <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--gold)" }} /></div>
       ) : jobs.length === 0 ? (
@@ -196,7 +190,6 @@ export function JobsPanel() {
           ))}
         </div>
       )}
-
       <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
