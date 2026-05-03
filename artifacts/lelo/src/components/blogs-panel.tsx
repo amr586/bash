@@ -184,7 +184,6 @@ export function BlogsPanel() {
                 <Input placeholder="مايو ٢٠٢٥" value={form.dateLabel} onChange={(e) => setForm({ ...form, dateLabel: e.target.value })} />
               </div>
               <div className="grid gap-2"><Label>العنوان — عربي *</Label><Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} /></div>
-              <div className="grid gap-2"><Label>المقتطف — عربي</Label><Textarea rows={2} value={form.excerptAr} onChange={(e) => setForm({ ...form, excerptAr: e.target.value })} /></div>
               <div className="grid gap-2 md:col-span-2">
                 <Label>صورة الغلاف</Label>
                 <div className="flex items-start gap-3 flex-wrap">
