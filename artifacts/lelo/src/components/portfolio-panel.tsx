@@ -193,25 +193,15 @@ export function PortfolioPanel() {
             <h3 className="font-bold text-base">{editId === "new" ? "➕ مشروع جديد" : "✏️ تعديل مشروع"}</h3>
 
             {/* ── الأسماء ── */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>اسم المشروع — عربي *</Label>
-                <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} placeholder="مشروع باشاك ريزيدنس" />
-              </div>
-              <div className="grid gap-2">
-                <Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder="Bashak Residence" />
-              </div>
+            <div className="grid gap-2">
+              <Label>اسم المشروع *</Label>
+              <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} placeholder="مشروع باشاك ريزيدنس" />
             </div>
 
             {/* ── الوصف ── */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>الوصف — عربي</Label>
-                <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} placeholder="وصف المشروع بالتفصيل..." />
-              </div>
-              <div className="grid gap-2">
-                <Textarea rows={4} dir="ltr" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder="Detailed project description..." />
-              </div>
+            <div className="grid gap-2">
+              <Label>الوصف</Label>
+              <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} placeholder="وصف المشروع بالتفصيل..." />
             </div>
 
             {/* ── بيانات إضافية ── */}
