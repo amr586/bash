@@ -127,7 +127,7 @@ export function JobsPanel() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>المسمى الوظيفي — *</Label>
+                <Label>المسمى الوظيفي  *</Label>
                 <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
               </div>
               <div className="grid gap-2">
@@ -135,7 +135,7 @@ export function JobsPanel() {
                 <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label>المتطلبات — English</Label>
+                <Label>المتطلبات </Label>
                 <Textarea rows={4} dir="ltr" value={form.requirementsEn} onChange={(e) => setForm({ ...form, requirementsEn: e.target.value })} />
               </div>
             </div>
