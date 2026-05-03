@@ -190,7 +190,7 @@ export function PortfolioPanel() {
       {editId && (
         <Card className="border-border/40 bg-card/50">
           <CardContent className="p-5 space-y-6">
-            <h3 className="font-bold text-base">{editId === "new" ? "➕ مشروع جديد" : "✏️ تعديل مشروع"}</h3>
+            <h3 className="font-bold text-base">{editId === "new" ? "➕سابقة الاعمال" : "✏️ تعديل مشروع"}</h3>
 
             {/* ── الأسماء ── */}
             <div className="grid gap-2">
