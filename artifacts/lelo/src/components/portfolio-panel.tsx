@@ -210,7 +210,6 @@ export function PortfolioPanel() {
                 <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} placeholder="وصف المشروع بالتفصيل..." />
               </div>
               <div className="grid gap-2">
-                <Label>Description — English</Label>
                 <Textarea rows={4} dir="ltr" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder="Detailed project description..." />
               </div>
             </div>
