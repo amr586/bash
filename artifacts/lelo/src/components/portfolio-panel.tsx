@@ -199,7 +199,6 @@ export function PortfolioPanel() {
                 <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} placeholder="مشروع باشاك ريزيدنس" />
               </div>
               <div className="grid gap-2">
-                <Label>Project Name — English</Label>
                 <Input dir="ltr" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder="Bashak Residence" />
               </div>
             </div>
