@@ -131,7 +131,7 @@ export function JobsPanel() {
                 <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label>الوصف — عربي</Label>
+                <Label>الوصف </Label>
                 <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} />
               </div>
               <div className="grid gap-2">
