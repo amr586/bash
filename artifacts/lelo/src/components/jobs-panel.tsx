@@ -135,10 +135,6 @@ export function JobsPanel() {
                 <Textarea rows={4} value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label>الوصف — English</Label>
-                <Textarea rows={4} dir="ltr" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} />
-              </div>
-              <div className="grid gap-2">
                 <Label>المتطلبات — عربي</Label>
                 <Textarea rows={4} value={form.requirementsAr} onChange={(e) => setForm({ ...form, requirementsAr: e.target.value })} />
               </div>
